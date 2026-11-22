@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../ui/main_window.dart';
 import 'theme.dart';
 import 'window_title.dart';
 
@@ -21,7 +22,7 @@ class JsonBetterEditorApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const Scaffold(),
+      home: const MainWindow(),
     );
   }
 }

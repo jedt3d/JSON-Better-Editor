@@ -99,6 +99,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'JSON Better Editor'**
   String get appTitle;
+
+  /// Toolbar tooltip: new document.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get toolbarNew;
+
+  /// Toolbar tooltip: open a .json file.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get toolbarOpen;
+
+  /// Toolbar tooltip: search keys and values.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get toolbarSearch;
+
+  /// Toolbar tooltip: show only the Text pane.
+  ///
+  /// In en, this message translates to:
+  /// **'Text only'**
+  String get toolbarLayoutText;
+
+  /// Toolbar tooltip: show only the Node pane.
+  ///
+  /// In en, this message translates to:
+  /// **'Node only'**
+  String get toolbarLayoutNode;
+
+  /// Toolbar tooltip: show Text and Node side by side.
+  ///
+  /// In en, this message translates to:
+  /// **'Split view'**
+  String get toolbarLayoutSplit;
+
+  /// Toolbar tooltip: switch UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get toolbarLanguage;
+
+  /// Toolbar tooltip: switch light/dark theme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get toolbarTheme;
+
+  /// Toolbar tooltip: open settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get toolbarSettings;
+
+  /// Message for toolbar buttons that are not built yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get comingSoon;
+
+  /// Shown in the content area when no document is loaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a JSON file'**
+  String get emptyState;
 }
 
 class _AppLocalizationsDelegate
