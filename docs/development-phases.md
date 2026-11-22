@@ -2,13 +2,14 @@
 
 > Rough task breakdown by phase, agreed with Jedt on 2026-11-22.
 > Section numbers (e.g. §1.3) refer to [`requirements-checklist.md`](requirements-checklist.md). Phase decisions are logged in [`decision-log.md`](decision-log.md).
-> Platform: Flutter desktop, macOS only.
+> Platform: Flutter desktop, macOS only (macOS 14+, Flutter 3.50.1+).
+> Reviewed at the end of every phase so it matches what was actually built.
 
 Each phase ends with an app that builds and runs on macOS. A phase starts only after the previous one works.
 
 ---
 
-## Phase 1 — Bootstrap
+## Phase 1 — Bootstrap (done 2026-11-22)
 
 Goal: the application is up and running on macOS with very basic features, and the foundations later phases build on.
 
@@ -21,8 +22,10 @@ Goal: the application is up and running on macOS with very basic features, and t
 - [x] Invalid JSON on open: error dialog with position, file not opened (§1.2).
 - [x] Plain text view of the opened document (no highlighting yet).
 - [x] Local build-and-test script (`scripts/check.sh`) and a smoke test that the app launches on macOS. No GitHub Actions (decision #34).
+- [x] Added during the phase: Flutter 3.50.1 so Release builds work with Xcode 27, and the move to `material_ui` (decisions #44, #45).
+- [x] Added during the phase: toolbar in the title-bar row with a native macOS look, document title under it, window sized from the usable work area (§3.2, §3.8; decisions #46, #48, #50).
 
-**Done when:** you can open a valid `.json` file, see its text, save it, and an invalid file shows an error dialog.
+**Done when:** you can open a valid `.json` file, see its text, save it, and an invalid file shows an error dialog. Confirmed in the Release app (issue #2).
 
 ---
 
@@ -38,9 +41,9 @@ Goal: every Text-mode feature and the file/editor basics, on top of the Phase 1 
 - [ ] Word wrap toggle for Text mode (§1.5).
 - [ ] Search keys and values with Next / Previous (§3.3), Text mode side.
 - [ ] Undo / redo in Text mode (§3.5).
-- [ ] Save reformats (pretty-prints) the JSON (§3.4).
+- [ ] New creates an editable document; Save with no file yet behaves like Save As (§3.4, decision #43). Pretty-printing on Save is already done in Phase 1.
 - [ ] Standard File menu: New, Open, Save, Save As, Close; one document per window, multiple instances (§3.4).
-- [ ] Register as a `.json` handler in "Open With" (§3.8).
+- [ ] Register as a `.json` handler in "Open With" (§3.9).
 - [ ] Check performance with files under 5 MB (§3.4).
 
 **Done when:** the app works as a complete JSON text editor on its own.
@@ -88,12 +91,12 @@ Goal: introduce the Node pane, and with it the split view and two-way sync.
 
 Goal: the Settings screen and everything it controls.
 
-- [ ] Settings screen from the gear icon (§3.9).
-- [ ] Atom One Light / One Dark themes, follow macOS appearance by default, toolbar toggle overrides (§3.9).
-- [ ] Default fonts: IBM Plex Sans (UI), IBM Plex Mono (keys/types, Text mode), IBM Plex Sans Thai Looped (values); not bundled (§3.9).
-- [ ] Choose a system monospace font, replacing Plex Mono in Text mode and Node keys/types (§3.9).
-- [ ] Fallback to the macOS default monospace font when a font is missing (§3.9).
-- [ ] Document-wide default for single-line or multi-line values (§3.9, §2.3).
+- [ ] Settings screen from the gear icon (§3.10).
+- [ ] Atom One Light / One Dark themes, follow macOS appearance by default, toolbar toggle overrides (§3.10).
+- [ ] Default fonts: IBM Plex Sans (UI), IBM Plex Mono (keys/types, Text mode), IBM Plex Sans Thai Looped (values); not bundled (§3.10).
+- [ ] Choose a system monospace font, replacing Plex Mono in Text mode and Node keys/types (§3.10).
+- [ ] Fallback to the macOS default monospace font when a font is missing (§3.10).
+- [ ] Document-wide default for single-line or multi-line values (§3.10, §2.3).
 - [ ] Full Thai translation and the toolbar language switch; English on first launch (§3.7).
 
-**Done when:** every setting in §3.9 works and persists between launches.
+**Done when:** every setting in §3.10 works and persists between launches.

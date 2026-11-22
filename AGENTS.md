@@ -10,6 +10,12 @@ JSON Better Editor: a Flutter desktop app (macOS first) for editing JSON in two 
 
 `docs/decision-log.md` is the project's decision log. Append every new decision as a new row at the bottom of its table, numbered after the last row. Never edit or delete past rows; if a decision is reversed, add a new row that says which row it supersedes.
 
+## Keeping the docs current
+
+- `docs/requirements-checklist.md` is the only requirements file; it has no version suffix. Update it in the same PR whenever a decision or a merged ticket changes a requirement, and tick items that are built. Never add versioned copies.
+- `docs/decision-log.md`: append decisions as described above.
+- `docs/development-phases.md`: review it at the end of every phase and update it to what was actually built.
+
 ## Checkboxes, PRs and issues
 
 Before asking for a merge, tick every checkbox that is done in the PR body and in its issue, with evidence for each. Leave a box unticked only with a note saying why (for example, moved to a later phase and the decision row). After the merge, close the issue and tick it in its parent issue's checklist. A merged PR or closed issue must never show unticked boxes without a note.
