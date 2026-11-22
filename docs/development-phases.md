@@ -67,6 +67,7 @@ Approved by the maintainer on 2026-11-23 (decision #87), built on the current do
 - [ ] Randomized parser test and the Save round trip. #94
 - [ ] Keep the file's line endings on Save. #95
 - [ ] `docs/shortcuts.md` listing every shortcut, as the base for a later shortcut review. #96
+- [ ] Status Bar (decision #88): the bar and the View menu toggle #98, last validation result #99, cursor position #100, error list popover #101, Wrap / Format / Minify #102, Fold all / Unfold all #103, line endings #104.
 
 ---
 
@@ -98,6 +99,7 @@ Goal: introduce the Node pane, and with it the split view and two-way sync.
 - [ ] Blank node while Text has invalid JSON, sync delay ≤250 ms (§3.1).
 - [ ] One shared undo history across both panes (§3.5, decision #53).
 - [ ] Search works in Node mode too (§3.3).
+- [ ] Status Bar: JSON path at the caret or selected node, `NODE` label, node type and child count (§3.12, decision #88). #105
 
 ### 3e. Rich value previews
 - [ ] Detect `data:image/...;base64,` values, 64×64 center-crop thumbnail, full-image popup (§2.8).
@@ -141,5 +143,6 @@ errors on files up to 20 MB**; slowness on large files is accepted. Tracked in i
 - [ ] Typing latency on large files (37 ms per key at 10 MB, up to 1.2 s at 50 MB).
 - [ ] Save on large files (3.4 s at 100 MB).
 - [ ] Decide on a warning before opening very large files.
+- [ ] Report more than the first JSON error (error recovery), for the Status Bar error list. #106
 
 **Done when:** each item meets the target set at the start of the phase, measured in the Release app with `scripts/perf.sh --release`.
