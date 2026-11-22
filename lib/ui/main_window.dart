@@ -32,10 +32,17 @@ class MainWindow extends StatefulWidget {
 /// never-saved document), and the Text pane's editing controller, which
 /// holds the current (possibly edited) text.
 class _OpenFile {
-  _OpenFile(this.file, this.controller);
+  _OpenFile(this.file, this.controller) : savedLines = controller.codeLines;
 
   final PickedFile? file;
   final CodeLineEditingController controller;
+
+  /// The editor's lines when the document was opened or last saved. re_editor
+  /// replaces this object on every edit and puts it back on undo, so the
+  /// document is edited exactly when the current lines are another object.
+  final CodeLines savedLines;
+
+  bool get edited => !identical(controller.codeLines, savedLines);
 
   /// The file name, or [untitled] for a new document.
   String name(String untitled) => file?.name ?? untitled;
@@ -47,10 +54,16 @@ class _MainWindowState extends State<MainWindow> {
   /// True while Open, Save or Save As is running; a second one is ignored.
   bool _busy = false;
 
+  /// Whether the window shows the document as edited (decision #55).
+  bool _edited = false;
+
   /// Replaces the open document, disposing the old editor controller.
   void _setOpen(_OpenFile? open) {
     final old = _open;
+    old?.controller.removeListener(_onEdit);
+    open?.controller.addListener(_onEdit);
     setState(() => _open = open);
+    _onEdit();
     if (old != null && !identical(old.controller, open?.controller)) {
       // After this frame, so the editor no longer listens to it.
       WidgetsBinding.instance.addPostFrameCallback(
@@ -59,8 +72,23 @@ class _MainWindowState extends State<MainWindow> {
     }
   }
 
+  /// Keeps the edited marker (title and close-button dot) up to date.
+  void _onEdit() {
+    final edited = _open?.edited ?? false;
+    if (edited == _edited) return;
+    setState(() => _edited = edited);
+    setDocumentEdited(edited);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    onCloseRequest(_confirmDiscard);
+  }
+
   @override
   void dispose() {
+    onCloseRequest(null);
     _open?.controller.dispose();
     super.dispose();
   }
@@ -77,7 +105,49 @@ class _MainWindowState extends State<MainWindow> {
 
   Future<void> _openFile() => _exclusive(_pickAndOpen);
 
+  /// Asks Save / Don't Save / Cancel when the document has unsaved changes
+  /// (decision #55). True when it is fine to drop the document: there were
+  /// no changes, the user chose Don't Save, or the save succeeded.
+  Future<bool> _confirmDiscard() async {
+    final open = _open;
+    if (open == null || !open.edited) return true;
+    final l10n = AppLocalizations.of(context)!;
+    final choice = await showDialog<_UnsavedChoice>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.unsavedTitle(open.name(l10n.untitled))),
+        content: Text(l10n.unsavedMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(_UnsavedChoice.discard),
+            child: Text(l10n.dontSave),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(_UnsavedChoice.cancel),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            autofocus: true, // Default button: Return chooses Save.
+            onPressed: () => Navigator.of(context).pop(_UnsavedChoice.save),
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || !identical(open, _open)) return false;
+    switch (choice) {
+      case _UnsavedChoice.discard:
+        return true;
+      case _UnsavedChoice.save:
+        final path = open.file?.path;
+        return path == null ? _askPathAndWrite(open) : _writeTo(open, path);
+      case _UnsavedChoice.cancel || null:
+        return false;
+    }
+  }
+
   Future<void> _pickAndOpen() async {
+    if (!await _confirmDiscard() || !mounted) return;
     final l10n = AppLocalizations.of(context)!;
     final PickedFile? picked;
     try {
@@ -117,58 +187,69 @@ class _MainWindowState extends State<MainWindow> {
     if (open != null) await _askPathAndWrite(open);
   });
 
-  /// Shows the save panel; Cancel leaves everything as it was.
-  Future<void> _askPathAndWrite(_OpenFile open) async {
+  /// Shows the save panel; Cancel leaves everything as it was. True when
+  /// the document was written.
+  Future<bool> _askPathAndWrite(_OpenFile open) async {
     final l10n = AppLocalizations.of(context)!;
     final String? path;
     try {
       path = await widget.chooseSavePath(open.name(l10n.untitled));
     } on FileAccessException catch (e) {
-      if (!mounted) return;
-      return _showError(l10n.saveFailed, e.osMessage ?? l10n.unknownError);
+      if (mounted) {
+        await _showError(l10n.saveFailed, e.osMessage ?? l10n.unknownError);
+      }
+      return false;
     }
-    if (path != null && mounted) await _writeTo(open, path);
+    return path != null && mounted && await _writeTo(open, path);
   }
 
   /// Writes the edited text, pretty-printed (decision #28), to [path] and
   /// makes [path] the current file. Invalid JSON is not written; the error
   /// dialog shows where it is (decision #54). The editor keeps the text as
-  /// typed (decision #61).
-  Future<void> _writeTo(_OpenFile open, String path) async {
+  /// typed (decision #61). True when the file was written.
+  Future<bool> _writeTo(_OpenFile open, String path) async {
     final l10n = AppLocalizations.of(context)!;
     final JsonDocument document;
     switch (parse(open.controller.text)) {
       case ParseSuccess(document: final parsed):
         document = parsed;
       case ParseFailure(:final error):
-        return _showError(
+        await _showError(
           l10n.saveFailedTitle(path.split('/').last),
           l10n.invalidJsonPosition(error.line, error.column, error.message),
         );
+        return false;
     }
     // Ending with a newline (decision #47).
     final text = '${document.toText()}\n';
     try {
       await widget.writeTextFile(path, text);
     } on FileAccessException catch (e) {
-      if (!mounted) return;
-      return _showError(
-        l10n.saveFailedTitle(e.name),
-        e.osMessage ?? l10n.unknownError,
-      );
+      if (mounted) {
+        await _showError(
+          l10n.saveFailedTitle(e.name),
+          e.osMessage ?? l10n.unknownError,
+        );
+      }
+      return false;
     }
-    if (!mounted || !identical(_open, open)) return;
+    if (!mounted || !identical(_open, open)) return true;
     final saved = PickedFile(path: path, text: text);
+    // ponytail: the saved state is the lines at the moment Save finished, so
+    // typing during a slow write would be counted as saved. Capture the lines
+    // before parsing if writes ever become slow enough to matter.
     _setOpen(_OpenFile(saved, open.controller));
     setWindowTitle(saved.name);
+    return true;
   }
 
   /// Cmd+N: a new, never-saved document holding `{}`.
-  void _newDocument() {
+  Future<void> _newDocument() => _exclusive(() async {
+    if (!await _confirmDiscard() || !mounted) return;
     final untitled = AppLocalizations.of(context)!.untitled;
     _setOpen(_OpenFile(null, textPaneController('{}')));
     setWindowTitle(untitled);
-  }
+  });
 
   Future<void> _showError(String title, String message) {
     final l10n = AppLocalizations.of(context)!;
@@ -214,7 +295,11 @@ class _MainWindowState extends State<MainWindow> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                open?.name(l10n.untitled) ?? l10n.appTitle,
+                open == null
+                    ? l10n.appTitle
+                    : _edited
+                    ? l10n.editedTitle(open.name(l10n.untitled))
+                    : open.name(l10n.untitled),
                 key: const Key('documentTitle'),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -236,6 +321,8 @@ class _MainWindowState extends State<MainWindow> {
     );
   }
 }
+
+enum _UnsavedChoice { save, discard, cancel }
 
 /// The toolbar shares the title-bar row with the traffic-light buttons
 /// (MainFlutterWindow.swift hides the native title bar). Its empty parts act

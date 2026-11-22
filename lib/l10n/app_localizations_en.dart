@@ -75,5 +75,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get untitled => 'Untitled';
 
   @override
+  String editedTitle(String fileName) {
+    return '$fileName — Edited';
+  }
+
+  @override
+  String unsavedTitle(String fileName) {
+    return 'Do you want to save the changes made to “$fileName”?';
+  }
+
+  @override
+  String get unsavedMessage =>
+      'Your changes will be lost if you don\'t save them.';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get dontSave => 'Don\'t Save';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
   String get unknownError => 'An unknown error occurred.';
 }

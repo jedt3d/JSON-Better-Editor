@@ -11,11 +11,34 @@ CodeLineEditingController textPaneController(String text) =>
       const CodeLineOptions(indentSize: indentSize),
     );
 
-/// The editable Text pane (decision #60: built on re_editor).
-class TextPane extends StatelessWidget {
+/// The editable Text pane (decision #60: built on re_editor). It takes the
+/// keyboard focus when it appears, so typing works right after New or Open
+/// (decision #64).
+class TextPane extends StatefulWidget {
   const TextPane({super.key, required this.controller});
 
   final CodeLineEditingController controller;
+
+  @override
+  State<TextPane> createState() => _TextPaneState();
+}
+
+class _TextPaneState extends State<TextPane> {
+  final _focus = FocusNode(debugLabel: 'TextPane');
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focus.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +46,11 @@ class TextPane extends StatelessWidget {
     // every colour is passed in explicitly.
     final colors = Theme.of(context).colorScheme;
     return CodeEditor(
-      controller: controller,
+      controller: widget.controller,
+      focusNode: _focus,
+      // Auto-closing quotes and brackets doubled them when typing `"x"` in
+      // the real app (decision #65).
+      autocompleteSymbols: false,
       wordWrap: false,
       shortcutsActivatorsBuilder: const _TextPaneShortcuts(),
       padding: const EdgeInsets.fromLTRB(8, 8, 16, 8),

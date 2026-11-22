@@ -2,7 +2,10 @@ import Cocoa
 import FlutterMacOS
 import UniformTypeIdentifiers
 
-class MainFlutterWindow: NSWindow {
+class MainFlutterWindow: NSWindow, NSWindowDelegate {
+  /// The window channel (lib/app/native_window.dart).
+  private var windowChannel: FlutterMethodChannel?
+
   /// The mouse-down that may start a window drag. Flutter reports the drag
   /// only after the mouse has moved, and performDrag needs the press.
   private var lastMouseDown: NSEvent?
@@ -38,11 +41,17 @@ class MainFlutterWindow: NSWindow {
     let windowChannel = FlutterMethodChannel(
       name: "json_better_editor/window",
       binaryMessenger: flutterViewController.engine.binaryMessenger)
+    self.windowChannel = windowChannel
+    self.delegate = self
     windowChannel.setMethodCallHandler { [weak self] call, result in
       guard let self else { return result(nil) }
       switch call.method {
       case "setTitle":
         self.title = call.arguments as? String ?? ""
+        result(nil)
+      case "setEdited":
+        // The dot in the close button for unsaved changes (decision #55).
+        self.isDocumentEdited = call.arguments as? Bool ?? false
         result(nil)
       case "openJsonFile":
         let panel = NSOpenPanel()
@@ -96,6 +105,22 @@ class MainFlutterWindow: NSWindow {
                            width: size.width, height: size.height),
                     display: true)
     }
+  }
+
+  /// Asks Dart's Save / Don't Save / Cancel prompt (decision #55) when the
+  /// document is edited; [done] gets true when the window may go away.
+  func confirmClose(_ done: @escaping (Bool) -> Void) {
+    guard isDocumentEdited, let channel = windowChannel else { return done(true) }
+    channel.invokeMethod("confirmClose", arguments: nil) { reply in
+      done(reply as? Bool ?? false)
+    }
+  }
+
+  /// Close button and Cmd+W: ask first, then close for real.
+  func windowShouldClose(_ sender: NSWindow) -> Bool {
+    guard isDocumentEdited else { return true }
+    confirmClose { ok in if ok { self.close() } }
+    return false
   }
 
   /// The part of the screen windows may use: the screen minus the menu bar
