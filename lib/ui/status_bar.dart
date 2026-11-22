@@ -25,6 +25,8 @@ class StatusBar extends StatefulWidget {
     this.onMinify,
     this.onFoldAll,
     this.onUnfoldAll,
+    this.lineEnding,
+    this.onLineEnding,
   });
 
   /// The open document's editor, or null when nothing is open.
@@ -56,6 +58,11 @@ class StatusBar extends StatefulWidget {
   /// Fold All / Unfold All in the Text pane (#103).
   final VoidCallback? onFoldAll;
   final VoidCallback? onUnfoldAll;
+
+  /// The document's line ending, `LF`, `CRLF` or `CR` (#104); clicking it
+  /// calls [onLineEnding] with the pill's context, to place a menu.
+  final String? lineEnding;
+  final void Function(BuildContext anchor)? onLineEnding;
 
   @override
   State<StatusBar> createState() => _StatusBarState();
@@ -262,6 +269,20 @@ class _StatusBarState extends State<StatusBar> {
                               (l10n.statusUnfoldAll, widget.onUnfoldAll),
                             ],
                           ),
+                          if (widget.lineEnding case final ending?) ...[
+                            const SizedBox(width: 8),
+                            Builder(
+                              builder: (anchor) => _Pill(
+                                key: const Key('lineEndingPill'),
+                                segments: [
+                                  (
+                                    ending,
+                                    () => widget.onLineEnding?.call(anchor),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ],
                         const SizedBox(width: 16),
                         if (hasDocument)

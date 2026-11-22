@@ -43,14 +43,18 @@ class MainWindow extends StatefulWidget {
 /// holds the current (possibly edited) text.
 class _OpenFile {
   _OpenFile(this.file, this.controller, this.lineEnding)
-    : savedLines = controller.codeLines;
+    : savedLines = controller.codeLines,
+      savedLineEnding = lineEnding;
 
   final PickedFile? file;
   final CodeLineEditingController controller;
 
   /// The file's line ending, written back on Save (#95). The editor itself
-  /// always works with LF.
-  final LineEnding lineEnding;
+  /// always works with LF. The Status Bar pill changes it (#104).
+  LineEnding lineEnding;
+
+  /// The line ending when the document was opened or last saved.
+  final LineEnding savedLineEnding;
 
   /// The editor's lines when the document was opened or last saved.
   /// re_editor replaces this object on every edit (and puts it back on
@@ -62,7 +66,10 @@ class _OpenFile {
   CodeLines? _checkedLines;
   bool _checkedEdited = false;
 
-  bool get edited {
+  /// Text or line ending differ from the opened or saved file.
+  bool get edited => lineEnding != savedLineEnding || _textEdited;
+
+  bool get _textEdited {
     final lines = controller.codeLines;
     if (identical(lines, savedLines)) {
       _checkedLines = lines;
@@ -173,6 +180,39 @@ class _MainWindowState extends State<MainWindow> {
         (_) => old.controller.dispose(),
       );
     }
+  }
+
+  /// The Status Bar's line ending pill was clicked (#104): a menu of the
+  /// two endings; choosing one changes what the next Save writes.
+  Future<void> _chooseLineEnding(BuildContext anchor) async {
+    final open = _open;
+    if (open == null) return;
+    final l10n = AppLocalizations.of(context)!;
+    final box = anchor.findRenderObject()! as RenderBox;
+    final overlay =
+        Overlay.of(context).context.findRenderObject()! as RenderBox;
+    final topLeft = box.localToGlobal(Offset.zero, ancestor: overlay);
+    final chosen = await showMenu<LineEnding>(
+      context: context,
+      position: RelativeRect.fromRect(
+        topLeft & box.size,
+        Offset.zero & overlay.size,
+      ),
+      items: [
+        for (final (ending, label) in [
+          (LineEnding.lf, l10n.lineEndingLf),
+          (LineEnding.crlf, l10n.lineEndingCrlf),
+        ])
+          CheckedPopupMenuItem(
+            value: ending,
+            checked: open.lineEnding == ending,
+            child: Text(label),
+          ),
+      ],
+    );
+    if (chosen == null || !identical(open, _open)) return;
+    setState(() => open.lineEnding = chosen);
+    _onEdit();
   }
 
   /// Keeps the edited marker (title and close-button dot) up to date.
@@ -832,6 +872,8 @@ class _MainWindowState extends State<MainWindow> {
               onMinify: () => _reformat((document) => document.toCompactText()),
               onFoldAll: () => _textPane?.foldAll(),
               onUnfoldAll: () => _textPane?.unfoldAll(),
+              lineEnding: open?.lineEnding.name.toUpperCase(),
+              onLineEnding: _chooseLineEnding,
             ),
         ],
       ),

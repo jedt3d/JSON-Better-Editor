@@ -490,6 +490,18 @@ abstract class AppLocalizations {
   /// **'Unfold all'**
   String get statusUnfoldAll;
 
+  /// Line ending menu item: LF line breaks.
+  ///
+  /// In en, this message translates to:
+  /// **'LF (macOS, Linux)'**
+  String get lineEndingLf;
+
+  /// Line ending menu item: CRLF line breaks.
+  ///
+  /// In en, this message translates to:
+  /// **'CRLF (Windows)'**
+  String get lineEndingCrlf;
+
   /// Dialog body when the system gives no error message.
   ///
   /// In en, this message translates to:
