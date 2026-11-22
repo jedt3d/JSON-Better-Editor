@@ -460,6 +460,24 @@ abstract class AppLocalizations {
   /// **'Line {line}, Col {column}'**
   String errorsAt(int line, int column);
 
+  /// Status Bar pill: word wrap on/off.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrap'**
+  String get statusWrap;
+
+  /// Status Bar pill: pretty-print the document.
+  ///
+  /// In en, this message translates to:
+  /// **'Format'**
+  String get statusFormat;
+
+  /// Status Bar pill: put the document on one line.
+  ///
+  /// In en, this message translates to:
+  /// **'Minify'**
+  String get statusMinify;
+
   /// Dialog body when the system gives no error message.
   ///
   /// In en, this message translates to:
