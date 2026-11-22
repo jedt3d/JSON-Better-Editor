@@ -424,6 +424,18 @@ abstract class AppLocalizations {
   /// **'Validate JSON now'**
   String get statusValidateTooltip;
 
+  /// Status Bar: caret line and column, 1-based.
+  ///
+  /// In en, this message translates to:
+  /// **'Ln {line}, Col {column}'**
+  String statusCaret(int line, int column);
+
+  /// Status Bar: caret position with the number of selected characters.
+  ///
+  /// In en, this message translates to:
+  /// **'{position} ({count} selected)'**
+  String statusCaretSelected(String position, int count);
+
   /// Dialog body when the system gives no error message.
   ///
   /// In en, this message translates to:

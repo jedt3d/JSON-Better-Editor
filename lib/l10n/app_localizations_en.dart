@@ -216,5 +216,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusValidateTooltip => 'Validate JSON now';
 
   @override
+  String statusCaret(int line, int column) {
+    return 'Ln $line, Col $column';
+  }
+
+  @override
+  String statusCaretSelected(String position, int count) {
+    return '$position ($count selected)';
+  }
+
+  @override
   String get unknownError => 'An unknown error occurred.';
 }

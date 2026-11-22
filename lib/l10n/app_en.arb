@@ -292,6 +292,30 @@
   "@statusValidateTooltip": {
     "description": "Tooltip of the Status Bar item when the text was not checked since an edit."
   },
+  "statusCaret": "Ln {line}, Col {column}",
+  "@statusCaret": {
+    "description": "Status Bar: caret line and column, 1-based.",
+    "placeholders": {
+      "line": {
+        "type": "int"
+      },
+      "column": {
+        "type": "int"
+      }
+    }
+  },
+  "statusCaretSelected": "{position} ({count} selected)",
+  "@statusCaretSelected": {
+    "description": "Status Bar: caret position with the number of selected characters.",
+    "placeholders": {
+      "position": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "unknownError": "An unknown error occurred.",
   "@unknownError": {
     "description": "Dialog body when the system gives no error message."
