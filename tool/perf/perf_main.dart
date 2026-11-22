@@ -1,6 +1,7 @@
 // Performance check for #44 (decision #59). Not part of the app: build it
 // with scripts/perf.sh, which runs it as a profile build for several file
 // sizes and prints one PERF line per measurement.
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -108,6 +109,17 @@ Future<void> main() async {
   final c = controller!;
   await reportFrames('open');
 
+  // Save, as Cmd+S does: parse the text, pretty-print, write the file.
+  final saved = Completer<void>();
+  final save = Stopwatch()..start();
+  ServicesBinding.instance.channelBuffers.push(
+    channel.name,
+    channel.codec.encodeMethodCall(const MethodCall('menu', 'save')),
+    (_) => saved.complete(),
+  );
+  await saved.future;
+  report('save_ms', save.elapsedMilliseconds);
+
   // Fold markers appear when re_editor's isolate has analysed the file.
   final chunks = findWidget<DefaultCodeChunkIndicator>()!.controller;
   final foldWait = Stopwatch()..start();
@@ -117,6 +129,16 @@ Future<void> main() async {
   report('fold_markers_after_open_ms', foldWait.elapsedMilliseconds);
 
   final lineCount = c.codeLines.length;
+
+  // One jump from the last line to the first (#67, fork patch 1).
+  c.selection = CodeLineSelection.collapsed(index: lineCount - 1, offset: 0);
+  c.makeCursorVisible();
+  await nextFrame();
+  final top = Stopwatch()..start();
+  c.selection = const CodeLineSelection.collapsed(index: 0, offset: 0);
+  c.makeCursorVisible();
+  await nextFrame();
+  report('jump_end_to_top_ms', top.elapsedMilliseconds);
   // Typing in the middle and near the end (the edited check compares lines
   // up to the edit).
   for (final (name, line) in [

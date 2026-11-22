@@ -45,7 +45,38 @@ its fold analysis never finished, so less work ran.
 **Current capacity: about 30 MB** (opens and shows in 2.5 s). Files up to 5 MB meet the targets apart from
 the first key suggestion; between 10 and 30 MB the file opens but typing and fold markers lag.
 
-## What #44 fixed
+## Large files in a Release build (2026-11-23, measure only)
+
+The maintainer asked at what size operations start taking more than 2 s, testing 10, 50 and 100 MB,
+without fixing anything yet. Run: `scripts/perf.sh --release 10 50 100` (same harness, Release build).
+Earlier profile-build numbers for 20 and 30 MB are in the table above.
+
+| | 10 MB | 50 MB | 100 MB | Passes 2 s at about |
+|---|---|---|---|---|
+| Lines | 519,010 | 2,594,977 | 5,189,935 | |
+| **Open and show** | 0.91 s | **4.25 s** | **8.48 s** | 25 MB (20 MB 1.6 s, 30 MB 2.5 s) |
+| **Save** (parse, pretty-print, write) | 0.35 s | 1.55 s | **3.39 s** | 65 MB |
+| **Fold markers ready after open** | **5.6 s** | > 60 s | > 60 s | 7 MB (5 MB 1.3 s) |
+| **First key suggestion** | 0.65 s | **2.85 s** | **5.92 s** | 35 MB |
+| Typing: time per key (wall) | 37 ms | 0.39–1.19 s | 0.15 s | not reached |
+| Typing: longest frame | 26 ms | 169 ms | 30 ms | not reached |
+| Jump end → top | 20 ms | 0.59 s | 0.18 s | not reached |
+| Scrolling, 60 jumps: frame p50 / longest | 8.5 / 19 ms | 5.9 / 26 ms | 12 / 18 ms | not reached |
+| Search, common word / not present | 0.10 / 0.03 s | 0.39 / 0.13 s | 0.81 / 0.26 s | not reached |
+| Bracket pair from the root `[` | 57 ms | 93 ms | 198 ms | not reached |
+| **Fold the root block** | 62 ms | (markers never ready) | **29 min** | between 10 and 100 MB |
+
+Notes:
+
+- At 50 and 100 MB the fold analysis did not finish within the harness's 60 s wait, so the typing and
+  scrolling rows ran without fold markers; numbers at 50 MB varied between runs (typing 0.39–1.19 s
+  per key).
+- Folding the root block of a 100 MB file took 1,720 s. The cause was not investigated (measure only);
+  re_editor's `collapseChunk` indexes `CodeLines` line by line, the same quadratic pattern found in #44,
+  is the first suspect.
+- Not fixed here, by request. Already tracked: first key suggestion (#67).
+
+
 
 The first run at 5 MB opened in 2.1 s with a 1.6 s frame, typing took 33–83 ms per key, search 0.9 s, and
 fold markers never appeared. Causes and fixes:
