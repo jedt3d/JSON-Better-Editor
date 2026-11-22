@@ -138,6 +138,11 @@ class _MainWindowState extends State<MainWindow> {
 
   /// Close/Quit confirmation and the File menu (MainFlutterWindow.swift).
   Future<Object?> _nativeRequest(String method, Object? arguments) async {
+    // The native menus keep working while a Flutter dialog is open; their
+    // actions must not reach the document behind it (#54).
+    if (!(ModalRoute.of(context)?.isCurrent ?? true)) {
+      return method == 'confirmClose' ? false : null;
+    }
     switch ((method, arguments)) {
       case ('confirmClose', _):
         return _confirmDiscard();
@@ -375,6 +380,8 @@ class _MainWindowState extends State<MainWindow> {
         content: Text(message),
         actions: [
           TextButton(
+            // Return presses OK, as in a native alert (#54).
+            autofocus: true,
             onPressed: () => Navigator.of(context).pop(),
             child: Text(l10n.ok),
           ),
