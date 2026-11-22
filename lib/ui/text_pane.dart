@@ -55,6 +55,12 @@ class _TextPaneState extends State<TextPane> {
       autocompleteSymbols: false,
       wordWrap: false,
       shortcutsActivatorsBuilder: const _TextPaneShortcuts(),
+      // Line numbers (#34): the gutter widens with the number of lines;
+      // the caret's line number is drawn in full colour, the others at half.
+      indicatorBuilder: (context, editing, chunks, notifier) => Padding(
+        padding: const EdgeInsets.only(left: 8, right: 4),
+        child: DefaultCodeLineNumber(controller: editing, notifier: notifier),
+      ),
       padding: const EdgeInsets.fromLTRB(8, 8, 16, 8),
       style: CodeEditorStyle(
         // macOS default monospace font (decisions #17, #29).
