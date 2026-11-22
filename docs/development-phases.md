@@ -56,18 +56,22 @@ Built beyond the original list, found while checking the real app: the Edit menu
 
 Approved by the maintainer on 2026-11-23 (decision #87), built on the current document code (none of it waits for the shared Document model planned before Phase 3). Each only needs to work without errors on files up to 20 MB (decision #86).
 
-- [ ] Validate JSON menu command. #86
-- [ ] Save through a temporary file and swap (per-OS writer; macOS now). #87
-- [ ] Notice when another program changes the open file. #88
-- [ ] Format and Minify, undoable. #89
-- [ ] Go to Line, menu only. #90
-- [ ] Auto-close brackets and quotes with type-over. #91
-- [ ] Open Recent. #92
-- [ ] Keep the app running after the last window closes. #93
-- [ ] Randomized parser test and the Save round trip. #94
-- [ ] Keep the file's line endings on Save. #95
-- [ ] `docs/shortcuts.md` listing every shortcut, as the base for a later shortcut review. #96
-- [ ] Status Bar (decision #88): the bar and the View menu toggle #98, last validation result #99, cursor position #100, error list popover #101, Wrap / Format / Minify #102, Fold all / Unfold all #103, line endings #104.
+- [x] Validate JSON menu command. #86
+- [x] Save through a temporary file and swap (per-OS writer; macOS now). #87
+- [x] Notice when another program changes the open file. #88
+- [x] Format and Minify, undoable. #89
+- [x] Go to Line, menu only. #90
+- [x] Auto-close brackets and quotes with type-over. #91
+- [x] Open Recent. #92
+- [x] Keep the app running after the last window closes. #93
+- [x] Randomized parser test and the Save round trip. #94
+- [x] Keep the file's line endings on Save. #95
+- [x] `docs/shortcuts.md` listing every shortcut, as the base for a later shortcut review. #96
+- [x] Status Bar (decision #88): the bar and the View menu toggle #98, last validation result #99, cursor position #100, error list popover #101, Wrap / Format / Minify #102, Fold all / Unfold all #103 (fork patch 3), line endings #104.
+
+Built beyond the list, found in the real app: Status Bar clicks no longer take the keyboard from the Text pane (#102), and Fold All needed a one-pass fold in the fork (patch 3, #103; 23 MB folds in 2.6 s). Every choice made without the maintainer (decisions #90–#100) is listed in `docs/phase-2-review.md`.
+
+**Done when:** every ticket is merged and checked in the Release app. ✅ 2026-11-23 (PRs #108–#125, #85 closed).
 
 ---
 
@@ -139,7 +143,7 @@ errors on files up to 20 MB**; slowness on large files is accepted. Tracked in i
 
 - [ ] First key suggestion on large files (0.3 s at 5 MB). #67
 - [ ] Opening large files (passes 2 s at about 25 MB; 100 MB takes 8.5 s).
-- [ ] Fold markers and folding on large files (markers 5.6 s after open at 10 MB; folding the root of a 100 MB file took 29 min). Folding stays in the Text pane.
+- [ ] Fold markers and folding on large files (markers 5.6 s after open at 10 MB; folding the root of a 100 MB file from the gutter took 29 min). Fold All / Unfold All fold in one pass since fork patch 3 (23 MB: 2.6 s / 2.1 s, #103); re-measure both at 100 MB. Folding stays in the Text pane.
 - [ ] Typing latency on large files (37 ms per key at 10 MB, up to 1.2 s at 50 MB).
 - [ ] Save on large files (3.4 s at 100 MB).
 - [ ] Decide on a warning before opening very large files.
