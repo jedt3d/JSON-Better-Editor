@@ -135,6 +135,30 @@
   "@cancel": {
     "description": "Button: cancel the action."
   },
+  "searchHint": "Search keys and values",
+  "@searchHint": {
+    "description": "Placeholder in the search field."
+  },
+  "searchCount": "{current} of {total}",
+  "@searchCount": {
+    "description": "Which match is selected, e.g. 2 of 7.",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "searchNoResults": "No results",
+  "@searchNoResults": {
+    "description": "Shown when the search text is not found."
+  },
+  "searchClose": "Close search",
+  "@searchClose": {
+    "description": "Tooltip of the button that closes the search field."
+  },
   "unknownError": "An unknown error occurred.",
   "@unknownError": {
     "description": "Dialog body when the system gives no error message."

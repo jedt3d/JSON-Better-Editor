@@ -8,6 +8,7 @@ import '../app/native_window.dart';
 import '../document/json_document.dart';
 import '../l10n/app_localizations.dart';
 import 'file_access.dart';
+import 'search_bar.dart';
 import 'text_pane.dart';
 import 'toolbar_metrics.dart';
 
@@ -75,6 +76,26 @@ class _MainWindowState extends State<MainWindow> {
   /// View › Word Wrap (Opt+Z), off by default (decision #58).
   bool _wordWrap = false;
 
+  /// The search field above the Text pane (#41).
+  bool _searchOpen = false;
+  final _searchBar = GlobalKey<JsonSearchBarState>();
+
+  /// Toolbar Search, Cmd+F and Edit › Find…: open the field, or put the
+  /// keyboard back in it.
+  void _openSearch() {
+    if (_open == null) return;
+    if (_searchOpen) return _searchBar.currentState?.focus();
+    setState(() => _searchOpen = true);
+  }
+
+  void _closeSearch() {
+    setState(() => _searchOpen = false);
+    final controller = _open?.controller;
+    if (controller != null) {
+      GlobalObjectKey<TextPaneState>(controller).currentState?.focus();
+    }
+  }
+
   /// Replaces the open document, disposing the old editor controller.
   void _setOpen(_OpenFile? open) {
     final old = _open;
@@ -123,6 +144,8 @@ class _MainWindowState extends State<MainWindow> {
         await _saveAs();
       case ('menu', 'wordWrap'):
         _toggleWordWrap();
+      case ('menu', 'find'):
+        _openSearch();
       case ('openPath', final String path):
         await _openPath(path);
       case ('edit', final String action):
@@ -361,6 +384,7 @@ class _MainWindowState extends State<MainWindow> {
         const SingleActivator(LogicalKeyboardKey.keyS, meta: true): _save,
         const SingleActivator(LogicalKeyboardKey.keyZ, alt: true):
             _toggleWordWrap,
+        const SingleActivator(LogicalKeyboardKey.keyF, meta: true): _openSearch,
         const SingleActivator(LogicalKeyboardKey.keyS, meta: true, shift: true):
             _saveAs,
       },
@@ -372,7 +396,11 @@ class _MainWindowState extends State<MainWindow> {
     return Scaffold(
       body: Column(
         children: [
-          _Toolbar(onNew: _newDocument, onOpen: _openFile),
+          _Toolbar(
+            onNew: _newDocument,
+            onOpen: _openFile,
+            onSearch: _openSearch,
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: Align(
@@ -391,11 +419,19 @@ class _MainWindowState extends State<MainWindow> {
             ),
           ),
           const Divider(height: 1),
+          if (open != null && _searchOpen) ...[
+            JsonSearchBar(
+              key: _searchBar,
+              controller: open.controller,
+              onClose: _closeSearch,
+            ),
+            const Divider(height: 1),
+          ],
           Expanded(
             child: open == null
                 ? Center(child: Text(l10n.emptyState))
                 : TextPane(
-                    key: ObjectKey(open.controller),
+                    key: GlobalObjectKey<TextPaneState>(open.controller),
                     controller: open.controller,
                     wordWrap: _wordWrap,
                   ),
@@ -439,10 +475,15 @@ enum _UnsavedChoice { save, discard, cancel }
 /// (MainFlutterWindow.swift hides the native title bar). Its empty parts act
 /// like a title bar: drag to move the window, double-click to zoom.
 class _Toolbar extends StatelessWidget {
-  const _Toolbar({required this.onNew, required this.onOpen});
+  const _Toolbar({
+    required this.onNew,
+    required this.onOpen,
+    required this.onSearch,
+  });
 
   final VoidCallback onNew;
   final VoidCallback onOpen;
+  final VoidCallback onSearch;
 
   static const metrics = ToolbarMetrics.macOS;
   static const buttonCount = 9;
@@ -471,7 +512,11 @@ class _Toolbar extends StatelessWidget {
             height: metrics.buttonSize * 0.6,
             child: VerticalDivider(width: metrics.gap * 2),
           ),
-          _ToolbarButton(icon: Icons.search, tooltip: l10n.toolbarSearch),
+          _ToolbarButton(
+            icon: Icons.search,
+            tooltip: l10n.toolbarSearch,
+            onPressed: onSearch,
+          ),
           const Spacer(),
           _ToolbarButton(icon: Icons.notes, tooltip: l10n.toolbarLayoutText),
           _ToolbarButton(

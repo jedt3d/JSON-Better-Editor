@@ -41,8 +41,8 @@ Future<void> setDocumentEdited(bool edited) => _fire('setEdited', edited);
 /// Requests from the native side, answered by [handler] (null removes it):
 /// - `confirmClose`: Close (red button, File › Close, Cmd+W) and Quit ask
 ///   first; answer true when the window may close or the app may quit.
-/// - `menu` with `new`, `open`, `save`, `saveAs` (File menu) or `wordWrap`
-///   (View menu).
+/// - `menu` with `new`, `open`, `save`, `saveAs` (File menu), `wordWrap`
+///   (View menu) or `find` (Edit › Find › Find…).
 /// - `openPath` with a file path: a .json opened from Finder (#32).
 /// - `edit` with `undo`, `redo`, `cut`, `copy`, `paste` or `selectAll`: an
 ///   Edit menu item (#38, #43).
@@ -58,7 +58,9 @@ void onNativeRequest(
 /// (for example the file that launched the app). Empty when there are none.
 Future<List<String>> takePendingOpenPaths() async {
   try {
-    final paths = await _channel.invokeListMethod<String>('takePendingOpenPaths');
+    final paths = await _channel.invokeListMethod<String>(
+      'takePendingOpenPaths',
+    );
     return paths ?? const [];
   } on MissingPluginException {
     return const [];

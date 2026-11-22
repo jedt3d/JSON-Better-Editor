@@ -42,6 +42,12 @@ class AppDelegate: FlutterAppDelegate {
       item.target = nil
       item.representedObject = name
     }
+    // Edit › Find › Find… opens the app's search field (#41).
+    let find = edit.items.first(where: { $0.submenu?.title == "Find" })?.submenu
+    if let findItem = find?.items.first(where: { $0.tag == 1 }) {
+      findItem.action = #selector(MainFlutterWindow.fileFind(_:))
+      findItem.target = nil
+    }
   }
 
   /// The standard File menu (§3.4, decision #21), after the app menu. Items

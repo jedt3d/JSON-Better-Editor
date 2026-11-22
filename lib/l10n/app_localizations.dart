@@ -250,6 +250,30 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get cancel;
 
+  /// Placeholder in the search field.
+  ///
+  /// In en, this message translates to:
+  /// **'Search keys and values'**
+  String get searchHint;
+
+  /// Which match is selected, e.g. 2 of 7.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} of {total}'**
+  String searchCount(int current, int total);
+
+  /// Shown when the search text is not found.
+  ///
+  /// In en, this message translates to:
+  /// **'No results'**
+  String get searchNoResults;
+
+  /// Tooltip of the button that closes the search field.
+  ///
+  /// In en, this message translates to:
+  /// **'Close search'**
+  String get searchClose;
+
   /// Dialog body when the system gives no error message.
   ///
   /// In en, this message translates to:
