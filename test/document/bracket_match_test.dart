@@ -63,4 +63,20 @@ void main() {
       expect(at('{"open', 0, 4), isNull);
     });
   });
+
+  group('multi-line blocks (folding)', () {
+    test('one block per opening line, outermost wins', () {
+      const text = '[{\n  "a": [\n    1\n  ],\n  "s": "{["\n}]';
+      expect(multiLineBlocks(text.split('\n')), [(0, 5), (1, 3)]);
+    });
+
+    test('single-line and unbalanced brackets are not blocks', () {
+      expect(multiLineBlocks(['{"a": [1, 2]}']), isEmpty);
+      expect(multiLineBlocks(['{', '  "a": 1']), isEmpty);
+    });
+  });
+
+  test('bracketsOutsideStrings skips escaped quotes', () {
+    expect(bracketsOutsideStrings(r'{"a\"[": [1]}'), [0, 9, 11, 12]);
+  });
 }

@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:re_editor/re_editor.dart';
 
 import '../document/json_search.dart';
+import 'line_list.dart';
 import '../l10n/app_localizations.dart';
 
 /// The search field above the Text pane (§3.3, #41): finds the text in keys
@@ -53,8 +54,7 @@ class JsonSearchBarState extends State<JsonSearchBar> {
   void _search(String query) {
     final controller = widget.controller;
     if (query.isNotEmpty) _unfoldAll(controller);
-    final lines = controller.codeLines;
-    final matches = searchJson((i) => lines[i].text, lines.length, query);
+    final matches = searchJson(_texts(controller), query);
     setState(() {
       _matches = matches;
       _current = matches.isEmpty ? -1 : 0;
@@ -69,8 +69,7 @@ class JsonSearchBarState extends State<JsonSearchBar> {
   void step({bool forward = true}) {
     if (_query.text.isEmpty) return;
     final controller = widget.controller;
-    final lines = controller.codeLines;
-    final matches = searchJson((i) => lines[i].text, lines.length, _query.text);
+    final matches = searchJson(_texts(controller), _query.text);
     final selection = controller.selection;
     final i = nextMatch(
       matches,
@@ -170,9 +169,15 @@ class JsonSearchBarState extends State<JsonSearchBar> {
   }
 }
 
+List<String> _texts(CodeLineEditingController controller) => [
+  for (final line in lineList(controller.codeLines)) line.text,
+];
+
 /// Search covers folded text too, so folds are opened first (decision #76).
 void _unfoldAll(CodeLineEditingController controller) {
-  for (var i = controller.codeLines.length - 1; i >= 0; i--) {
-    if (controller.codeLines[i].chunkParent) controller.expandChunk(i);
+  final lines = lineList(controller.codeLines);
+  // From the end, so earlier indexes stay valid as folds open.
+  for (var i = lines.length - 1; i >= 0; i--) {
+    if (lines[i].chunkParent) controller.expandChunk(i);
   }
 }

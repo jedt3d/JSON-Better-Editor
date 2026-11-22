@@ -11,21 +11,29 @@ final _token = RegExp(
 );
 
 /// Finds [query] in keys and values, never in punctuation or whitespace
-/// between tokens (§3.3, #41). Case-insensitive. [lineAt] gives line i of
-/// [lineCount].
-List<SearchMatch> searchJson(
-  String Function(int line) lineAt,
-  int lineCount,
-  String query,
-) {
+/// between tokens (§3.3, #41). Case-insensitive.
+///
+/// The lines are joined and searched with one regular expression, and only
+/// lines with a hit are split into tokens: searching line by line took
+/// about 0.8 s at 5 MB (#44).
+List<SearchMatch> searchJson(List<String> lines, String query) {
   if (query.isEmpty) return const [];
   final needle = RegExp(RegExp.escape(query), caseSensitive: false);
+  final text = lines.join('\n');
   final matches = <SearchMatch>[];
-  for (var line = 0; line < lineCount; line++) {
-    final text = lineAt(line);
-    // Most lines do not contain the query at all; skip them cheaply.
-    if (!needle.hasMatch(text)) continue;
-    for (final token in _token.allMatches(text)) {
+  var line = 0;
+  var lineStart = 0;
+  var checkedLine = -1;
+  for (final hit in needle.allMatches(text)) {
+    while (line + 1 < lines.length &&
+        lineStart + lines[line].length < hit.start) {
+      lineStart += lines[line].length + 1;
+      line++;
+    }
+    if (line == checkedLine) continue; // This line's matches are added.
+    checkedLine = line;
+    final lineText = lines[line];
+    for (final token in _token.allMatches(lineText)) {
       final quoted = token[1] != null;
       final start = quoted ? token.start + 1 : token.start;
       final content = token[1] ?? token[2]!;

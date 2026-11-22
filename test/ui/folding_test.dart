@@ -136,4 +136,19 @@ void main() {
     expect(controller.codeLines.length, 9);
     expect(controller.text, text);
   }, variant: macOS);
+
+  testWidgets('edit, undo, then fold: still not edited', (tester) async {
+    await openText(tester);
+    final controller = editorController(tester)
+      ..selection = const CodeLineSelection.collapsed(index: 7, offset: 11);
+    await tester.pump();
+    await typeText(tester, 'X');
+    expect(documentTitle(tester), 'a.json — Edited');
+    await pressCmd(tester, LogicalKeyboardKey.keyZ);
+    expect(documentTitle(tester), 'a.json');
+    chunks(tester).collapse(1);
+    await tester.pumpAndSettle();
+    expect(controller.codeLines.length, 4);
+    expect(documentTitle(tester), 'a.json');
+  }, variant: macOS);
 }

@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:re_editor/re_editor.dart';
 
+import 'line_list.dart';
 import '../document/bracket_match.dart';
 
 /// A quote typed where an object key goes: after `{` or `,` (or at the
@@ -32,7 +33,8 @@ class JsonKeyPrompts implements CodeAutocompletePromptsBuilder {
     if (typed == null) return null;
     final input = typed[1]!;
     final lines = controller.codeLines;
-    final container = openContainerAt((i) => lines[i].text, (
+    final list = lineList(lines);
+    final container = openContainerAt((i) => list[i].text, (
       line: selection.extentIndex,
       column: selection.extentOffset,
     ));
@@ -63,9 +65,15 @@ class JsonKeyPrompts implements CodeAutocompletePromptsBuilder {
     );
   }
 
-  // ponytail: walks every line on each keystroke in a key position (cached
-  // per line, so only identity lookups); #44 checks the cost on 5 MB.
+  List<String>? _keys;
+  final _keysAge = Stopwatch();
+
+  // ponytail: the document's keys are collected at most every 2 s (about
+  // 90 ms at 5 MB, #44), so a key added elsewhere in the last 2 s may be
+  // missing from the list. Upgrade path: update the set per edited line.
   List<String> _documentKeys(CodeLines lines) {
+    final cached = _keys;
+    if (cached != null && _keysAge.elapsedMilliseconds < 2000) return cached;
     final keys = <String>{};
     void add(CodeLine line) {
       keys.addAll(
@@ -79,7 +87,10 @@ class JsonKeyPrompts implements CodeAutocompletePromptsBuilder {
     for (final segment in lines.segments) {
       segment.codeLines.forEach(add);
     }
-    return keys.toList()..sort();
+    _keysAge
+      ..reset()
+      ..start();
+    return _keys = keys.toList()..sort();
   }
 }
 
