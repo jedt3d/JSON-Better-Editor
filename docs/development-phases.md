@@ -20,7 +20,7 @@ Goal: the application is up and running on macOS with very basic features, and t
 - [ ] Open, Save and Save As for `.json` files (§3.4).
 - [ ] Invalid JSON on open: error dialog with position, file not opened (§1.2).
 - [ ] Plain text view of the opened document (no highlighting yet).
-- [ ] CI build and a smoke test that the app launches on macOS.
+- [ ] Local build-and-test script (`scripts/check.sh`) and a smoke test that the app launches on macOS. No GitHub Actions (decision #34).
 
 **Done when:** you can open a valid `.json` file, see its text, save it, and an invalid file shows an error dialog.
 
