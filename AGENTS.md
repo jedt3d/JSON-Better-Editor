@@ -10,6 +10,10 @@ JSON Better Editor: a Flutter desktop app (macOS first) for editing JSON in two 
 
 `docs/decision-log.md` is the project's decision log. Append every new decision as a new row at the bottom of its table, numbered after the last row. Never edit or delete past rows; if a decision is reversed, add a new row that says which row it supersedes.
 
+## Checkboxes, PRs and issues
+
+Before asking for a merge, tick every checkbox that is done in the PR body and in its issue, with evidence for each. Leave a box unticked only with a note saying why (for example, moved to a later phase and the decision row). After the merge, close the issue and tick it in its parent issue's checklist. A merged PR or closed issue must never show unticked boxes without a note.
+
 ## Messages to the maintainer
 
 Every message you send back for the maintainer to read falls into exactly one of three groups. Mark it with the label at the very start of the message.

@@ -90,7 +90,7 @@ void main() {
       final saved = disk.files['/d/data.json']!;
       expect(
         saved,
-        '{\n  "b": [\n    1,\n    2\n  ],\n  "a": {\n    "x": 1e5\n  }\n}',
+        '{\n  "b": [\n    1,\n    2\n  ],\n  "a": {\n    "x": 1e5\n  }\n}\n',
       );
       expect(modelText(saved), modelText(original));
       expect(disk.askedNames, isEmpty, reason: 'Save must not ask for a path');
@@ -110,13 +110,13 @@ void main() {
       await pressSave(tester, shift: true);
 
       expect(disk.askedNames, ['a.json']);
-      expect(disk.files['/d/copy.json'], '[\n  1\n]');
+      expect(disk.files['/d/copy.json'], '[\n  1\n]\n');
       expect(disk.files['/d/a.json'], '[1]', reason: 'original untouched');
       expect(titles.last, 'copy.json');
 
       await pressSave(tester);
       expect(disk.askedNames, ['a.json'], reason: 'Save goes to copy.json now');
-      expect(disk.files['/d/copy.json'], '[\n  1\n]');
+      expect(disk.files['/d/copy.json'], '[\n  1\n]\n');
     },
   );
 
@@ -180,7 +180,7 @@ void main() {
 
     disk.writeError = null;
     await pressSave(tester);
-    expect(disk.files['/d/a.json'], '[\n  1\n]', reason: 'still a.json');
+    expect(disk.files['/d/a.json'], '[\n  1\n]\n', reason: 'still a.json');
     expect(titles.last, 'a.json');
   });
 
@@ -193,6 +193,6 @@ void main() {
     await tester.pumpAndSettle();
     await pressSave(tester);
 
-    expect(disk.files['/d/a.json'], '[\n  1\n]');
+    expect(disk.files['/d/a.json'], '[\n  1\n]\n');
   });
 }

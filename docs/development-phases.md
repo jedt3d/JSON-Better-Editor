@@ -12,15 +12,15 @@ Each phase ends with an app that builds and runs on macOS. A phase starts only a
 
 Goal: the application is up and running on macOS with very basic features, and the foundations later phases build on.
 
-- [ ] Create the Flutter macOS project, folder structure, lint and test setup.
-- [ ] Basic Material 3 theme (§3.6). Full One Light / One Dark comes in Phase 4.
-- [ ] i18n scaffolding with English as the default language (§3.7). Thai strings and the switch come in Phase 4.
-- [ ] Main window and toolbar skeleton (§3.2): New, Open, Search, Layout toggles, Language, Theme, Settings. Buttons can be placeholders.
-- [ ] Shared JSON document model used by both Text and Node panes (§1.2). Covers all six types, including Null.
-- [ ] Open, Save and Save As for `.json` files (§3.4).
-- [ ] Invalid JSON on open: error dialog with position, file not opened (§1.2).
-- [ ] Plain text view of the opened document (no highlighting yet).
-- [ ] Local build-and-test script (`scripts/check.sh`) and a smoke test that the app launches on macOS. No GitHub Actions (decision #34).
+- [x] Create the Flutter macOS project, folder structure, lint and test setup.
+- [x] Basic Material 3 theme (§3.6). Full One Light / One Dark comes in Phase 4.
+- [x] i18n scaffolding with English as the default language (§3.7). Thai strings and the switch come in Phase 4.
+- [x] Main window and toolbar skeleton (§3.2): New, Open, Search, Layout toggles, Language, Theme, Settings. Buttons can be placeholders.
+- [x] Shared JSON document model used by both Text and Node panes (§1.2). Covers all six types, including Null.
+- [x] Open, Save and Save As for `.json` files (§3.4).
+- [x] Invalid JSON on open: error dialog with position, file not opened (§1.2).
+- [x] Plain text view of the opened document (no highlighting yet).
+- [x] Local build-and-test script (`scripts/check.sh`) and a smoke test that the app launches on macOS. No GitHub Actions (decision #34).
 
 **Done when:** you can open a valid `.json` file, see its text, save it, and an invalid file shows an error dialog.
 
