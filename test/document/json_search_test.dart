@@ -2,8 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:json_better_editor/document/json_search.dart';
 
 List<SearchMatch> find(String text, String query) {
-  final lines = text.split('\n');
-  return searchJson((i) => lines[i], lines.length, query);
+  return searchJson(text.split('\n'), query);
 }
 
 void main() {

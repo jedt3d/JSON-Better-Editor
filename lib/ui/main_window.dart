@@ -52,10 +52,17 @@ class _OpenFile {
 
   bool get edited {
     final lines = controller.codeLines;
-    if (identical(lines, savedLines)) return false;
-    if (!identical(lines, _checkedLines)) {
+    if (identical(lines, savedLines)) {
       _checkedLines = lines;
-      _checkedEdited = !_sameText(lines, savedLines);
+      return _checkedEdited = false;
+    }
+    if (!identical(lines, _checkedLines)) {
+      // Once edited, a further change keeps it edited without comparing
+      // (#44: comparing on every keystroke cost tens of ms at 5 MB). Only
+      // the step from unedited (a fold, or a first edit) is compared; undo
+      // back to the saved text brings back savedLines itself.
+      _checkedEdited = _checkedEdited || !_sameText(lines, savedLines);
+      _checkedLines = lines;
     }
     return _checkedEdited;
   }
@@ -485,28 +492,26 @@ class _MainWindowState extends State<MainWindow> {
 
 /// Whether [a] and [b] hold the same text, folded parts included.
 bool _sameText(CodeLines a, CodeLines b) {
-  final left = _lineTexts(a).iterator;
-  final right = _lineTexts(b).iterator;
-  while (true) {
-    final more = left.moveNext();
-    if (more != right.moveNext()) return false;
-    if (!more) return true;
-    if (left.current != right.current) return false;
+  final left = <String>[];
+  final right = <String>[];
+  _texts(a, left);
+  _texts(b, right);
+  if (left.length != right.length) return false;
+  for (var i = 0; i < left.length; i++) {
+    // Unchanged lines are the same String object: a cheap check.
+    if (left[i] != right[i]) return false;
   }
+  return true;
 }
 
-Iterable<String> _lineTexts(CodeLines lines) sync* {
+void _texts(CodeLines lines, List<String> out) {
+  void add(CodeLine line) {
+    out.add(line.text);
+    line.chunks.forEach(add);
+  }
+
   for (final segment in lines.segments) {
-    for (final line in segment.codeLines) {
-      yield* _withChunks(line);
-    }
-  }
-}
-
-Iterable<String> _withChunks(CodeLine line) sync* {
-  yield line.text;
-  for (final chunk in line.chunks) {
-    yield* _withChunks(chunk);
+    segment.codeLines.forEach(add);
   }
 }
 

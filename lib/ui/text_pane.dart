@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:re_editor/re_editor.dart';
 
 import '../document/bracket_match.dart';
+import 'line_list.dart';
 import 'json_highlight.dart';
 import 'key_autocomplete.dart';
 
@@ -113,10 +114,10 @@ class TextPaneState extends State<TextPane> {
 
   void _updatePair() {
     final controller = widget.controller;
-    final lines = controller.codeLines;
+    final list = lineList(controller.codeLines);
     final selection = controller.selection;
     _pair.value = selection.isCollapsed
-        ? matchAt((i) => lines[i].text, lines.length, (
+        ? matchAt((i) => list[i].text, list.length, (
             line: selection.extentIndex,
             column: selection.extentOffset,
           ))
@@ -312,13 +313,19 @@ class _JsonChunkAnalyzer implements CodeChunkAnalyzer {
 
   static final _closerOnly = RegExp(r'^\s*[}\]],?\s*$');
 
+  // Runs in re_editor's isolate on every change. Its default analyzer
+  // indexes CodeLines line by line, which is quadratic (minutes at 5 MB,
+  // #44); this reads the lines once.
   @override
-  List<CodeChunk> run(CodeLines codeLines) => [
-    for (final chunk in const DefaultCodeChunkAnalyzer().run(codeLines))
-      _closerOnly.hasMatch(codeLines[chunk.end].text)
-          ? CodeChunk(chunk.index, chunk.end + 1)
-          : chunk,
-  ];
+  List<CodeChunk> run(CodeLines codeLines) {
+    final lines = [for (final line in lineList(codeLines)) line.text];
+    return [
+      for (final (start, end) in multiLineBlocks(lines))
+        _closerOnly.hasMatch(lines[end])
+            ? CodeChunk(start, end + 1)
+            : CodeChunk(start, end),
+    ];
+  }
 }
 
 /// re_editor's macOS shortcuts, minus the ones the app owns (Save goes to

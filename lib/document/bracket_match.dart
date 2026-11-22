@@ -43,29 +43,22 @@ List<TextPoint>? matchAt(
   return null;
 }
 
-// ponytail: scans line by line from the bracket, so pairing the root `{`
-// of a huge file walks the whole file (a few ms per MB). Cap the scan if
-// #44 shows caret moves lagging.
+// ponytail: pairing the root bracket of a large file walks the whole file
+// (about 30 ms at 5 MB, #44). Cap the walk if that ever shows as lag.
 TextPoint? _scanForward(
   String Function(int) lineAt,
   int lineCount,
   TextPoint from,
 ) {
-  final stack = <String>[];
+  final stack = <int>[];
   for (var line = from.line; line < lineCount; line++) {
-    final text = lineAt(line);
-    final strings = _stringRanges(text);
-    final start = line == from.line ? from.column : 0;
-    for (var i = start; i < text.length; i++) {
-      final c = text[i];
-      if (_inString(strings, i)) continue;
-      if (_open.contains(c)) {
+    for (final i in bracketsOutsideStrings(lineAt(line))) {
+      if (line == from.line && i < from.column) continue;
+      final c = lineAt(line).codeUnitAt(i);
+      if (_isOpen(c)) {
         stack.add(c);
-      } else if (_close.contains(c)) {
-        if (stack.isEmpty ||
-            _open.indexOf(stack.removeLast()) != _close.indexOf(c)) {
-          return null; // Mismatched.
-        }
+      } else {
+        if (stack.isEmpty || !_pairs(stack.removeLast(), c)) return null;
         if (stack.isEmpty) return (line: line, column: i);
       }
     }
@@ -74,26 +67,78 @@ TextPoint? _scanForward(
 }
 
 TextPoint? _scanBackward(String Function(int) lineAt, TextPoint from) {
-  final stack = <String>[];
+  final stack = <int>[];
   for (var line = from.line; line >= 0; line--) {
     final text = lineAt(line);
-    final strings = _stringRanges(text);
-    final start = line == from.line ? from.column : text.length - 1;
-    for (var i = start; i >= 0; i--) {
-      final c = text[i];
-      if (_inString(strings, i)) continue;
-      if (_close.contains(c)) {
+    for (final i in bracketsOutsideStrings(text).reversed) {
+      if (line == from.line && i > from.column) continue;
+      final c = text.codeUnitAt(i);
+      if (!_isOpen(c)) {
         stack.add(c);
-      } else if (_open.contains(c)) {
-        if (stack.isEmpty ||
-            _close.indexOf(stack.removeLast()) != _open.indexOf(c)) {
-          return null;
-        }
+      } else {
+        if (stack.isEmpty || !_pairs(c, stack.removeLast())) return null;
         if (stack.isEmpty) return (line: line, column: i);
       }
     }
   }
   return null;
+}
+
+const _quote = 0x22, _backslash = 0x5C;
+const _openBrace = 0x7B, _closeBrace = 0x7D;
+const _openBracket = 0x5B, _closeBracket = 0x5D;
+
+bool _isOpen(int c) => c == _openBrace || c == _openBracket;
+
+bool _pairs(int open, int close) =>
+    (open == _openBrace && close == _closeBrace) ||
+    (open == _openBracket && close == _closeBracket);
+
+/// Columns of `{ } [ ]` on one line that are not inside a string. JSON
+/// strings never span lines, so each line is read on its own.
+List<int> bracketsOutsideStrings(String text) {
+  final columns = <int>[];
+  var inString = false;
+  for (var i = 0; i < text.length; i++) {
+    final c = text.codeUnitAt(i);
+    if (inString) {
+      if (c == _backslash) {
+        i++;
+      } else if (c == _quote) {
+        inString = false;
+      }
+    } else if (c == _quote) {
+      inString = true;
+    } else if (c == _openBrace ||
+        c == _closeBrace ||
+        c == _openBracket ||
+        c == _closeBracket) {
+      columns.add(i);
+    }
+  }
+  return columns;
+}
+
+/// Blocks that span more than one line, as (opening line, closing line),
+/// one per opening line (the outermost when several open on one line).
+/// Unbalanced brackets are skipped. Used for folding (#36).
+List<(int, int)> multiLineBlocks(List<String> lines) {
+  final open = <(int, int)>[]; // (bracket, line)
+  final byStart = <int, int>{};
+  for (var line = 0; line < lines.length; line++) {
+    final text = lines[line];
+    for (final i in bracketsOutsideStrings(text)) {
+      final c = text.codeUnitAt(i);
+      if (_isOpen(c)) {
+        open.add((c, line));
+      } else if (open.isNotEmpty && _pairs(open.last.$1, c)) {
+        final start = open.removeLast().$2;
+        if (line > start) byStart[start] = line;
+      }
+    }
+  }
+  return [for (final e in byStart.entries) (e.key, e.value)]
+    ..sort((a, b) => a.$1 - b.$1);
 }
 
 /// (opening quote, closing quote) of each string on one line. An unclosed
@@ -127,15 +172,13 @@ String? openContainerAt(String Function(int line) lineAt, TextPoint caret) {
   var depth = 0;
   for (var line = caret.line; line >= 0; line--) {
     final text = lineAt(line);
-    final strings = _stringRanges(text);
-    final start = line == caret.line ? caret.column - 1 : text.length - 1;
-    for (var i = start; i >= 0; i--) {
-      final c = text[i];
-      if (_inString(strings, i)) continue;
-      if (_close.contains(c)) {
+    for (final i in bracketsOutsideStrings(text).reversed) {
+      if (line == caret.line && i >= caret.column) continue;
+      if (!_isOpen(text.codeUnitAt(i))) {
         depth++;
-      } else if (_open.contains(c)) {
-        if (depth == 0) return c;
+      } else if (depth == 0) {
+        return text[i];
+      } else {
         depth--;
       }
     }
