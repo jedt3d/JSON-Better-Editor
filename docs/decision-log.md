@@ -35,3 +35,4 @@
 | 28 | 2026-11-22 | Save formatting | Save reformats (pretty-prints) the JSON. |
 | 29 | 2026-11-22 | Missing fonts | Fall back to the macOS default monospace font. |
 | 30 | 2026-11-22 | Default UI language | Always English on first launch. |
+| 31 | 2026-11-22 | Node-mode paste shortcuts (final) | Cmd+V = paste as child; Cmd+Shift+V = paste sibling after; Cmd+Opt+V = paste sibling before. Cmd+Opt+Shift+V removed. Supersedes the shortcut parts of #5 and #25. |
