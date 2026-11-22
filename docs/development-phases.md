@@ -109,3 +109,21 @@ Goal: the Settings screen and everything it controls.
 - [ ] Replace the default Flutter app icon with the app's own icon (§3.11). #78
 
 **Done when:** every setting in §3.10 works and persists between launches, and the release items in §3.11 are done.
+
+---
+
+## Phase 5 — Optimization
+
+Goal: make large files fast. Decided by the maintainer on 2026-11-23 (decision #86): all performance work
+waits for this phase. Until then, Phases 1–4 build the planned features and only need to **work without
+errors on files up to 20 MB**; slowness on large files is accepted. Tracked in issue #82; numbers in
+`docs/performance.md`.
+
+- [ ] First key suggestion on large files (0.3 s at 5 MB). #67
+- [ ] Opening large files (passes 2 s at about 25 MB; 100 MB takes 8.5 s).
+- [ ] Fold markers and folding on large files (markers 5.6 s after open at 10 MB; folding the root of a 100 MB file took 29 min). Folding stays in the Text pane.
+- [ ] Typing latency on large files (37 ms per key at 10 MB, up to 1.2 s at 50 MB).
+- [ ] Save on large files (3.4 s at 100 MB).
+- [ ] Decide on a warning before opening very large files.
+
+**Done when:** each item meets the target set at the start of the phase, measured in the Release app with `scripts/perf.sh --release`.

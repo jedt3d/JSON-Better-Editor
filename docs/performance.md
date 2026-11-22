@@ -4,6 +4,9 @@ Targets (decision #59): a 5 MB file opens and is shown in 2 s or less; typing, s
 no visible lag (frame time 16 ms or less in a profile build). Also find the largest file that still opens
 within 2–3 s.
 
+Since 2026-11-23 (decision #86) performance work waits for **Phase 5 — Optimization** (issue #82).
+Until then the bar is: every feature works without errors on files up to 20 MB.
+
 ## How to measure
 
 ```bash

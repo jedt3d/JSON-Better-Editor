@@ -58,7 +58,7 @@ Every PR was reviewed against its acceptance criteria by the coordinator before 
 - **#67 — decided 2026-11-22: fork re_editor.** It now lives in `packages/re_editor/` (#70, decision
   #81) with its own change log `JBE_CHANGES.md`. Patch 1 (#71, decision #82) fixed the long jump to
   the top: 5 MB went from a 2.7 s frame to 10 ms. Still open in #67: the first key suggestion in a
-  session takes 0.3 s at 5 MB.
+  session takes 0.3 s at 5 MB. Moved to Phase 5 — Optimization (#82, decision #86).
 - **Merging (resolved).** `gh pr merge` was refused on this Mac until the maintainer allowed it in
   `~/.claude/settings.json` on 2026-11-22; PRs #46–#69 were then merged in order.
 - Search and undo cover the Text pane only; Node mode and the shared history are Phase 3 (decision #53).

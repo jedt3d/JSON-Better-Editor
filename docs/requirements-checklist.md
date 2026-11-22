@@ -151,6 +151,7 @@
 - [x] A failed write shows an error dialog, keeps the document open, and puts the file's previous contents back (decision #42).
 - [x] One document per window. The app can run multiple instances.
 - [x] Target for now: files under 5 MB: open and show in 2 s or less, no visible lag when typing, scrolling or searching (decision #59). Measured: 5 MB opens in 0.5 s, typing frames ≤ 8 ms, scrolling frames ≤ 10 ms, search 19 ms (`docs/performance.md`). A jump from the end to the top of a 5 MB file now takes one 10 ms frame (forked re_editor, #71). Not yet: the first key suggestion in a session (0.3 s), #67. **Current capacity: about 30 MB** (opens in 2.5 s). Release-build limits at 10/50/100 MB (2026-11-23): open passes 2 s at about 25 MB, first key suggestion at 35 MB, Save at 65 MB, fold markers at 7 MB (decision #85). Progressive loading/rendering is future work.
+- [ ] Working bar for Phases 1–4: every feature works without errors on files up to **20 MB**; slowness on large files is accepted until Phase 5 (Optimization, #82, decision #86).
 
 ### 3.5 Undo / redo
 - [x] Undo and redo are required (Cmd+Z / Cmd+Shift+Z). Text pane only for now (decision #53).
