@@ -182,5 +182,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'The file is no longer there. It was removed from Open Recent.';
 
   @override
+  String get statusPaneText => 'TEXT';
+
+  @override
+  String statusSize(int lines, String size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      lines,
+      locale: localeName,
+      other: '$lines lines',
+      one: '1 line',
+    );
+    return '$_temp0 · $size';
+  }
+
+  @override
   String get unknownError => 'An unknown error occurred.';
 }

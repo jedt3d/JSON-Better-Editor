@@ -12,6 +12,7 @@ import '../l10n/app_localizations.dart';
 import 'file_access.dart';
 import 'line_list.dart';
 import 'search_bar.dart';
+import 'status_bar.dart';
 import 'text_pane.dart';
 import 'toolbar_metrics.dart';
 
@@ -100,6 +101,14 @@ class _MainWindowState extends State<MainWindow> {
 
   /// View › Word Wrap (Opt+Z), off by default (decision #58).
   bool _wordWrap = false;
+
+  /// View › Hide / Show Status Bar (⌘/), shown by default (#98).
+  bool _statusBarShown = true;
+
+  void _toggleStatusBar() {
+    setState(() => _statusBarShown = !_statusBarShown);
+    setStatusBarShown(_statusBarShown);
+  }
 
   /// The search field above the Text pane (#41).
   bool _searchOpen = false;
@@ -327,6 +336,8 @@ class _MainWindowState extends State<MainWindow> {
         await _saveAs();
       case ('menu', 'wordWrap'):
         _toggleWordWrap();
+      case ('menu', 'statusBar'):
+        _toggleStatusBar();
       case ('menu', 'validate'):
         await _validate();
       case ('menu', 'format'):
@@ -692,6 +703,8 @@ class _MainWindowState extends State<MainWindow> {
         const SingleActivator(LogicalKeyboardKey.keyZ, alt: true):
             _toggleWordWrap,
         const SingleActivator(LogicalKeyboardKey.keyF, meta: true): _openSearch,
+        const SingleActivator(LogicalKeyboardKey.slash, meta: true):
+            _toggleStatusBar,
         const SingleActivator(LogicalKeyboardKey.keyG, meta: true): _findNext,
         const SingleActivator(
           LogicalKeyboardKey.keyG,
@@ -750,6 +763,7 @@ class _MainWindowState extends State<MainWindow> {
                     wordWrap: _wordWrap,
                   ),
           ),
+          if (_statusBarShown) StatusBar(controller: open?.controller),
         ],
       ),
     );
