@@ -23,6 +23,7 @@
 ### 1.2 JSON understanding and validation
 - [x] Parse key-value pairs, objects, arrays, and data types: String, Number, Boolean, Object, Array, Null. Key order, duplicate keys and number text are kept as written; nesting deeper than 512 levels is rejected (decisions #39, #40).
 - [x] If a file being opened is invalid JSON, show the error position (line and column) in a dialog and do **not** open the file; the document already open stays.
+- [ ] Edit › Validate JSON checks the Text pane on demand and moves the caret to the error's line and column (#86, decision #87). Background validation while typing is Phase 5.
 
 ### 1.3 Autocomplete
 - [x] Autocomplete a `key` from keys that already exist in the document.
@@ -30,6 +31,9 @@
 
 ### 1.4 Keyboard and clipboard
 - [x] **Tab** / **Shift+Tab** indent and de-indent text by 2 spaces, as in a normal code editor (decision #57).
+- [ ] Typing `{`, `[` or `"` inserts the closing pair; typing the closer next to it moves past it; Backspace in an empty pair deletes both (#91, decision #87; replaces the switch-off in decision #65).
+- [ ] Edit › Format (2-space pretty-print) and Edit › Minify, each one undoable edit (#89, decision #87).
+- [ ] Edit › Go to Line…, menu only with no shortcut for now (#90, decision #87).
 - [x] Copy, cut and paste follow normal text-editor behavior (no node-aware paste in Text mode).
 
 ### 1.5 Word wrap
@@ -149,6 +153,11 @@
 - [x] Unsaved changes are marked in the window; New, Open, Close and Quit ask Save / Don't Save / Cancel, default Save (decision #55).
 - [x] Save reformats the JSON (pretty-print, 2-space indent) before writing, and the file ends with a newline (decisions #28, #47).
 - [x] A failed write shows an error dialog, keeps the document open, and puts the file's previous contents back (decision #42).
+- [ ] Save writes a temporary file and swaps it in, so a crash cannot truncate the file; one writer interface with a per-OS implementation (macOS now; Linux `rename`, Windows `ReplaceFileW` later) (#87, decision #87).
+- [ ] When another program changes or deletes the open file, ask Reload / Keep Mine; Save over a file changed on disk asks first, default Cancel (#88, decision #87).
+- [ ] File › Open Recent: last 10 files, kept between launches through security-scoped bookmarks, with Clear Menu (#92, decision #87).
+- [ ] Save keeps the file's original line endings (most common one if mixed); new files use the OS default (#95, decision #87).
+- [ ] Closing the last window keeps the app running; the Dock icon, New and Open bring a window back (#93, decision #87; supersedes decision #68).
 - [x] One document per window. The app can run multiple instances.
 - [x] Target for now: files under 5 MB: open and show in 2 s or less, no visible lag when typing, scrolling or searching (decision #59). Measured: 5 MB opens in 0.5 s, typing frames ≤ 8 ms, scrolling frames ≤ 10 ms, search 19 ms (`docs/performance.md`). A jump from the end to the top of a 5 MB file now takes one 10 ms frame (forked re_editor, #71). Not yet: the first key suggestion in a session (0.3 s), #67. **Current capacity: about 30 MB** (opens in 2.5 s). Release-build limits at 10/50/100 MB (2026-11-23): open passes 2 s at about 25 MB, first key suggestion at 35 MB, Save at 65 MB, fold markers at 7 MB (decision #85). Progressive loading/rendering is future work.
 - [ ] Working bar for Phases 1–4: every feature works without errors on files up to **20 MB**; slowness on large files is accepted until Phase 5 (Optimization, #82, decision #86).

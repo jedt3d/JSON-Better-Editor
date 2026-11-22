@@ -52,6 +52,22 @@ Built beyond the original list, found while checking the real app: the Edit menu
 
 **Done when:** the app works as a complete JSON text editor on its own. ✅ Confirmed in the Release app on 2026-11-22 (#45, `docs/screenshots/45-phase2-done.jpg`).
 
+### Phase 2 extras (#85)
+
+Approved by the maintainer on 2026-11-23 (decision #87), built on the current document code (none of it waits for the shared Document model planned before Phase 3). Each only needs to work without errors on files up to 20 MB (decision #86).
+
+- [ ] Validate JSON menu command. #86
+- [ ] Save through a temporary file and swap (per-OS writer; macOS now). #87
+- [ ] Notice when another program changes the open file. #88
+- [ ] Format and Minify, undoable. #89
+- [ ] Go to Line, menu only. #90
+- [ ] Auto-close brackets and quotes with type-over. #91
+- [ ] Open Recent. #92
+- [ ] Keep the app running after the last window closes. #93
+- [ ] Randomized parser test and the Save round trip. #94
+- [ ] Keep the file's line endings on Save. #95
+- [ ] `docs/shortcuts.md` listing every shortcut, as the base for a later shortcut review. #96
+
 ---
 
 ## Phase 3 — Node Visualization
