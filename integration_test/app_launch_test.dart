@@ -14,5 +14,8 @@ void main() {
 
     expect(find.byType(JsonBetterEditorApp), findsOneWidget);
     expect(find.byType(Scaffold), findsOneWidget);
+    expect(find.byTooltip('Open'), findsOneWidget);
+    expect(find.byTooltip('Settings'), findsOneWidget);
+    expect(find.text('Open a JSON file'), findsOneWidget);
   });
 }

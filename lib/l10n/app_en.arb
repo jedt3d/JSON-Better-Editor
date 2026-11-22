@@ -3,5 +3,49 @@
   "appTitle": "JSON Better Editor",
   "@appTitle": {
     "description": "Application name, shown as the window title."
+  },
+  "toolbarNew": "New",
+  "@toolbarNew": {
+    "description": "Toolbar tooltip: new document."
+  },
+  "toolbarOpen": "Open",
+  "@toolbarOpen": {
+    "description": "Toolbar tooltip: open a .json file."
+  },
+  "toolbarSearch": "Search",
+  "@toolbarSearch": {
+    "description": "Toolbar tooltip: search keys and values."
+  },
+  "toolbarLayoutText": "Text only",
+  "@toolbarLayoutText": {
+    "description": "Toolbar tooltip: show only the Text pane."
+  },
+  "toolbarLayoutNode": "Node only",
+  "@toolbarLayoutNode": {
+    "description": "Toolbar tooltip: show only the Node pane."
+  },
+  "toolbarLayoutSplit": "Split view",
+  "@toolbarLayoutSplit": {
+    "description": "Toolbar tooltip: show Text and Node side by side."
+  },
+  "toolbarLanguage": "Language",
+  "@toolbarLanguage": {
+    "description": "Toolbar tooltip: switch UI language."
+  },
+  "toolbarTheme": "Theme",
+  "@toolbarTheme": {
+    "description": "Toolbar tooltip: switch light/dark theme."
+  },
+  "toolbarSettings": "Settings",
+  "@toolbarSettings": {
+    "description": "Toolbar tooltip: open settings."
+  },
+  "comingSoon": "Coming soon",
+  "@comingSoon": {
+    "description": "Message for toolbar buttons that are not built yet."
+  },
+  "emptyState": "Open a JSON file",
+  "@emptyState": {
+    "description": "Shown in the content area when no document is loaded."
   }
 }
