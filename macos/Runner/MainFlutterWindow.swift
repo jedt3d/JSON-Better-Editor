@@ -85,6 +85,11 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
         result(nil)
       case "accessRecent":
         result(RecentFiles.access(call.arguments as? String ?? ""))
+      case "setStatusBarShown":
+        let shown = call.arguments as? Bool ?? true
+        (NSApp.delegate as? AppDelegate)?.statusBarItem?.title =
+          shown ? "Hide Status Bar" : "Show Status Bar"
+        result(nil)
       case "setEdited":
         // The dot in the close button for unsaved changes (decision #55).
         self.isDocumentEdited = call.arguments as? Bool ?? false
@@ -207,6 +212,10 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
   /// setWordWrapChecked (Opt+Z itself is handled in Dart, see main_window).
   @objc func toggleWordWrap(_ sender: NSMenuItem) {
     windowChannel?.invokeMethod("menu", arguments: "wordWrap")
+  }
+
+  @objc func toggleStatusBar(_ sender: Any?) {
+    windowChannel?.invokeMethod("menu", arguments: "statusBar")
   }
 
   /// File › Open Recent entries and Clear Menu (#92).

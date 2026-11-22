@@ -3,6 +3,8 @@ import FlutterMacOS
 
 @main
 class AppDelegate: FlutterAppDelegate {
+  var statusBarItem: NSMenuItem?
+
   /// Closing the window leaves the app running, like other macOS editors
   /// (#93, supersedes decision #68); Cmd+Q quits.
   override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
@@ -68,7 +70,13 @@ class AppDelegate: FlutterAppDelegate {
     item.keyEquivalentModifierMask = [.option]
     item.state = .off
     view.insertItem(item, at: 0)
-    view.insertItem(.separator(), at: 1)
+    // View › Hide / Show Status Bar (⌘/, as in Finder; #98).
+    let status = NSMenuItem(title: "Hide Status Bar",
+                            action: #selector(MainFlutterWindow.toggleStatusBar(_:)),
+                            keyEquivalent: "/")
+    view.insertItem(status, at: 1)
+    statusBarItem = status
+    view.insertItem(.separator(), at: 2)
   }
 
   /// The template's Edit items (Undo … Select All) send AppKit selectors

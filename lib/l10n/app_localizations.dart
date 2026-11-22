@@ -388,6 +388,18 @@ abstract class AppLocalizations {
   /// **'The file is no longer there. It was removed from Open Recent.'**
   String get recentMissing;
 
+  /// Status Bar label for the Text pane.
+  ///
+  /// In en, this message translates to:
+  /// **'TEXT'**
+  String get statusPaneText;
+
+  /// Status Bar: number of lines and document size, e.g. 120 lines · 4.2 KB.
+  ///
+  /// In en, this message translates to:
+  /// **'{lines, plural, =1{1 line} other{{lines} lines}} · {size}'**
+  String statusSize(int lines, String size);
+
   /// Dialog body when the system gives no error message.
   ///
   /// In en, this message translates to:

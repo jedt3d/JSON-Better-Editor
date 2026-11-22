@@ -46,7 +46,8 @@ Future<void> setDocumentEdited(bool edited) => _fire('setEdited', edited);
 ///   `closeDocument` (the window was closed and hidden, #93), `clearRecent`
 ///   (File › Open Recent › Clear Menu).
 /// - `openRecent` with a path: a File › Open Recent entry (#92)., `find`,
-///   `findNext` or `findPrevious` (Edit › Find).
+///   `findNext` or `findPrevious` (Edit › Find), `statusBar` (View menu,
+///   #98).
 /// - `openPath` with a file path: a .json opened from Finder (#32).
 /// - `edit` with `undo`, `redo`, `cut`, `copy`, `paste` or `selectAll`: an
 ///   Edit menu item (#38, #43).
@@ -103,3 +104,6 @@ Future<String?> accessRecentFile(String path) async {
     return path;
   }
 }
+
+/// Sets the View menu item to "Hide Status Bar" or "Show Status Bar".
+Future<void> setStatusBarShown(bool shown) => _fire('setStatusBarShown', shown);
