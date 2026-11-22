@@ -55,14 +55,12 @@ Every PR was reviewed against its acceptance criteria by the coordinator before 
 
 ## Open issues and decisions for you
 
-- **#67 — a long jump to the top of a large file freezes** (2.7 s at 5 MB). re_editor lays out every
-  line between the old and new position when scrolling up. Fixing it needs a patched re_editor (a
-  vendored copy or a fork), which is a dependency decision. Also in #67: the first key suggestion in a
-  session takes 0.3 s at 5 MB. Kept outside Phase 2.
-- **Merging.** The Claude Code safety check on this Mac refused `gh pr merge`, so PRs #46–#68 are
-  approved by the coordinator but **not merged**. They form one chain (each branch builds on the previous
-  one); merging in order #46, #47, … #68 works without conflicts. Allowing `gh pr merge` in
-  `~/.claude/settings.json` would let the agent do it.
+- **#67 — decided 2026-11-22: fork re_editor.** It now lives in `packages/re_editor/` (#70, decision
+  #81) with its own change log `JBE_CHANGES.md`. Patch 1 (#71, decision #82) fixed the long jump to
+  the top: 5 MB went from a 2.7 s frame to 10 ms. Still open in #67: the first key suggestion in a
+  session takes 0.3 s at 5 MB.
+- **Merging (resolved).** `gh pr merge` was refused on this Mac until the maintainer allowed it in
+  `~/.claude/settings.json` on 2026-11-22; PRs #46–#69 were then merged in order.
 - Search and undo cover the Text pane only; Node mode and the shared history are Phase 3 (decision #53).
 
 ## Evidence
