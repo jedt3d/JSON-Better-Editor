@@ -96,5 +96,9 @@
   "saveFailed": "Can't save the file",
   "@saveFailed": {
     "description": "Error dialog title when the save panel itself fails."
+  },
+  "unknownError": "An unknown error occurred.",
+  "@unknownError": {
+    "description": "Dialog body when the system gives no error message."
   }
 }

@@ -34,17 +34,21 @@ class _OpenFile {
 
 class _MainWindowState extends State<MainWindow> {
   _OpenFile? _open;
-  bool _opening = false;
 
-  Future<void> _openFile() async {
-    if (_opening) return;
-    _opening = true;
+  /// True while Open, Save or Save As is running; a second one is ignored.
+  bool _busy = false;
+
+  Future<void> _exclusive(Future<void> Function() action) async {
+    if (_busy) return;
+    _busy = true;
     try {
-      await _pickAndOpen();
+      await action();
     } finally {
-      _opening = false;
+      _busy = false;
     }
   }
+
+  Future<void> _openFile() => _exclusive(_pickAndOpen);
 
   Future<void> _pickAndOpen() async {
     final l10n = AppLocalizations.of(context)!;
@@ -74,43 +78,41 @@ class _MainWindowState extends State<MainWindow> {
 
   /// Cmd+S. Every open document has a file in Phase 1 (New gives the empty
   /// state), so Save always writes to it.
-  Future<void> _save() async {
+  Future<void> _save() => _exclusive(() async {
     final open = _open;
-    if (open != null) await _writeTo(open.file.path);
-  }
+    if (open != null) await _writeTo(open, open.file.path);
+  });
 
   /// Cmd+Shift+S.
-  Future<void> _saveAs() async {
+  Future<void> _saveAs() => _exclusive(() async {
     final open = _open;
     if (open == null) return;
+    final l10n = AppLocalizations.of(context)!;
     final String? path;
     try {
       path = await widget.chooseSavePath(open.file.name);
     } on FileAccessException catch (e) {
       if (!mounted) return;
-      return _showError(
-        AppLocalizations.of(context)!.saveFailed,
-        e.osMessage ?? '',
-      );
+      return _showError(l10n.saveFailed, e.osMessage ?? l10n.unknownError);
     }
-    if (path != null && mounted) await _writeTo(path);
-  }
+    if (path != null && mounted) await _writeTo(open, path);
+  });
 
-  /// Writes the pretty-printed document (decision #28) and makes [path] the
-  /// current file.
-  Future<void> _writeTo(String path) async {
-    final open = _open!;
+  /// Writes [open]'s pretty-printed document (decision #28) to [path] and
+  /// makes [path] the current file.
+  Future<void> _writeTo(_OpenFile open, String path) async {
+    final l10n = AppLocalizations.of(context)!;
     final text = open.document.toText();
     try {
       await widget.writeTextFile(path, text);
     } on FileAccessException catch (e) {
       if (!mounted) return;
       return _showError(
-        AppLocalizations.of(context)!.saveFailedTitle(e.name),
-        e.osMessage ?? '',
+        l10n.saveFailedTitle(e.name),
+        e.osMessage ?? l10n.unknownError,
       );
     }
-    if (!mounted) return;
+    if (!mounted || !identical(_open, open)) return;
     final saved = PickedFile(path: path, text: text);
     setState(() => _open = _OpenFile(saved, open.document));
     setWindowTitle(saved.name);

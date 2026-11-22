@@ -161,4 +161,37 @@ void main() {
     expect(disk.files, isEmpty);
     expect(disk.askedNames, isEmpty);
   });
+
+  testWidgets('a Save As write error keeps the old current file', (
+    tester,
+  ) async {
+    final disk = FakeDisk()
+      ..files['/d/a.json'] = '[1]'
+      ..nextSavePath = '/locked/b.json';
+    await pumpApp(tester, disk, '/d/a.json');
+    await open(tester);
+    disk.writeError = const FileAccessException('/locked/b.json', 'denied');
+
+    await pressSave(tester, shift: true);
+    expect(find.textContaining("Can't save b.json"), findsOneWidget);
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
+    disk.writeError = null;
+    await pressSave(tester);
+    expect(disk.files['/d/a.json'], '[\n  1\n]', reason: 'still a.json');
+    expect(titles.last, 'a.json');
+  });
+
+  testWidgets('Cmd+S works while the text view has focus', (tester) async {
+    final disk = FakeDisk()..files['/d/a.json'] = '[1]';
+    await pumpApp(tester, disk, '/d/a.json');
+    await open(tester);
+
+    await tester.tap(find.text('[1]'));
+    await tester.pumpAndSettle();
+    await pressSave(tester);
+
+    expect(disk.files['/d/a.json'], '[\n  1\n]');
+  });
 }

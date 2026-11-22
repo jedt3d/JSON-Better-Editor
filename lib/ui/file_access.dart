@@ -14,8 +14,9 @@ class PickedFile {
   String get name => path.split('/').last;
 }
 
-/// Picking or reading the file failed. [osMessage] is null when the file is
-/// not UTF-8 text; [path] is empty when the open panel itself failed.
+/// Picking, reading or writing a file failed. [path] is empty when the
+/// open or save panel itself failed. [osMessage] is null when there is no
+/// OS message (when reading, that means the file is not UTF-8 text).
 class FileAccessException implements Exception {
   const FileAccessException(this.path, [this.osMessage]);
 
@@ -51,13 +52,24 @@ typedef WriteTextFile = Future<void> Function(String path, String text);
 Future<String?> chooseSavePathOnDisk(String suggestedName) =>
     _panel(() => showSaveJsonPanel(suggestedName));
 
-// ponytail: writes in place (the sandbox only grants the chosen file, not a
-// sibling temp file), so a crash mid-write can truncate it. Revisit with
-// NSFileCoordinator / replaceItemAt if that matters.
+// ponytail: writes in place, because the sandbox grants only the chosen file
+// and not a sibling temp file to rename over it. A failed write puts the old
+// contents back, but a crash mid-write can still truncate the file
+// (decision #42). Upgrade path: native NSFileCoordinator / replaceItemAt.
 Future<void> writeTextFileOnDisk(String path, String text) async {
+  final file = File(path);
+  List<int>? previous;
   try {
-    await File(path).writeAsString(text, flush: true);
+    if (await file.exists()) previous = await file.readAsBytes();
+    await file.writeAsString(text, flush: true);
   } on FileSystemException catch (e) {
+    if (previous != null) {
+      try {
+        await file.writeAsBytes(previous, flush: true);
+      } on FileSystemException {
+        // Nothing more we can do; the error below is still reported.
+      }
+    }
     throw FileAccessException(path, e.osError?.message ?? e.message);
   }
 }

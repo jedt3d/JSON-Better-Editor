@@ -70,4 +70,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saveFailed => 'Can\'t save the file';
+
+  @override
+  String get unknownError => 'An unknown error occurred.';
 }
