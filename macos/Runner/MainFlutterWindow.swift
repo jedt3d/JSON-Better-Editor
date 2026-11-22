@@ -10,12 +10,17 @@ class MainFlutterWindow: NSWindow {
   override func sendEvent(_ event: NSEvent) {
     if event.type == .leftMouseDown { lastMouseDown = event }
     super.sendEvent(event)
-    if event.type == .leftMouseUp { isMovable = false }
+    if event.type == .leftMouseUp {
+      isMovable = false
+      lastMouseDown = nil
+    }
   }
 
   override func awakeFromNib() {
     let flutterViewController = FlutterViewController()
     self.contentViewController = flutterViewController
+    // Not restorable, so macOS does not put back the last session's frame.
+    self.isRestorable = false
 
     // Flutter draws the toolbar in the title-bar row (decision #46): hide the
     // native title, let content run under it, and use an empty unified
@@ -55,7 +60,8 @@ class MainFlutterWindow: NSWindow {
           result(response == .OK ? panel.url?.path : nil)
         }
       case "startWindowDrag":
-        if let event = self.lastMouseDown {
+        // Only while the press that started it is still held.
+        if let event = self.lastMouseDown, NSEvent.pressedMouseButtons & 1 != 0 {
           self.isMovable = true  // Back to false on mouse-up.
           self.performDrag(with: event)
         }
@@ -78,8 +84,6 @@ class MainFlutterWindow: NSWindow {
     super.awakeFromNib()
 
     // Open at 60% × 80% of the screen, centred; shrink to 20% × 20% (#46).
-    // Not restorable, so macOS does not put back the last session's frame.
-    self.isRestorable = false
     if let screen = NSScreen.main ?? self.screen {
       let area = screen.visibleFrame
       let size = NSSize(width: (area.width * 0.6).rounded(),
