@@ -159,4 +159,18 @@ void main() {
     await undo(tester);
     expect(reopened.text, original);
   }, variant: macOS);
+
+  testWidgets('caret moves and folds are not undo steps', (tester) async {
+    final c = await openDoc(tester);
+    await select(tester, c, 11);
+    await typeText(tester, ', 3');
+    await select(tester, c, 2);
+    await select(tester, c, 5);
+    await undo(tester);
+    expect(c.text, original, reason: 'one Cmd+Z undoes the typing');
+    await undo(tester);
+    expect(c.text, original, reason: 'nothing earlier: no change');
+    await redo(tester);
+    expect(c.text, '{"a": [1, 2, 3]}');
+  }, variant: macOS);
 }
