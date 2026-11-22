@@ -7,6 +7,7 @@ import '../app/native_window.dart';
 import '../document/json_document.dart';
 import '../l10n/app_localizations.dart';
 import 'file_access.dart';
+import 'toolbar_metrics.dart';
 
 /// Main window: toolbar on top, content area below.
 class MainWindow extends StatefulWidget {
@@ -225,20 +226,17 @@ class _Toolbar extends StatelessWidget {
   final VoidCallback onNew;
   final VoidCallback onOpen;
 
-  /// Height of the unified macOS title bar with a toolbar.
-  static const height = 52.0;
-
-  /// Room for the traffic-light buttons, which end 80 pt from the left edge.
-  static const leadingInset = 88.0;
-
-  /// Width the buttons need; narrower windows cut the toolbar off.
-  static const naturalWidth = 610.0;
+  static const metrics = ToolbarMetrics.macOS;
+  static const buttonCount = 9;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final row = Padding(
-      padding: const EdgeInsets.only(left: leadingInset, right: 12),
+      padding: EdgeInsets.only(
+        left: metrics.leadingInset,
+        right: metrics.trailingInset,
+      ),
       child: Row(
         children: [
           _ToolbarButton(
@@ -251,7 +249,10 @@ class _Toolbar extends StatelessWidget {
             tooltip: l10n.toolbarOpen,
             onPressed: onOpen,
           ),
-          const SizedBox(height: 24, child: VerticalDivider(width: 16)),
+          SizedBox(
+            height: metrics.buttonSize * 0.6,
+            child: VerticalDivider(width: metrics.gap * 2),
+          ),
           _ToolbarButton(icon: Icons.search, tooltip: l10n.toolbarSearch),
           const Spacer(),
           _ToolbarButton(icon: Icons.notes, tooltip: l10n.toolbarLayoutText),
@@ -273,7 +274,7 @@ class _Toolbar extends StatelessWidget {
       ),
     );
     return SizedBox(
-      height: height,
+      height: metrics.height,
       child: Stack(
         children: [
           // Behind the buttons, so it only gets events on empty space.
@@ -289,7 +290,10 @@ class _Toolbar extends StatelessWidget {
               child: OverflowBox(
                 alignment: Alignment.centerLeft,
                 minWidth: 0,
-                maxWidth: math.max(constraints.maxWidth, naturalWidth),
+                maxWidth: math.max(
+                  constraints.maxWidth,
+                  metrics.naturalWidth(buttonCount),
+                ),
                 child: row,
               ),
             ),
@@ -300,7 +304,8 @@ class _Toolbar extends StatelessWidget {
   }
 }
 
-/// Pill-shaped outlined icon button. Without [onPressed] (feature not built
+/// Borderless icon button that shows a rounded fill only on hover and press,
+/// like macOS toolbars (decision #50). Without [onPressed] (feature not built
 /// yet) it shows a "Coming soon" message.
 class _ToolbarButton extends StatelessWidget {
   const _ToolbarButton({
@@ -315,11 +320,37 @@ class _ToolbarButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const m = _Toolbar.metrics;
+    final colors = Theme.of(context).colorScheme;
+    final size = WidgetStatePropertyAll(Size.square(m.buttonSize));
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2),
-      child: IconButton.outlined(
+      padding: EdgeInsets.symmetric(horizontal: m.gap / 2),
+      child: IconButton(
         icon: Icon(icon),
         tooltip: tooltip,
+        style: ButtonStyle(
+          fixedSize: size,
+          minimumSize: size,
+          maximumSize: size,
+          padding: const WidgetStatePropertyAll(EdgeInsets.zero),
+          iconSize: WidgetStatePropertyAll(m.iconSize),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          side: const WidgetStatePropertyAll(BorderSide.none),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(m.cornerRadius),
+            ),
+          ),
+          foregroundColor: WidgetStatePropertyAll(colors.onSurfaceVariant),
+          overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+          backgroundColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.pressed)
+                ? colors.onSurface.withValues(alpha: 0.16)
+                : states.contains(WidgetState.hovered)
+                ? colors.onSurface.withValues(alpha: 0.08)
+                : colors.onSurface.withValues(alpha: 0),
+          ),
+        ),
         onPressed:
             onPressed ??
             () => ScaffoldMessenger.of(context)
