@@ -42,10 +42,22 @@ Future<void> setDocumentEdited(bool edited) => _fire('setEdited', edited);
 /// - `confirmClose`: Close (red button, File › Close, Cmd+W) and Quit ask
 ///   first; answer true when the window may close or the app may quit.
 /// - `menu` with `new`, `open`, `save` or `saveAs`: a File menu item.
+/// - `openPath` with a file path: a .json opened from Finder (#32).
 void onNativeRequest(
   Future<Object?> Function(String method, Object? arguments)? handler,
 ) {
   _channel.setMethodCallHandler(
     handler == null ? null : (call) => handler(call.method, call.arguments),
   );
+}
+
+/// Paths of .json files Finder asked the app to open before Dart was ready
+/// (for example the file that launched the app). Empty when there are none.
+Future<List<String>> takePendingOpenPaths() async {
+  try {
+    final paths = await _channel.invokeListMethod<String>('takePendingOpenPaths');
+    return paths ?? const [];
+  } on MissingPluginException {
+    return const [];
+  }
 }

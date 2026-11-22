@@ -32,6 +32,15 @@ class AppDelegate: FlutterAppDelegate {
     NSApp.mainMenu?.insertItem(top, at: 1)
   }
 
+  /// Files opened from Finder ("Open With", double-click when the app is
+  /// the default). One window, so the last file wins (decision #56).
+  override func application(_ application: NSApplication, open urls: [URL]) {
+    guard let window = application.windows.compactMap({ $0 as? MainFlutterWindow }).first,
+      let url = urls.last
+    else { return }
+    window.openFromFinder(url.path)
+  }
+
   /// Quit (Cmd+Q) asks about unsaved changes first (decision #55).
   override func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
     guard let window = sender.windows.compactMap({ $0 as? MainFlutterWindow })

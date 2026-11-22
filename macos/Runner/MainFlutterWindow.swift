@@ -6,6 +6,20 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
   /// The window channel (lib/app/native_window.dart).
   private var windowChannel: FlutterMethodChannel?
 
+  /// Files Finder asked to open before Dart asked for them (app launch).
+  private var pendingOpenPaths: [String] = []
+  private var dartReady = false
+
+  /// Opens a .json from Finder (AppDelegate). Before Dart is running the
+  /// path waits until Dart calls takePendingOpenPaths.
+  func openFromFinder(_ path: String) {
+    if dartReady {
+      windowChannel?.invokeMethod("openPath", arguments: path)
+    } else {
+      pendingOpenPaths.append(path)
+    }
+  }
+
   /// The mouse-down that may start a window drag. Flutter reports the drag
   /// only after the mouse has moved, and performDrag needs the press.
   private var lastMouseDown: NSEvent?
@@ -49,6 +63,10 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
       case "setTitle":
         self.title = call.arguments as? String ?? ""
         result(nil)
+      case "takePendingOpenPaths":
+        self.dartReady = true
+        result(self.pendingOpenPaths)
+        self.pendingOpenPaths = []
       case "setEdited":
         // The dot in the close button for unsaved changes (decision #55).
         self.isDocumentEdited = call.arguments as? Bool ?? false

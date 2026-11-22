@@ -149,7 +149,7 @@
 - [x] Unsaved changes are marked in the window; New, Open, Close and Quit ask Save / Don't Save / Cancel, default Save (decision #55).
 - [x] Save reformats the JSON (pretty-print, 2-space indent) before writing, and the file ends with a newline (decisions #28, #47).
 - [x] A failed write shows an error dialog, keeps the document open, and puts the file's previous contents back (decision #42).
-- [ ] One document per window. The app can run multiple instances.
+- [x] One document per window. The app can run multiple instances.
 - [ ] Target for now: files under 5 MB: open and show in 2 s or less, no visible lag when typing, scrolling or searching (decision #59). The largest file that opens within 2–3 s is measured and recorded as the current upper limit. Progressive loading/rendering is future work.
 
 ### 3.5 Undo / redo
@@ -170,7 +170,7 @@
 - [x] Sizes are never fixed in pixels, because HiDPI scaling differs per machine; they are fractions of the usable work area (future Windows: minus the taskbar; Linux/Ubuntu: minus the dock).
 
 ### 3.9 OS integration
-- [ ] Register as a handler for `.json` on macOS, so it appears in "Open With" and can be set as the default editor. Opening a file from Finder while the app runs replaces the window's document after the unsaved-changes prompt (decision #56).
+- [x] Register as a handler for `.json` on macOS, so it appears in "Open With" and can be set as the default editor. Opening a file from Finder while the app runs replaces the window's document after the unsaved-changes prompt (decision #56).
 
 ### 3.10 Settings (gear icon, top-right)
 - [ ] Theme: Atom **One Light** and **One Dark**. Follows the macOS appearance by default; the toolbar toggle overrides it.

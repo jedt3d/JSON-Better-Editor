@@ -18,11 +18,13 @@ class MainWindow extends StatefulWidget {
     this.pickJsonFile = pickJsonFileFromDisk,
     this.chooseSavePath = chooseSavePathOnDisk,
     this.writeTextFile = writeTextFileOnDisk,
+    this.readJsonFile = readJsonFileFromDisk,
   });
 
   final PickJsonFile pickJsonFile;
   final ChooseSavePath chooseSavePath;
   final WriteTextFile writeTextFile;
+  final ReadJsonFile readJsonFile;
 
   @override
   State<MainWindow> createState() => _MainWindowState();
@@ -84,6 +86,10 @@ class _MainWindowState extends State<MainWindow> {
   void initState() {
     super.initState();
     onNativeRequest(_nativeRequest);
+    // A file that launched the app from Finder (#32).
+    takePendingOpenPaths().then((paths) {
+      if (paths.isNotEmpty && mounted) _openPath(paths.last);
+    });
   }
 
   /// Close/Quit confirmation and the File menu (MainFlutterWindow.swift).
@@ -99,6 +105,8 @@ class _MainWindowState extends State<MainWindow> {
         await _save();
       case ('menu', 'saveAs'):
         await _saveAs();
+      case ('openPath', final String path):
+        await _openPath(path);
     }
     return null;
   }
@@ -120,7 +128,15 @@ class _MainWindowState extends State<MainWindow> {
     }
   }
 
-  Future<void> _openFile() => _exclusive(_pickAndOpen);
+  Future<void> _openFile() => _exclusive(
+    () => _confirmThenOpen(widget.pickJsonFile),
+  );
+
+  /// Opens [path] from Finder; the window's document is replaced after the
+  /// unsaved-changes prompt (decision #56).
+  Future<void> _openPath(String path) => _exclusive(
+    () => _confirmThenOpen(() => widget.readJsonFile(path)),
+  );
 
   /// Asks Save / Don't Save / Cancel when the document has unsaved changes
   /// (decision #55). True when it is fine to drop the document: there were
@@ -163,12 +179,14 @@ class _MainWindowState extends State<MainWindow> {
     }
   }
 
-  Future<void> _pickAndOpen() async {
+  /// Opens the file [read] returns (null: cancelled), after the
+  /// unsaved-changes prompt.
+  Future<void> _confirmThenOpen(Future<PickedFile?> Function() read) async {
     if (!await _confirmDiscard() || !mounted) return;
     final l10n = AppLocalizations.of(context)!;
     final PickedFile? picked;
     try {
-      picked = await widget.pickJsonFile();
+      picked = await read();
     } on FileAccessException catch (e) {
       if (!mounted) return;
       return _showError(
