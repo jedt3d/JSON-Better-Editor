@@ -179,9 +179,9 @@ class _MainWindowState extends State<MainWindow> {
     if (controller == null) return;
     switch (action) {
       case 'undo':
-        controller.undo();
+        undoTextChange(controller);
       case 'redo':
-        controller.redo();
+        redoTextChange(controller);
       case 'cut':
         controller.cut();
       case 'copy':

@@ -16,6 +16,44 @@ CodeLineEditingController textPaneController(String text) =>
       const CodeLineOptions(indentSize: indentSize),
     );
 
+/// Cmd+Z / Edit › Undo: undoes the last text change. re_editor's history
+/// also records caret moves and folds; those steps are skipped, so undo
+/// always changes the text, as in other editors (decision #78). If no
+/// earlier text exists, nothing changes.
+void undoTextChange(CodeLineEditingController controller) => _stepText(
+  controller,
+  controller.undo,
+  controller.redo,
+  () => controller.canUndo,
+);
+
+/// Cmd+Shift+Z / Edit › Redo, skipping caret-only and fold steps likewise.
+void redoTextChange(CodeLineEditingController controller) => _stepText(
+  controller,
+  controller.redo,
+  controller.undo,
+  () => controller.canRedo,
+);
+
+void _stepText(
+  CodeLineEditingController controller,
+  VoidCallback step,
+  VoidCallback back,
+  bool Function() canStep,
+) {
+  final before = controller.text;
+  var steps = 0;
+  while (canStep()) {
+    step();
+    steps++;
+    if (controller.text != before) return;
+  }
+  // Only caret moves or folds were left: put everything back.
+  for (var i = 0; i < steps; i++) {
+    back();
+  }
+}
+
 /// The editable Text pane (decision #60: built on re_editor). It takes the
 /// keyboard focus when it appears, so typing works right after New or Open
 /// (decision #64).
@@ -118,6 +156,14 @@ class TextPaneState extends State<TextPane> {
       autocompleteSymbols: false,
       wordWrap: widget.wordWrap,
       shortcutsActivatorsBuilder: const _TextPaneShortcuts(),
+      shortcutOverrideActions: {
+        CodeShortcutUndoIntent: CallbackAction<CodeShortcutUndoIntent>(
+          onInvoke: (_) => undoTextChange(widget.controller),
+        ),
+        CodeShortcutRedoIntent: CallbackAction<CodeShortcutRedoIntent>(
+          onInvoke: (_) => redoTextChange(widget.controller),
+        ),
+      },
       chunkAnalyzer: const _JsonChunkAnalyzer(),
       // Line numbers (#34): the gutter widens with the number of lines;
       // the caret's line number is drawn in full colour, the others at half.
