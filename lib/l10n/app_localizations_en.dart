@@ -178,5 +178,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get overwrite => 'Overwrite';
 
   @override
+  String get recentMissing =>
+      'The file is no longer there. It was removed from Open Recent.';
+
+  @override
   String get unknownError => 'An unknown error occurred.';
 }

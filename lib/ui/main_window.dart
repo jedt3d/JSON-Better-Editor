@@ -6,6 +6,7 @@ import 'package:re_editor/re_editor.dart';
 
 import '../app/native_window.dart';
 import '../document/json_document.dart';
+import '../document/recent_files.dart';
 import '../l10n/app_localizations.dart';
 import 'file_access.dart';
 import 'line_list.dart';
@@ -241,7 +242,48 @@ class _MainWindowState extends State<MainWindow> {
     takePendingOpenPaths().then((paths) {
       if (paths.isNotEmpty && mounted) _openPath(paths.last);
     });
+    // Files opened before the list loaded (from Finder at launch) stay
+    // newest.
+    loadRecentFiles().then(
+      (paths) => _recent = [
+        ..._recent,
+        ...paths.where((p) => !_recent.contains(p)),
+      ].take(maxRecentFiles).toList(),
+    );
   }
+
+  /// File › Open Recent, newest first (#92).
+  List<String> _recent = const [];
+
+  /// A file was opened or saved: it becomes the newest recent file.
+  void _addRecent(String path) {
+    _recent = addRecentFile(_recent, path);
+    saveRecentFiles(_recent);
+    rememberRecentFile(path);
+  }
+
+  void _removeRecent(String path) {
+    _recent = [..._recent.where((p) => p != path)];
+    saveRecentFiles(_recent);
+  }
+
+  /// A File › Open Recent entry: after the unsaved-changes prompt, regain
+  /// access through its bookmark and open it; a missing file is reported
+  /// and dropped from the list.
+  Future<void> _openRecent(String path) => _exclusive(() async {
+    if (!await _confirmDiscard() || !mounted) return;
+    final resolved = await accessRecentFile(path);
+    if (!mounted) return;
+    if (resolved == null) {
+      _removeRecent(path);
+      final l10n = AppLocalizations.of(context)!;
+      return _showError(
+        l10n.openFailedTitle(path.split('/').last),
+        l10n.recentMissing,
+      );
+    }
+    await _confirmThenOpen(() => widget.readJsonFile(resolved));
+  });
 
   /// No dialog is covering the window.
   bool get _onTop => ModalRoute.of(context)?.isCurrent ?? true;
@@ -285,6 +327,11 @@ class _MainWindowState extends State<MainWindow> {
         await _reformat((document) => document.toText());
       case ('menu', 'minify'):
         await _reformat((document) => document.toCompactText());
+      case ('menu', 'clearRecent'):
+        _recent = const [];
+        saveRecentFiles(_recent);
+      case ('openRecent', final String path):
+        await _openRecent(path);
       case ('menu', 'closeDocument'):
         _closeDocument();
       case ('menu', 'goToLine'):
@@ -419,6 +466,7 @@ class _MainWindowState extends State<MainWindow> {
       case ParseSuccess():
         _setOpen(_OpenFile(picked, textPaneController(picked.text)));
         _rememberDiskTime(_open!);
+        _addRecent(picked.path);
         setWindowTitle(picked.name);
       case ParseFailure(:final error):
         _showError(
@@ -500,6 +548,7 @@ class _MainWindowState extends State<MainWindow> {
     // before parsing if writes ever become slow enough to matter.
     _setOpen(_OpenFile(saved, open.controller));
     _rememberDiskTime(_open!);
+    _addRecent(path);
     setWindowTitle(saved.name);
     return true;
   }
