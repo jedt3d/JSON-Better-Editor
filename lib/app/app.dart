@@ -1,9 +1,17 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../l10n/app_localizations.dart';
 import '../ui/main_window.dart';
 import 'theme.dart';
 import 'native_window.dart';
+
+/// App strings plus Material, Cupertino and widgets localizations from
+/// material_ui (the generated AppLocalizations.localizationsDelegates still
+/// points at the deprecated flutter_localizations classes).
+const appLocalizationsDelegates = <LocalizationsDelegate<dynamic>>[
+  AppLocalizations.delegate,
+  ...GlobalMaterialLocalizations.delegates,
+];
 
 /// Root widget of JSON Better Editor.
 class JsonBetterEditorApp extends StatelessWidget {
@@ -20,7 +28,7 @@ class JsonBetterEditorApp extends StatelessWidget {
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: ThemeMode.system,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localizationsDelegates: appLocalizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const MainWindow(),
     );
