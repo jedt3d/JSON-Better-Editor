@@ -11,6 +11,21 @@ class AppDelegate: FlutterAppDelegate {
     addFileMenu()
     retargetEditMenu()
     addWordWrapItem()
+    addValidateItem()
+  }
+
+  /// Edit › Validate JSON, no shortcut (#86). Checks the Text pane now;
+  /// background validation is Phase 5 (#82).
+  private func addValidateItem() {
+    guard let edit = NSApp.mainMenu?.items.first(where: { $0.submenu?.title == "Edit" })?.submenu
+    else { return }
+    let item = NSMenuItem(title: "Validate JSON",
+                          action: #selector(MainFlutterWindow.validateJson(_:)),
+                          keyEquivalent: "")
+    // After Select All, before the Find submenu.
+    let at = edit.items.firstIndex(where: { $0.submenu?.title == "Find" }) ?? edit.items.count
+    edit.insertItem(.separator(), at: at)
+    edit.insertItem(item, at: at)
   }
 
   /// View › Word Wrap (Opt+Z), off by default (decision #58). Dart holds the

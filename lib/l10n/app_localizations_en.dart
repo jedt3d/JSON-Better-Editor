@@ -118,5 +118,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchClose => 'Close search';
 
   @override
+  String get validateValid => 'Valid JSON';
+
+  @override
+  String get validateValidMessage => 'The document is valid JSON.';
+
+  @override
+  String get validateInvalid => 'Invalid JSON';
+
+  @override
   String get unknownError => 'An unknown error occurred.';
 }

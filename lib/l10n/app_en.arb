@@ -167,6 +167,18 @@
   "@searchClose": {
     "description": "Tooltip of the button that closes the search field."
   },
+  "validateValid": "Valid JSON",
+  "@validateValid": {
+    "description": "Title of the Validate JSON result when the text is valid."
+  },
+  "validateValidMessage": "The document is valid JSON.",
+  "@validateValidMessage": {
+    "description": "Body of the Validate JSON result when the text is valid."
+  },
+  "validateInvalid": "Invalid JSON",
+  "@validateInvalid": {
+    "description": "Title of the Validate JSON result when the text has an error."
+  },
   "unknownError": "An unknown error occurred.",
   "@unknownError": {
     "description": "Dialog body when the system gives no error message."
