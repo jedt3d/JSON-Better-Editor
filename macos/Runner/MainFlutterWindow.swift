@@ -116,10 +116,22 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
     }
   }
 
+  /// File menu items (AppDelegate.addFileMenu) run the Dart action of the
+  /// same name; Close is AppKit's performClose:, which asks first.
+  @objc func fileNew(_ sender: Any?) { windowChannel?.invokeMethod("menu", arguments: "new") }
+  @objc func fileOpen(_ sender: Any?) { windowChannel?.invokeMethod("menu", arguments: "open") }
+  @objc func fileSave(_ sender: Any?) { windowChannel?.invokeMethod("menu", arguments: "save") }
+  @objc func fileSaveAs(_ sender: Any?) { windowChannel?.invokeMethod("menu", arguments: "saveAs") }
+
   /// Close button and Cmd+W: ask first, then close for real.
   func windowShouldClose(_ sender: NSWindow) -> Bool {
     guard isDocumentEdited else { return true }
-    confirmClose { ok in if ok { self.close() } }
+    confirmClose { ok in
+      guard ok else { return }
+      // Answered; Quit (after the last window closes) must not ask again.
+      self.isDocumentEdited = false
+      self.close()
+    }
     return false
   }
 
