@@ -59,6 +59,36 @@ class JsonDocument {
     _write(root, out, '');
     return out.toString();
   }
+
+  /// On one line with no spaces (Edit › Minify, #89). Key order, duplicate
+  /// keys and number text are kept, as in [toText].
+  String toCompactText() {
+    final out = StringBuffer();
+    _writeCompact(root, out);
+    return out.toString();
+  }
+}
+
+void _writeCompact(JsonNode node, StringBuffer out) {
+  switch (node) {
+    case JsonObject(:final members):
+      out.write('{');
+      for (var i = 0; i < members.length; i++) {
+        if (i > 0) out.write(',');
+        out.write('${jsonEncode(members[i].key)}:');
+        _writeCompact(members[i].value, out);
+      }
+      out.write('}');
+    case JsonArray(:final items):
+      out.write('[');
+      for (var i = 0; i < items.length; i++) {
+        if (i > 0) out.write(',');
+        _writeCompact(items[i], out);
+      }
+      out.write(']');
+    default:
+      _write(node, out, '');
+  }
 }
 
 void _write(JsonNode node, StringBuffer out, String indent) {

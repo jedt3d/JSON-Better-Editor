@@ -177,7 +177,10 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
   @objc func fileOpen(_ sender: Any?) { windowChannel?.invokeMethod("menu", arguments: "open") }
   @objc func fileSave(_ sender: Any?) { windowChannel?.invokeMethod("menu", arguments: "save") }
   @objc func fileSaveAs(_ sender: Any?) { windowChannel?.invokeMethod("menu", arguments: "saveAs") }
-  @objc func validateJson(_ sender: Any?) { windowChannel?.invokeMethod("menu", arguments: "validate") }
+  /// Edit › Validate JSON, Format, Minify (#86, #89).
+  @objc func jsonCommand(_ sender: NSMenuItem) {
+    windowChannel?.invokeMethod("menu", arguments: sender.representedObject as? String)
+  }
   @objc func find(_ sender: NSMenuItem) {
     windowChannel?.invokeMethod("menu", arguments: sender.representedObject as? String)
   }

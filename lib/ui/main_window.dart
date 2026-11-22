@@ -182,6 +182,10 @@ class _MainWindowState extends State<MainWindow> {
         _toggleWordWrap();
       case ('menu', 'validate'):
         await _validate();
+      case ('menu', 'format'):
+        await _reformat((document) => document.toText());
+      case ('menu', 'minify'):
+        await _reformat((document) => document.toCompactText());
       case ('menu', 'find'):
         _openSearch();
       case ('menu', 'findNext'):
@@ -424,6 +428,31 @@ class _MainWindowState extends State<MainWindow> {
           l10n.invalidJsonPosition(e.line, e.column, e.message),
       ].join('\n'),
     );
+  }
+
+  /// Edit › Format and Minify (#89): rewrite the Text pane from the parsed
+  /// document as one undoable edit. Invalid JSON shows where it is and
+  /// changes nothing.
+  Future<void> _reformat(String Function(JsonDocument) write) async {
+    final open = _open;
+    if (open == null) return;
+    final l10n = AppLocalizations.of(context)!;
+    final controller = open.controller;
+    switch (parse(controller.text)) {
+      case ParseSuccess(:final document):
+        final text = write(document);
+        if (text == controller.text) return;
+        controller
+          ..selectAll()
+          ..replaceSelection(text)
+          ..selection = const CodeLineSelection.zero()
+          ..makeCursorVisible();
+      case ParseFailure(:final error):
+        await _showError(
+          l10n.validateInvalid,
+          l10n.invalidJsonPosition(error.line, error.column, error.message),
+        );
+    }
   }
 
   Future<void> _showError(String title, String message) {
