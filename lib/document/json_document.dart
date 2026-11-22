@@ -95,7 +95,8 @@ void _write(JsonNode node, StringBuffer out, String indent) {
   }
 }
 
-/// Where and why parsing failed. [line] and [column] are 1-based.
+/// Where and why parsing failed. [line] and [column] are 1-based;
+/// [column] counts characters.
 class JsonParseError {
   const JsonParseError(this.line, this.column, this.message);
 
@@ -143,15 +144,19 @@ class _Failure implements Exception {
 final _number = RegExp(r'-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?');
 final _bareWord = RegExp(r'[A-Za-z0-9_.+-]+');
 
-// ponytail: recursive descent, so nesting depth is limited by the Dart stack
-// (thousands of levels). Switch to an explicit stack if real files hit that.
+/// Deeper input is rejected so recursion (here and in toText) cannot
+/// overflow the stack.
+const maxDepth = 512;
+
 class _Parser {
   _Parser(this.text);
 
   final String text;
   int pos = 0;
+  int depth = 0;
 
   JsonNode parseDocument() {
+    if (text.startsWith('\uFEFF')) pos = 1; // Byte order mark (RFC 8259 §8.1).
     final value = parseValue();
     skipWhitespace();
     if (pos < text.length) {
@@ -164,8 +169,14 @@ class _Parser {
     skipWhitespace();
     if (pos >= text.length) throw _Failure(pos, 'Unexpected end of input');
     final c = text[pos];
-    if (c == '{') return parseObject();
-    if (c == '[') return parseArray();
+    if (c == '{' || c == '[') {
+      if (++depth > maxDepth) {
+        throw _Failure(pos, 'Nesting is too deep (over $maxDepth levels)');
+      }
+      final node = c == '{' ? parseObject() : parseArray();
+      depth--;
+      return node;
+    }
     if (c == '"') return JsonString(parseString());
     if (c == '-' || isDigit(c)) return parseNumber();
     for (final (word, node) in const [
@@ -198,7 +209,7 @@ class _Parser {
       }
       final key = parseString();
       skipWhitespace();
-      expect(':', "Expected ':' after the key");
+      consume(':', "Expected ':' after the key");
       final value = parseValue();
       members.add(JsonMember(key, value));
       skipWhitespace();
@@ -206,7 +217,7 @@ class _Parser {
         pos++;
         return JsonObject(members);
       }
-      expect(',', "Expected ',' or '}'");
+      consume(',', "Expected ',' or '}'");
       skipWhitespace();
       if (peek('}')) throw _Failure(pos, 'Trailing comma before }');
     }
@@ -227,7 +238,7 @@ class _Parser {
         pos++;
         return JsonArray(items);
       }
-      expect(',', "Expected ',' or ']'");
+      consume(',', "Expected ',' or ']'");
       skipWhitespace();
       if (peek(']')) throw _Failure(pos, 'Trailing comma before ]');
     }
@@ -259,7 +270,7 @@ class _Parser {
     return JsonNumber(match[0]!);
   }
 
-  void expect(String char, String message) {
+  void consume(String char, String message) {
     if (pos >= text.length) throw _Failure(pos, 'Unexpected end of input');
     if (text[pos] != char) throw _Failure(pos, message);
     pos++;
@@ -287,6 +298,8 @@ class _Parser {
         lineStart = i + 1;
       }
     }
-    return JsonParseError(line, offset - lineStart + 1, message);
+    // Count characters (code points), not UTF-16 units, as the user sees them.
+    final column = text.substring(lineStart, offset).runes.length + 1;
+    return JsonParseError(line, column, message);
   }
 }

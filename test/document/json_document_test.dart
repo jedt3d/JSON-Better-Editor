@@ -73,6 +73,20 @@ void main() {
     expect(text.indexOf('alpha') < text.indexOf('mid'), isTrue);
   });
 
+  test('a leading byte order mark is ignored', () {
+    expect(rootOf('\uFEFF{}'), isA<JsonObject>());
+  });
+
+  test('key order survives parse, toText, parse', () {
+    final once = (parse('{"b": 1, "a": {"y": 2, "x": 3}}') as ParseSuccess)
+        .document
+        .toText();
+    final again = rootOf(once) as JsonObject;
+    expect(again.members.map((m) => m.key), ['b', 'a']);
+    expect((again.members[1].value as JsonObject).members.map((m) => m.key),
+        ['y', 'x']);
+  });
+
   test('toText pretty-prints with 2-space indent', () {
     final doc = (parse('{"a":[1,{"b":"x\\"y"}],"c":{},"d":[],"e":null}')
             as ParseSuccess)
@@ -133,6 +147,26 @@ void main() {
     test('invalid number', () {
       final e = errorOf('[01]');
       expect((e.line, e.column), (1, 2));
+    });
+
+    test('literal with extra letters', () {
+      final e = errorOf('[truex]');
+      expect((e.line, e.column), (1, 2));
+    });
+
+    test('raw control character in a string', () {
+      final e = errorOf('["a\tb"]');
+      expect((e.line, e.column), (1, 2));
+    });
+
+    test('column counts characters, not UTF-16 units', () {
+      final e = errorOf('["😀" x]');
+      expect((e.line, e.column), (1, 6));
+    });
+
+    test('nesting deeper than the limit is an error, not a crash', () {
+      final e = errorOf('[' * 200000);
+      expect(e.message, contains('too deep'));
     });
 
     test('unterminated string', () {
