@@ -103,17 +103,22 @@ class _MainWindowState extends State<MainWindow> {
     }
   }
 
-  /// Cmd+S. Every open document has a file in Phase 1 (New gives the empty
-  /// state), so Save always writes to it.
+  /// Cmd+S. A document with no file yet behaves like Save As (#29).
   Future<void> _save() => _exclusive(() async {
-    final path = _open?.file?.path;
-    if (path != null) await _writeTo(_open!, path);
+    final open = _open;
+    if (open == null) return;
+    final path = open.file?.path;
+    await (path == null ? _askPathAndWrite(open) : _writeTo(open, path));
   });
 
   /// Cmd+Shift+S.
   Future<void> _saveAs() => _exclusive(() async {
     final open = _open;
-    if (open == null) return;
+    if (open != null) await _askPathAndWrite(open);
+  });
+
+  /// Shows the save panel; Cancel leaves everything as it was.
+  Future<void> _askPathAndWrite(_OpenFile open) async {
     final l10n = AppLocalizations.of(context)!;
     final String? path;
     try {
@@ -123,7 +128,7 @@ class _MainWindowState extends State<MainWindow> {
       return _showError(l10n.saveFailed, e.osMessage ?? l10n.unknownError);
     }
     if (path != null && mounted) await _writeTo(open, path);
-  });
+  }
 
   /// Writes the edited text, pretty-printed (decision #28), to [path] and
   /// makes [path] the current file. Invalid JSON is not written; the error
