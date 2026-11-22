@@ -1,8 +1,10 @@
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:re_editor/re_editor.dart';
 
 import '../document/bracket_match.dart';
 import 'json_highlight.dart';
+import 'key_autocomplete.dart';
 
 /// Indent unit for Tab, Shift+Tab and Save's pretty-print (decision #57).
 const indentSize = 2;
@@ -18,11 +20,7 @@ CodeLineEditingController textPaneController(String text) =>
 /// keyboard focus when it appears, so typing works right after New or Open
 /// (decision #64).
 class TextPane extends StatefulWidget {
-  const TextPane({
-    super.key,
-    required this.controller,
-    this.wordWrap = false,
-  });
+  const TextPane({super.key, required this.controller, this.wordWrap = false});
 
   final CodeLineEditingController controller;
 
@@ -36,6 +34,22 @@ class TextPane extends StatefulWidget {
 
 class _TextPaneState extends State<TextPane> {
   final _focus = FocusNode(debugLabel: 'TextPane');
+  late final _keyPrompts = JsonKeyPrompts(widget.controller);
+
+  /// Esc closes the key suggestions (#40). re_editor has no call for that;
+  /// it closes them whenever the caret moves without a text change, so the
+  /// caret is moved off and back. Harmless when no list is shown.
+  void _closeSuggestions() {
+    final controller = widget.controller;
+    final selection = controller.selection;
+    // A list needs a typed quote, so the caret is never at column 0 then.
+    if (selection.extentOffset == 0) return;
+    controller.selection = CodeLineSelection.collapsed(
+      index: selection.extentIndex,
+      offset: 0,
+    );
+    controller.selection = selection;
+  }
 
   /// Bracket or quote pair at the caret (#35), recomputed when the text or
   /// the caret changes, not on every scroll.
@@ -151,7 +165,19 @@ class _TextPaneState extends State<TextPane> {
     // has no hook to style single characters by caret position.
     return Stack(
       children: [
-        editor,
+        CallbackShortcuts(
+          bindings: {
+            const SingleActivator(LogicalKeyboardKey.escape): _closeSuggestions,
+          },
+          // Keys typed in an object get suggestions from the document's
+          // keys; Enter accepts, Tab still indents (#40).
+          child: CodeAutocomplete(
+            promptsBuilder: _keyPrompts,
+            viewBuilder: (context, notifier, onSelected) =>
+                KeySuggestions(notifier: notifier, onSelected: onSelected),
+            child: editor,
+          ),
+        ),
         Positioned.fill(
           child: IgnorePointer(
             child: CustomPaint(

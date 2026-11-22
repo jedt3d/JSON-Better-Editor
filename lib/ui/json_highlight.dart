@@ -18,10 +18,7 @@ abstract final class JsonScope {
 final jsonMode = Mode(
   name: 'JSON',
   contains: <Mode>[
-    Mode(
-      scope: JsonScope.key,
-      match: r'"(?:\\.|[^\\"\r\n])*"(?=\s*:)',
-    ),
+    Mode(scope: JsonScope.key, match: r'"(?:\\.|[^\\"\r\n])*"(?=\s*:)'),
     Mode(scope: JsonScope.string, match: r'"(?:\\.|[^\\"\r\n])*"?'),
     Mode(scope: JsonScope.punctuation, match: r'[{}\[\],:]'),
     Mode(scope: JsonScope.boolean, match: r'\b(?:true|false)\b'),

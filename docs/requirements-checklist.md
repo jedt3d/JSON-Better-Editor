@@ -25,8 +25,8 @@
 - [x] If a file being opened is invalid JSON, show the error position (line and column) in a dialog and do **not** open the file; the document already open stays.
 
 ### 1.3 Autocomplete
-- [ ] Autocomplete a `key` from keys that already exist in the document.
-- [ ] Accept the selected suggestion from the popup list with **Enter/Return** only (Tab is not used to accept).
+- [x] Autocomplete a `key` from keys that already exist in the document.
+- [x] Accept the selected suggestion from the popup list with **Enter/Return** only (Tab is not used to accept).
 
 ### 1.4 Keyboard and clipboard
 - [x] **Tab** / **Shift+Tab** indent and de-indent text by 2 spaces, as in a normal code editor (decision #57).
