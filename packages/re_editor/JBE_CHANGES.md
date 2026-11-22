@@ -49,3 +49,16 @@ with a `// JBE:` comment naming the patch.
   `target < _displayParagraphs.first.top`. If it still walks lines one by one, add the `// JBE: patch 1`
   branch from this repository's history (`git log -p packages/re_editor/lib/src/_code_field.dart`) in
   front of it. Check: `test/ui/jump_up_test.dart` and `scripts/perf.sh 5` (`scroll_frame_max_ms`).
+
+### Patch 2 — type over a closing quote (#91, 2026-11-23)
+
+- **File / function:** `lib/src/_code_input.dart`, `_SmartTextEditingDelta._smartInsertion` (the quote
+  loop) and a new `_shouldSkipQuote`.
+- **Why:** with auto-closing on, upstream skips over a typed `}` or `]` but not a typed quote, so typing
+  `"x"` gave `"x""` (decision #65 had turned auto-closing off for this).
+- **Change:** before the auto-quote check, if the next character is the same quote and the caret is
+  inside a quoted string (an odd number of unescaped quotes before it on the line), the typed quote
+  only moves the caret past the existing one.
+- **How to re-apply:** in the new upstream `_smartInsertion`, add the `// JBE: patch 2` check at the top
+  of the quote loop and copy `_shouldSkipQuote`. Check: `test/ui/auto_close_test.dart`.
+

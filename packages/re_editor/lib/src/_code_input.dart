@@ -563,6 +563,16 @@ class _SmartTextEditingDelta {
       if (delta.textInserted != symbol) {
         continue;
       }
+      // JBE: patch 2 (JBE_CHANGES.md). Typing a closing quote right before the
+      // same quote moves past it instead of adding another, so `"x"` types as
+      // `"x"` and not `"x""`.
+      if (_shouldSkipQuote(delta.oldText, symbol, delta.insertionOffset)) {
+        return TextEditingDeltaNonTextUpdate(
+          oldText: delta.oldText,
+          selection: TextSelection.collapsed(offset: delta.insertionOffset + 1),
+          composing: delta.composing,
+        );
+      }
       if (!_shouldAutoQuoted(delta.oldText, symbol, delta.insertionOffset)) {
         break;
       }
@@ -635,6 +645,24 @@ class _SmartTextEditingDelta {
       return false;
     }
     return text.substring(offset, offset + 1) == symbol.right;
+  }
+
+  // JBE: patch 2. The next character is [symbol] and the caret is inside a
+  // quoted string (an odd number of unescaped [symbol]s before it on the line),
+  // so the typed quote closes the string.
+  bool _shouldSkipQuote(String text, String symbol, int offset) {
+    if (offset >= text.length || text[offset] != symbol) {
+      return false;
+    }
+    int count = 0;
+    for (int i = 0; i < offset; i++) {
+      if (text[i] == '\\') {
+        i++;
+      } else if (text[i] == symbol) {
+        count++;
+      }
+    }
+    return count.isOdd;
   }
 
   bool _shouldAutoQuoted(String text, String symbol, int offset) {

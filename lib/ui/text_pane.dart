@@ -152,9 +152,9 @@ class TextPaneState extends State<TextPane> {
     final editor = CodeEditor(
       controller: widget.controller,
       focusNode: _focus,
-      // Auto-closing quotes and brackets doubled them when typing `"x"` in
-      // the real app (decision #65).
-      autocompleteSymbols: false,
+      // Auto-close brackets and quotes, typing over the closer (#91, fork
+      // patch 2; reverses decision #65).
+      autocompleteSymbols: true,
       wordWrap: widget.wordWrap,
       shortcutsActivatorsBuilder: const _TextPaneShortcuts(),
       shortcutOverrideActions: {
