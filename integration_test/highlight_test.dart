@@ -6,6 +6,7 @@ import 'package:json_better_editor/l10n/app_localizations.dart';
 import 'package:json_better_editor/ui/file_access.dart';
 import 'package:json_better_editor/ui/main_window.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:re_editor/re_editor.dart';
 
 import '../test/ui/editor_support.dart';
 
@@ -49,7 +50,10 @@ void main() {
       );
       await tester.tap(find.byTooltip('Open'));
       await tester.pumpAndSettle();
-      editorController(tester).text = sample;
+      editorController(tester)
+        ..text = sample
+        // Caret just after `[` on the "langs" line: the pair is boxed (#35).
+        ..selection = const CodeLineSelection.collapsed(index: 7, offset: 12);
       // Highlighting runs in an isolate; give it a moment.
       for (var i = 0; i < 20; i++) {
         await tester.pump(const Duration(milliseconds: 100));
