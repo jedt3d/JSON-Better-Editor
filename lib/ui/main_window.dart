@@ -10,6 +10,7 @@ import '../document/line_endings.dart';
 import '../document/recent_files.dart';
 import '../l10n/app_localizations.dart';
 import 'file_access.dart';
+import 'error_popover.dart';
 import 'line_list.dart';
 import 'search_bar.dart';
 import 'status_bar.dart';
@@ -624,15 +625,7 @@ class _MainWindowState extends State<MainWindow> {
     if (errors.isEmpty) {
       return _showError(l10n.validateValid, l10n.validateValidMessage);
     }
-    final error = errors.first;
-    final line = error.line - 1;
-    final text = lineList(controller.codeLines)[line].text;
-    controller
-      ..selection = CodeLineSelection.collapsed(
-        index: line,
-        offset: utf16Column(text, error.column),
-      )
-      ..makeCursorVisible();
+    _jumpToError(controller, errors.first);
     await _showError(
       l10n.validateInvalid,
       [
@@ -640,6 +633,37 @@ class _MainWindowState extends State<MainWindow> {
           l10n.invalidJsonPosition(e.line, e.column, e.message),
       ].join('\n'),
     );
+  }
+
+  /// Puts the caret at [error]'s line and column, scrolled into view.
+  void _jumpToError(
+    CodeLineEditingController controller,
+    JsonParseError error,
+  ) {
+    final line = (error.line - 1).clamp(
+      0,
+      lineList(controller.codeLines).length - 1,
+    );
+    final text = lineList(controller.codeLines)[line].text;
+    controller
+      ..selection = CodeLineSelection.collapsed(
+        index: line,
+        offset: utf16Column(text, error.column),
+      )
+      ..makeCursorVisible();
+  }
+
+  /// The Status Bar's invalid JSON status was clicked (#101): show the
+  /// error list; a chosen row moves the caret to that error.
+  Future<void> _showErrorList(BuildContext anchor) async {
+    final open = _open;
+    final errors = _check?.errors;
+    if (open == null || errors == null || errors.isEmpty) return;
+    final chosen = await showErrorPopover(anchor, errors);
+    if (chosen != null && mounted && identical(open, _open)) {
+      _jumpToError(open.controller, chosen);
+      GlobalObjectKey<TextPaneState>(open.controller).currentState?.focus();
+    }
   }
 
   /// Edit › Go to Line… (#90): asks for a line number and puts the caret at
@@ -789,6 +813,7 @@ class _MainWindowState extends State<MainWindow> {
               check: _check,
               onValidate: _validate,
               onGoToLine: _goToLine,
+              onShowErrors: _showErrorList,
             ),
         ],
       ),

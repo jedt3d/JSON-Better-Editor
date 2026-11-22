@@ -226,5 +226,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get statusShowErrorsTooltip => 'Show the errors';
+
+  @override
+  String get errorsLocation => 'Location';
+
+  @override
+  String get errorsMessage => 'Error message';
+
+  @override
+  String errorsAt(int line, int column) {
+    return 'Line $line, Col $column';
+  }
+
+  @override
   String get unknownError => 'An unknown error occurred.';
 }

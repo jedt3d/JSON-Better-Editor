@@ -18,6 +18,7 @@ class StatusBar extends StatefulWidget {
     this.check,
     this.onValidate,
     this.onGoToLine,
+    this.onShowErrors,
   });
 
   /// The open document's editor, or null when nothing is open.
@@ -33,6 +34,10 @@ class StatusBar extends StatefulWidget {
 
   /// Opens Go to Line; called when the caret position is clicked (#100).
   final VoidCallback? onGoToLine;
+
+  /// Opens the error list above the JSON status item, given that item's
+  /// context to anchor on (#101).
+  final void Function(BuildContext anchor)? onShowErrors;
 
   @override
   State<StatusBar> createState() => _StatusBarState();
@@ -236,10 +241,23 @@ extension on _StatusBarState {
       );
     }
     final errors = check.errors.length;
-    return _StatusButton(
-      key: const Key('jsonStatus'),
-      label: errors == 0 ? l10n.statusValid : l10n.statusInvalid(errors),
-      color: errors == 0 ? colors.primary : colors.error,
+    if (errors == 0) {
+      return _StatusButton(
+        key: const Key('jsonStatus'),
+        label: l10n.statusValid,
+        color: colors.primary,
+      );
+    }
+    return Builder(
+      builder: (anchor) => _StatusButton(
+        key: const Key('jsonStatus'),
+        label: l10n.statusInvalid(errors),
+        color: colors.error,
+        tooltip: l10n.statusShowErrorsTooltip,
+        onPressed: widget.onShowErrors == null
+            ? null
+            : () => widget.onShowErrors!(anchor),
+      ),
     );
   }
 }
