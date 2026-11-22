@@ -340,6 +340,18 @@
       }
     }
   },
+  "statusWrap": "Wrap",
+  "@statusWrap": {
+    "description": "Status Bar pill: word wrap on/off."
+  },
+  "statusFormat": "Format",
+  "@statusFormat": {
+    "description": "Status Bar pill: pretty-print the document."
+  },
+  "statusMinify": "Minify",
+  "@statusMinify": {
+    "description": "Status Bar pill: put the document on one line."
+  },
   "unknownError": "An unknown error occurred.",
   "@unknownError": {
     "description": "Dialog body when the system gives no error message."

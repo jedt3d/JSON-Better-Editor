@@ -199,7 +199,7 @@
 - [x] Result of the last Validate JSON, Open or Save (`✓ Valid JSON` / `✗ Invalid JSON`), or `Not checked since edit` after a change; no live validation. #99
 - [x] Clicking an invalid result opens an error list popover (Location, Error message); a row jumps to the error. First error only for now; more than one is Phase 5 (#106). #101
 - [x] Caret `Ln L, Col C` and `(N selected)`; clicking opens Go to Line. #100
-- [ ] Wrap toggle (in sync with View › Word Wrap) and Format / Minify buttons. #102
+- [x] Wrap toggle (in sync with View › Word Wrap) and Format / Minify buttons. #102
 - [ ] Fold all / Unfold all, also in the View menu. #103
 - [ ] LF / CRLF shown and changeable. #104
 - [ ] Phase 3: JSON path at the caret or selected node (click to copy), and the selected node's type and child count. #105

@@ -19,6 +19,10 @@ class StatusBar extends StatefulWidget {
     this.onValidate,
     this.onGoToLine,
     this.onShowErrors,
+    this.wordWrap = false,
+    this.onToggleWrap,
+    this.onFormat,
+    this.onMinify,
   });
 
   /// The open document's editor, or null when nothing is open.
@@ -38,6 +42,14 @@ class StatusBar extends StatefulWidget {
   /// Opens the error list above the JSON status item, given that item's
   /// context to anchor on (#101).
   final void Function(BuildContext anchor)? onShowErrors;
+
+  /// The `Wrap` pill shows and toggles View › Word Wrap (#102).
+  final bool wordWrap;
+  final VoidCallback? onToggleWrap;
+
+  /// The `Format | Minify` pill runs Edit › Format / Minify (#102, #89).
+  final VoidCallback? onFormat;
+  final VoidCallback? onMinify;
 
   @override
   State<StatusBar> createState() => _StatusBarState();
@@ -176,50 +188,69 @@ class _StatusBarState extends State<StatusBar> {
       color: theme.colorScheme.onSurfaceVariant,
     );
     final hasDocument = widget.controller != null;
-    return Container(
-      key: const Key('statusBar'),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainer,
-        border: Border(top: BorderSide(color: theme.dividerColor)),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-      child: DefaultTextStyle.merge(
-        style: style,
-        // A narrow window cuts the left items off instead of overflowing.
-        child: Row(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const NeverScrollableScrollPhysics(),
-                child: Row(
-                  children: [
-                    Text(l10n.statusPaneText, key: const Key('statusPane')),
-                    if (hasDocument && widget.check != null) ...[
-                      const SizedBox(width: 16),
-                      _jsonStatus(l10n, theme),
+    // A click in the bar is not a click outside the editor, so the Text
+    // pane keeps the keyboard (shortcuts and undo keep working).
+    return CodeEditorTapRegion(
+      child: Container(
+        key: const Key('statusBar'),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainer,
+          border: Border(top: BorderSide(color: theme.dividerColor)),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+        child: DefaultTextStyle.merge(
+          style: style,
+          // A narrow window cuts the left items off instead of overflowing.
+          child: Row(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const NeverScrollableScrollPhysics(),
+                  child: Row(
+                    children: [
+                      Text(l10n.statusPaneText, key: const Key('statusPane')),
+                      if (hasDocument && widget.check != null) ...[
+                        const SizedBox(width: 16),
+                        _jsonStatus(l10n, theme),
+                      ],
+                      if (hasDocument && _caret.isNotEmpty) ...[
+                        const SizedBox(width: 16),
+                        _StatusButton(
+                          key: const Key('caretPosition'),
+                          label: _caret,
+                          color: theme.colorScheme.onSurfaceVariant,
+                          tooltip: l10n.goToLineTitle,
+                          onPressed: widget.onGoToLine,
+                        ),
+                      ],
                     ],
-                    if (hasDocument && _caret.isNotEmpty) ...[
-                      const SizedBox(width: 16),
-                      _StatusButton(
-                        key: const Key('caretPosition'),
-                        label: _caret,
-                        color: theme.colorScheme.onSurfaceVariant,
-                        tooltip: l10n.goToLineTitle,
-                        onPressed: widget.onGoToLine,
-                      ),
-                    ],
-                  ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 16),
-            if (hasDocument)
-              Text(
-                l10n.statusSize(_lines, formatSize(_bytes)),
-                key: const Key('statusSize'),
-              ),
-          ],
+              if (hasDocument) ...[
+                _Pill(
+                  key: const Key('wrapPill'),
+                  segments: [(l10n.statusWrap, widget.onToggleWrap)],
+                  selected: widget.wordWrap ? 0 : null,
+                ),
+                const SizedBox(width: 8),
+                _Pill(
+                  key: const Key('formatPill'),
+                  segments: [
+                    (l10n.statusFormat, widget.onFormat),
+                    (l10n.statusMinify, widget.onMinify),
+                  ],
+                ),
+              ],
+              const SizedBox(width: 16),
+              if (hasDocument)
+                Text(
+                  l10n.statusSize(_lines, formatSize(_bytes)),
+                  key: const Key('statusSize'),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -262,6 +293,65 @@ extension on _StatusBarState {
   }
 }
 
+/// A small rounded pill of one or more segments in the Status Bar (#102).
+/// [selected] marks a toggled-on segment.
+class _Pill extends StatelessWidget {
+  const _Pill({super.key, required this.segments, this.selected});
+
+  final List<(String, VoidCallback?)> segments;
+  final int? selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final radius = BorderRadius.circular(999);
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        border: Border.all(color: colors.outlineVariant),
+      ),
+      child: ClipRRect(
+        borderRadius: radius,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var i = 0; i < segments.length; i++) ...[
+              if (i > 0)
+                SizedBox(
+                  height: 12,
+                  child: VerticalDivider(
+                    width: 1,
+                    color: colors.outlineVariant,
+                  ),
+                ),
+              Material(
+                color: i == selected
+                    ? colors.secondaryContainer
+                    : Colors.transparent,
+                child: InkWell(
+                  canRequestFocus: false,
+                  onTap: segments[i].$2,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      segments[i].$1,
+                      style: TextStyle(
+                        color: i == selected
+                            ? colors.onSecondaryContainer
+                            : colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// A small text button in the Status Bar.
 class _StatusButton extends StatelessWidget {
   const _StatusButton({
@@ -284,6 +374,7 @@ class _StatusButton extends StatelessWidget {
     return Tooltip(
       message: tooltip ?? '',
       child: InkWell(
+        canRequestFocus: false,
         onTap: onPressed,
         borderRadius: BorderRadius.circular(4),
         child: Padding(

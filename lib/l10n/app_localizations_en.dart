@@ -240,5 +240,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get statusWrap => 'Wrap';
+
+  @override
+  String get statusFormat => 'Format';
+
+  @override
+  String get statusMinify => 'Minify';
+
+  @override
   String get unknownError => 'An unknown error occurred.';
 }
