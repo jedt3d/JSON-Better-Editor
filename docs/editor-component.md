@@ -2,6 +2,9 @@
 
 Chosen: **`re_editor` 0.10.0** (MIT, by Reqable). Decision #60.
 
+Since #70 (decision #81) the app uses its own fork in `packages/re_editor/`; our patches are listed in
+`packages/re_editor/JBE_CHANGES.md` (patch 1: jumping up without laying out every line, #71).
+
 ## Options
 
 | Need (requirements) | `re_editor` | `flutter_code_editor` | Own editor on `EditableText` |
@@ -46,3 +49,5 @@ These measure showing text already in memory; file reading and our own parse are
   decides whether to use it or our own tokenizer.
 - Highlighting turns itself off above `CodeHighlightThemeMode.maxSize` (4 MB by default); we raise it
   and check the cost in #44.
+- Found later (#44, #71): `CodeLines[i]` indexing is quadratic in loops, and scrolling up lays out every
+  line in between; the first is avoided in the app, the second is patched in the fork.

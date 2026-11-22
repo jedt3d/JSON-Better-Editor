@@ -28,6 +28,15 @@ Runs, in order, and stops at the first failure with a non-zero exit: `flutter pu
 Needs a Mac with the Flutter SDK (stable), Xcode, and CocoaPods (`integration_test` is a
 native plugin). There is no GitHub Actions CI; this script is the build check (decision #34).
 
+## Measure performance
+
+```bash
+./scripts/perf.sh 1 5
+```
+
+Builds `tool/perf/perf_main.dart` as a profile build and prints open, typing, scrolling, search and
+folding times for generated files of each size in MB. Results and targets: [`docs/performance.md`](docs/performance.md).
+
 ## Folder structure
 
 | Path | What goes there |
@@ -38,7 +47,9 @@ native plugin). There is no GitHub Actions CI; this script is the build check (d
 | `lib/ui/` | Windows, toolbar, Text pane and Node pane widgets. |
 | `test/` | Unit and widget tests, mirroring `lib/`. |
 | `integration_test/` | Tests that launch the real macOS app. |
-| `scripts/` | Local build-and-test scripts. |
+| `scripts/` | Local build, test, performance (`perf.sh`) and window-screenshot (`shot.sh`) scripts. |
+| `tool/perf/` | Performance harness run by `scripts/perf.sh`; not part of the app. |
+| `packages/re_editor/` | Our fork of the `re_editor` code editor; patches listed in its `JBE_CHANGES.md`. |
 | `macos/` | macOS runner (Xcode project, entitlements). The only platform target. |
 
 Folders appear when the first file for them lands.

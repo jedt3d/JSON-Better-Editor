@@ -35,7 +35,7 @@ Goal: every Text-mode feature and the file/editor basics, on top of the Phase 1 
 
 Tracked in issue #25 (sub-issues #26–#45, about 2–3 acceptance criteria each; decision #52).
 
-- [x] Syntax highlighting, line numbers, bracket and quote matching (§1.1). #33, #34, #35; editor component re_editor (#26, decision #60).
+- [x] Syntax highlighting, line numbers, bracket and quote matching (§1.1). #33, #34, #35; editor component re_editor (#26, decision #60), kept as our own fork in `packages/re_editor/` (#70, decision #81).
 - [x] Fold/unfold objects and arrays from the gutter (§1.1). #36; a folded block is one line (decision #72).
 - [x] Key autocomplete from existing keys, accepted with Enter/Return (§1.3). #40 (decision #75).
 - [x] Tab / Shift+Tab indent and de-indent text (§1.4). #37.
@@ -46,7 +46,7 @@ Tracked in issue #25 (sub-issues #26–#45, about 2–3 acceptance criteria each
 - [x] New creates an editable document; Save with no file yet behaves like Save As (§3.4, decision #43). #28, #29. Unsaved-changes prompt and edited marker: #30 (decision #55).
 - [x] Standard File menu: New, Open, Save, Save As, Close; one document per window, multiple instances (§3.4). #31, #32 (decisions #67, #68).
 - [x] Register as a `.json` handler in "Open With" (§3.9). #32 (decisions #56, #69).
-- [x] Check performance with files under 5 MB (§3.4). #44: 5 MB opens in 0.5 s, capacity about 30 MB (`docs/performance.md`, decision #79). Remaining gaps in #67 (outside Phase 2).
+- [x] Check performance with files under 5 MB (§3.4). #44: 5 MB opens in 0.5 s, capacity about 30 MB (`docs/performance.md`, decision #79). Jump-to-top freeze fixed in the fork (#71, decision #82). Remaining: first key suggestion, #67.
 
 Built beyond the original list, found while checking the real app: the Edit menu items were greyed out (#38), Opt+Z typed "Ω" (#39), menu shortcuts reached the document behind a dialog (#54), and quadratic line loops in re_editor (#44). Every choice made without the maintainer is listed in `docs/phase-2-review.md`.
 
