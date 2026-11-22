@@ -3,13 +3,31 @@ import FlutterMacOS
 import UniformTypeIdentifiers
 
 class MainFlutterWindow: NSWindow {
+  /// The mouse-down that may start a window drag. Flutter reports the drag
+  /// only after the mouse has moved, and performDrag needs the press.
+  private var lastMouseDown: NSEvent?
+
+  override func sendEvent(_ event: NSEvent) {
+    if event.type == .leftMouseDown { lastMouseDown = event }
+    super.sendEvent(event)
+    if event.type == .leftMouseUp { isMovable = false }
+  }
+
   override func awakeFromNib() {
     let flutterViewController = FlutterViewController()
-    let windowFrame = self.frame
     self.contentViewController = flutterViewController
-    self.setFrame(windowFrame, display: true)
-    // Narrowest width at which the toolbar row still fits.
-    self.minSize = NSSize(width: 640, height: 400)
+
+    // Flutter draws the toolbar in the title-bar row (decision #46): hide the
+    // native title, let content run under it, and use an empty unified
+    // toolbar so the bar is tall enough and the traffic lights are centred.
+    self.titleVisibility = .hidden
+    self.titlebarAppearsTransparent = true
+    self.styleMask.insert(.fullSizeContentView)
+    self.toolbar = NSToolbar()
+    self.toolbarStyle = .unified
+    // AppKit would otherwise move the window on any drag in the title-bar
+    // band, buttons included; Flutter starts drags only on empty space.
+    self.isMovable = false
 
     // Native window services for Dart (lib/app/native_window.dart).
     let windowChannel = FlutterMethodChannel(
@@ -36,6 +54,20 @@ class MainFlutterWindow: NSWindow {
         panel.beginSheetModal(for: self) { response in
           result(response == .OK ? panel.url?.path : nil)
         }
+      case "startWindowDrag":
+        if let event = self.lastMouseDown {
+          self.isMovable = true  // Back to false on mouse-up.
+          self.performDrag(with: event)
+        }
+        result(nil)
+      case "titleBarDoubleClick":
+        // Same choice as System Settings › Desktop & Dock.
+        switch UserDefaults.standard.string(forKey: "AppleActionOnDoubleClick") {
+        case "Minimize": self.performMiniaturize(nil)
+        case "None": break
+        default: self.performZoom(nil)
+        }
+        result(nil)
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -44,5 +76,20 @@ class MainFlutterWindow: NSWindow {
     RegisterGeneratedPlugins(registry: flutterViewController)
 
     super.awakeFromNib()
+
+    // Open at 60% × 80% of the screen, centred; shrink to 20% × 20% (#46).
+    // Not restorable, so macOS does not put back the last session's frame.
+    self.isRestorable = false
+    if let screen = NSScreen.main ?? self.screen {
+      let area = screen.visibleFrame
+      let size = NSSize(width: (area.width * 0.6).rounded(),
+                        height: (area.height * 0.8).rounded())
+      self.minSize = NSSize(width: (area.width * 0.2).rounded(),
+                            height: (area.height * 0.2).rounded())
+      let frame = NSRect(x: area.midX - size.width / 2,
+                         y: area.midY - size.height / 2,
+                         width: size.width, height: size.height)
+      self.setFrame(frame, display: true)
+    }
   }
 }

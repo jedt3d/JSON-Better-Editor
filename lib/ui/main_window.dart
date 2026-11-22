@@ -1,4 +1,6 @@
 import 'package:material_ui/material_ui.dart';
+import 'dart:math' as math;
+
 import 'package:flutter/services.dart';
 
 import '../app/native_window.dart';
@@ -102,7 +104,8 @@ class _MainWindowState extends State<MainWindow> {
   /// makes [path] the current file.
   Future<void> _writeTo(_OpenFile open, String path) async {
     final l10n = AppLocalizations.of(context)!;
-    final text = open.document.toText();
+    // Pretty-printed (decision #28), ending with a newline (decision #47).
+    final text = '${open.document.toText()}\n';
     try {
       await widget.writeTextFile(path, text);
     } on FileAccessException catch (e) {
@@ -159,6 +162,19 @@ class _MainWindowState extends State<MainWindow> {
       body: Column(
         children: [
           _Toolbar(onNew: _newDocument, onOpen: _openFile),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                open?.file.name ?? l10n.appTitle,
+                key: const Key('documentTitle'),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+          ),
           const Divider(height: 1),
           Expanded(
             child: open == null
@@ -200,17 +216,29 @@ class _PlainTextView extends StatelessWidget {
   }
 }
 
+/// The toolbar shares the title-bar row with the traffic-light buttons
+/// (MainFlutterWindow.swift hides the native title bar). Its empty parts act
+/// like a title bar: drag to move the window, double-click to zoom.
 class _Toolbar extends StatelessWidget {
   const _Toolbar({required this.onNew, required this.onOpen});
 
   final VoidCallback onNew;
   final VoidCallback onOpen;
 
+  /// Height of the unified macOS title bar with a toolbar.
+  static const height = 52.0;
+
+  /// Room for the traffic-light buttons, which end 80 pt from the left edge.
+  static const leadingInset = 88.0;
+
+  /// Width the buttons need; narrower windows cut the toolbar off.
+  static const naturalWidth = 610.0;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    final row = Padding(
+      padding: const EdgeInsets.only(left: leadingInset, right: 12),
       child: Row(
         children: [
           _ToolbarButton(
@@ -240,6 +268,31 @@ class _Toolbar extends StatelessWidget {
           _ToolbarButton(
             icon: Icons.settings_outlined,
             tooltip: l10n.toolbarSettings,
+          ),
+        ],
+      ),
+    );
+    return SizedBox(
+      height: height,
+      child: Stack(
+        children: [
+          // Behind the buttons, so it only gets events on empty space.
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onPanStart: (_) => startWindowDrag(),
+              onDoubleTap: titleBarDoubleClick,
+            ),
+          ),
+          LayoutBuilder(
+            builder: (context, constraints) => ClipRect(
+              child: OverflowBox(
+                alignment: Alignment.centerLeft,
+                minWidth: 0,
+                maxWidth: math.max(constraints.maxWidth, naturalWidth),
+                child: row,
+              ),
+            ),
           ),
         ],
       ),

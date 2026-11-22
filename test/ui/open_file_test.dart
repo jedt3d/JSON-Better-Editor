@@ -47,6 +47,10 @@ void main() {
     expect(find.text(text), findsOneWidget);
     expect(find.text('Open a JSON file'), findsNothing);
     expect(titles.last, 'people.json');
+    expect(
+      tester.widget<Text>(find.byKey(const Key('documentTitle'))).data,
+      'people.json',
+    );
   });
 
   testWidgets('opening invalid JSON shows the error and keeps the old state', (
