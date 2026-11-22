@@ -196,6 +196,61 @@
   "@goToLineGo": {
     "description": "Button that moves to the line."
   },
+  "fileChangedTitle": "“{fileName}” was changed by another program",
+  "@fileChangedTitle": {
+    "description": "Title when the open file changed on disk.",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "fileChangedMessage": "Reload it from disk, or keep the version shown here?",
+  "@fileChangedMessage": {
+    "description": "Body when the open file changed on disk and there are no unsaved edits."
+  },
+  "fileChangedDropEdits": "Reloading it drops your unsaved changes. Reload it from disk, or keep your version?",
+  "@fileChangedDropEdits": {
+    "description": "Body when the open file changed on disk and there are unsaved edits."
+  },
+  "reload": "Reload",
+  "@reload": {
+    "description": "Button: read the file again from disk."
+  },
+  "keepMine": "Keep Mine",
+  "@keepMine": {
+    "description": "Button: keep the version shown in the editor."
+  },
+  "fileDeletedTitle": "“{fileName}” was moved or deleted",
+  "@fileDeletedTitle": {
+    "description": "Title when the open file is no longer on disk.",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "fileDeletedMessage": "The document stays open. Save writes it again.",
+  "@fileDeletedMessage": {
+    "description": "Body when the open file is no longer on disk."
+  },
+  "overwriteChangedTitle": "“{fileName}” changed on disk since you opened it",
+  "@overwriteChangedTitle": {
+    "description": "Title when saving over a file that another program changed.",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "overwriteChangedMessage": "Saving replaces the other program's changes.",
+  "@overwriteChangedMessage": {
+    "description": "Body when saving over a file that another program changed."
+  },
+  "overwrite": "Overwrite",
+  "@overwrite": {
+    "description": "Button: save over the changed file."
+  },
   "unknownError": "An unknown error occurred.",
   "@unknownError": {
     "description": "Dialog body when the system gives no error message."

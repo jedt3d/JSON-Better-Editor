@@ -54,6 +54,15 @@ Future<PickedFile> readJsonFileFromDisk(String path) async {
 /// cancelled.
 typedef ChooseSavePath = Future<String?> Function(String suggestedName);
 
+/// When the file at a path was last modified, or null if it is gone (#88).
+/// Injected into the UI so tests need no disk.
+typedef FileModifiedTime = Future<DateTime?> Function(String path);
+
+Future<DateTime?> fileModifiedTimeOnDisk(String path) async {
+  final stat = await FileStat.stat(path);
+  return stat.type == FileSystemEntityType.notFound ? null : stat.modified;
+}
+
 /// Writes [text] to [path], throwing [FileAccessException] on failure.
 typedef WriteTextFile = Future<void> Function(String path, String text);
 
