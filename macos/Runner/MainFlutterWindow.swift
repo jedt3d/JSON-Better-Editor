@@ -8,6 +8,19 @@ class MainFlutterWindow: NSWindow {
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
 
+    // Lets Dart set the window title from the localized app name.
+    let windowChannel = FlutterMethodChannel(
+      name: "json_better_editor/window",
+      binaryMessenger: flutterViewController.engine.binaryMessenger)
+    windowChannel.setMethodCallHandler { [weak self] call, result in
+      if call.method == "setTitle", let title = call.arguments as? String {
+        self?.title = title
+        result(nil)
+      } else {
+        result(FlutterMethodNotImplemented)
+      }
+    }
+
     RegisterGeneratedPlugins(registry: flutterViewController)
 
     super.awakeFromNib()
