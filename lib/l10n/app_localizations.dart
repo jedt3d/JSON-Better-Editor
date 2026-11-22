@@ -165,6 +165,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open a JSON file'**
   String get emptyState;
+
+  /// Error dialog title when a file cannot be opened.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t open {fileName}'**
+  String openFailedTitle(String fileName);
+
+  /// Where the JSON is invalid. message is the parser's English message.
+  ///
+  /// In en, this message translates to:
+  /// **'Line {line}, column {column}: {message}'**
+  String invalidJsonPosition(int line, int column, String message);
+
+  /// Error when the chosen file cannot be decoded as UTF-8.
+  ///
+  /// In en, this message translates to:
+  /// **'The file is not UTF-8 text.'**
+  String get fileNotText;
+
+  /// Button that closes a dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// Error dialog title when the open panel itself fails.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t open the file'**
+  String get openFailed;
 }
 
 class _AppLocalizationsDelegate

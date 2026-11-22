@@ -45,3 +45,4 @@
 | 38 | 2026-11-22 | Minimum window size | The main window cannot be resized below 640×400, so the toolbar row always fits. |
 | 39 | 2026-11-22 | JSON parser | Own small parser in `lib/document/` instead of `dart:convert` `jsonDecode`: numbers keep their original text, duplicate keys are kept, errors carry line and column (characters). |
 | 40 | 2026-11-22 | Nesting limit | JSON nested deeper than 512 levels is rejected with a parse error instead of risking a stack overflow. |
+| 41 | 2026-11-22 | Native file dialogs | Open/Save panels are shown by the app's own Swift code over the `json_better_editor/window` method channel, not a plugin (no new dependency). The sandbox grants `files.user-selected.read-write` (Save needs write). |

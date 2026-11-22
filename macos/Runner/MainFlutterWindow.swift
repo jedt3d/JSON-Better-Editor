@@ -1,5 +1,6 @@
 import Cocoa
 import FlutterMacOS
+import UniformTypeIdentifiers
 
 class MainFlutterWindow: NSWindow {
   override func awakeFromNib() {
@@ -10,15 +11,25 @@ class MainFlutterWindow: NSWindow {
     // Narrowest width at which the toolbar row still fits.
     self.minSize = NSSize(width: 640, height: 400)
 
-    // Lets Dart set the window title from the localized app name.
+    // Native window services for Dart (lib/app/native_window.dart).
     let windowChannel = FlutterMethodChannel(
       name: "json_better_editor/window",
       binaryMessenger: flutterViewController.engine.binaryMessenger)
     windowChannel.setMethodCallHandler { [weak self] call, result in
-      if call.method == "setTitle", let title = call.arguments as? String {
-        self?.title = title
+      guard let self else { return result(nil) }
+      switch call.method {
+      case "setTitle":
+        self.title = call.arguments as? String ?? ""
         result(nil)
-      } else {
+      case "openJsonFile":
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.json]
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.beginSheetModal(for: self) { response in
+          result(response == .OK ? panel.url?.path : nil)
+        }
+      default:
         result(FlutterMethodNotImplemented)
       }
     }

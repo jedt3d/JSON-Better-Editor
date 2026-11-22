@@ -47,5 +47,41 @@
   "emptyState": "Open a JSON file",
   "@emptyState": {
     "description": "Shown in the content area when no document is loaded."
+  },
+  "openFailedTitle": "Can't open {fileName}",
+  "@openFailedTitle": {
+    "description": "Error dialog title when a file cannot be opened.",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "invalidJsonPosition": "Line {line}, column {column}: {message}",
+  "@invalidJsonPosition": {
+    "description": "Where the JSON is invalid. message is the parser's English message.",
+    "placeholders": {
+      "line": {
+        "type": "int"
+      },
+      "column": {
+        "type": "int"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "fileNotText": "The file is not UTF-8 text.",
+  "@fileNotText": {
+    "description": "Error when the chosen file cannot be decoded as UTF-8."
+  },
+  "ok": "OK",
+  "@ok": {
+    "description": "Button that closes a dialog."
+  },
+  "openFailed": "Can't open the file",
+  "@openFailed": {
+    "description": "Error dialog title when the open panel itself fails."
   }
 }

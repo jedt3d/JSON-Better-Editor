@@ -43,4 +43,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emptyState => 'Open a JSON file';
+
+  @override
+  String openFailedTitle(String fileName) {
+    return 'Can\'t open $fileName';
+  }
+
+  @override
+  String invalidJsonPosition(int line, int column, String message) {
+    return 'Line $line, column $column: $message';
+  }
+
+  @override
+  String get fileNotText => 'The file is not UTF-8 text.';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get openFailed => 'Can\'t open the file';
 }
