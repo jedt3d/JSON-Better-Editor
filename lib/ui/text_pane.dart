@@ -18,9 +18,17 @@ CodeLineEditingController textPaneController(String text) =>
 /// keyboard focus when it appears, so typing works right after New or Open
 /// (decision #64).
 class TextPane extends StatefulWidget {
-  const TextPane({super.key, required this.controller});
+  const TextPane({
+    super.key,
+    required this.controller,
+    this.wordWrap = false,
+  });
 
   final CodeLineEditingController controller;
+
+  /// Long lines wrap to the pane's width (#39); line numbers still count
+  /// logical lines.
+  final bool wordWrap;
 
   @override
   State<TextPane> createState() => _TextPaneState();
@@ -91,7 +99,7 @@ class _TextPaneState extends State<TextPane> {
       // Auto-closing quotes and brackets doubled them when typing `"x"` in
       // the real app (decision #65).
       autocompleteSymbols: false,
-      wordWrap: false,
+      wordWrap: widget.wordWrap,
       shortcutsActivatorsBuilder: const _TextPaneShortcuts(),
       chunkAnalyzer: const _JsonChunkAnalyzer(),
       // Line numbers (#34): the gutter widens with the number of lines;

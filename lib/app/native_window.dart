@@ -41,7 +41,8 @@ Future<void> setDocumentEdited(bool edited) => _fire('setEdited', edited);
 /// Requests from the native side, answered by [handler] (null removes it):
 /// - `confirmClose`: Close (red button, File › Close, Cmd+W) and Quit ask
 ///   first; answer true when the window may close or the app may quit.
-/// - `menu` with `new`, `open`, `save` or `saveAs`: a File menu item.
+/// - `menu` with `new`, `open`, `save`, `saveAs` (File menu) or `wordWrap`
+///   (View menu).
 /// - `openPath` with a file path: a .json opened from Finder (#32).
 /// - `edit` with `undo`, `redo`, `cut`, `copy`, `paste` or `selectAll`: an
 ///   Edit menu item (#38, #43).
@@ -63,3 +64,6 @@ Future<List<String>> takePendingOpenPaths() async {
     return const [];
   }
 }
+
+/// Shows the View › Word Wrap checkmark.
+Future<void> setWordWrapChecked(bool on) => _fire('setWordWrapChecked', on);

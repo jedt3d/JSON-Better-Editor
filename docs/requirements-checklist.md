@@ -33,8 +33,8 @@
 - [x] Copy, cut and paste follow normal text-editor behavior (no node-aware paste in Text mode).
 
 ### 1.5 Word wrap
-- [ ] Word-wrap toggle: View menu item (Opt+Z), off by default (decision #58).
-- [ ] When on, long lines wrap to the pane's width.
+- [x] Word-wrap toggle: View menu item (Opt+Z), off by default (decision #58).
+- [x] When on, long lines wrap to the pane's width.
 
 ---
 

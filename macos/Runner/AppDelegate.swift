@@ -10,6 +10,21 @@ class AppDelegate: FlutterAppDelegate {
   override func applicationWillFinishLaunching(_ notification: Notification) {
     addFileMenu()
     retargetEditMenu()
+    addWordWrapItem()
+  }
+
+  /// View › Word Wrap (Opt+Z), off by default (decision #58). Dart holds the
+  /// setting; the reply sets the checkmark.
+  private func addWordWrapItem() {
+    guard let view = NSApp.mainMenu?.items.first(where: { $0.submenu?.title == "View" })?.submenu
+    else { return }
+    let item = NSMenuItem(title: "Word Wrap",
+                          action: #selector(MainFlutterWindow.toggleWordWrap(_:)),
+                          keyEquivalent: "z")
+    item.keyEquivalentModifierMask = [.option]
+    item.state = .off
+    view.insertItem(item, at: 0)
+    view.insertItem(.separator(), at: 1)
   }
 
   /// The template's Edit items (Undo … Select All) send AppKit selectors
