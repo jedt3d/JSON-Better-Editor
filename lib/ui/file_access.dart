@@ -32,7 +32,14 @@ typedef PickJsonFile = Future<PickedFile?> Function();
 
 Future<PickedFile?> pickJsonFileFromDisk() async {
   final path = await _panel(showOpenJsonPanel);
-  if (path == null) return null;
+  return path == null ? null : readJsonFileFromDisk(path);
+}
+
+/// Reads the file at [path] (chosen in Finder or the open panel) as UTF-8.
+/// Injected into the UI so tests need no disk.
+typedef ReadJsonFile = Future<PickedFile> Function(String path);
+
+Future<PickedFile> readJsonFileFromDisk(String path) async {
   try {
     return PickedFile(path: path, text: await File(path).readAsString());
   } on FileSystemException catch (e) {
