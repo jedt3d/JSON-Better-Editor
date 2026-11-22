@@ -144,6 +144,14 @@ class _MainWindowState extends State<MainWindow> {
     _searchBar.currentState?.step(forward: forward);
   }
 
+  /// The Text pane of the open document, if one is shown.
+  TextPaneState? get _textPane {
+    final controller = _open?.controller;
+    return controller == null
+        ? null
+        : GlobalObjectKey<TextPaneState>(controller).currentState;
+  }
+
   void _closeSearch() {
     setState(() => _searchOpen = false);
     final controller = _open?.controller;
@@ -359,6 +367,10 @@ class _MainWindowState extends State<MainWindow> {
         await _reformat((document) => document.toText());
       case ('menu', 'minify'):
         await _reformat((document) => document.toCompactText());
+      case ('menu', 'foldAll'):
+        _textPane?.foldAll();
+      case ('menu', 'unfoldAll'):
+        _textPane?.unfoldAll();
       case ('menu', 'clearRecent'):
         _recent = const [];
         saveRecentFiles(_recent);
@@ -818,6 +830,8 @@ class _MainWindowState extends State<MainWindow> {
               onToggleWrap: _toggleWordWrap,
               onFormat: () => _reformat((document) => document.toText()),
               onMinify: () => _reformat((document) => document.toCompactText()),
+              onFoldAll: () => _textPane?.foldAll(),
+              onUnfoldAll: () => _textPane?.unfoldAll(),
             ),
         ],
       ),

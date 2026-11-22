@@ -478,6 +478,18 @@ abstract class AppLocalizations {
   /// **'Minify'**
   String get statusMinify;
 
+  /// Status Bar pill: fold every block inside the root.
+  ///
+  /// In en, this message translates to:
+  /// **'Fold all'**
+  String get statusFoldAll;
+
+  /// Status Bar pill: open every folded block.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfold all'**
+  String get statusUnfoldAll;
+
   /// Dialog body when the system gives no error message.
   ///
   /// In en, this message translates to:

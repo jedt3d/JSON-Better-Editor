@@ -112,6 +112,34 @@ class TextPaneState extends State<TextPane> {
 
   final _gutterKey = GlobalKey();
 
+  /// re_editor's fold state, handed out by its gutter builder.
+  CodeChunkController? _chunks;
+
+  /// Fold All (#103): folds every block inside the root, so the root's keys
+  /// stay visible. Folding is not a text change, so Undo skips it.
+  void foldAll() {
+    final chunks = _chunks;
+    if (chunks == null) return;
+    final controller = widget.controller;
+    if (lineList(controller.codeLines).any((line) => line.chunkParent)) {
+      chunks.expandAll();
+    }
+    // Analysed here, not taken from re_editor's marker state: that state
+    // lags behind the text after an edit or an unfold (markers inside a
+    // fold come back only after its next analysis).
+    chunks.value = const _JsonChunkAnalyzer().run(controller.codeLines);
+    final blocks = chunks.value;
+    if (blocks.isEmpty) return;
+    final root = blocks.first;
+    chunks.collapseAll([
+      for (final block in blocks.skip(1))
+        if (block.end <= root.end) block.index,
+    ]);
+  }
+
+  /// Unfold All (#103): opens every folded block, nested ones too.
+  void unfoldAll() => _chunks?.expandAll();
+
   void _updatePair() {
     final controller = widget.controller;
     final list = lineList(controller.codeLines);
@@ -170,6 +198,7 @@ class TextPaneState extends State<TextPane> {
       // the caret's line number is drawn in full colour, the others at half.
       indicatorBuilder: (context, editing, chunks, notifier) {
         _watchLines(notifier);
+        _chunks = chunks;
         return Padding(
           key: _gutterKey,
           padding: const EdgeInsets.only(left: 8, right: 4),

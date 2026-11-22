@@ -77,6 +77,15 @@ class AppDelegate: FlutterAppDelegate {
     view.insertItem(status, at: 1)
     statusBarItem = status
     view.insertItem(.separator(), at: 2)
+    // View › Fold All / Unfold All, no shortcuts (#103).
+    for (i, (title, name)) in [("Fold All", "foldAll"), ("Unfold All", "unfoldAll")].enumerated() {
+      let item = NSMenuItem(title: title,
+                            action: #selector(MainFlutterWindow.jsonCommand(_:)),
+                            keyEquivalent: "")
+      item.representedObject = name
+      view.insertItem(item, at: 3 + i)
+    }
+    view.insertItem(.separator(), at: 5)
   }
 
   /// The template's Edit items (Undo … Select All) send AppKit selectors

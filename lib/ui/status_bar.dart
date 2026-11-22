@@ -23,6 +23,8 @@ class StatusBar extends StatefulWidget {
     this.onToggleWrap,
     this.onFormat,
     this.onMinify,
+    this.onFoldAll,
+    this.onUnfoldAll,
   });
 
   /// The open document's editor, or null when nothing is open.
@@ -50,6 +52,10 @@ class StatusBar extends StatefulWidget {
   /// The `Format | Minify` pill runs Edit › Format / Minify (#102, #89).
   final VoidCallback? onFormat;
   final VoidCallback? onMinify;
+
+  /// Fold All / Unfold All in the Text pane (#103).
+  final VoidCallback? onFoldAll;
+  final VoidCallback? onUnfoldAll;
 
   @override
   State<StatusBar> createState() => _StatusBarState();
@@ -200,56 +206,75 @@ class _StatusBarState extends State<StatusBar> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
         child: DefaultTextStyle.merge(
           style: style,
-          // A narrow window cuts the left items off instead of overflowing.
-          child: Row(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const NeverScrollableScrollPhysics(),
-                  child: Row(
-                    children: [
-                      Text(l10n.statusPaneText, key: const Key('statusPane')),
-                      if (hasDocument && widget.check != null) ...[
-                        const SizedBox(width: 16),
-                        _jsonStatus(l10n, theme),
+          // A narrow window cuts the bar off at its right edge instead of
+          // overflowing.
+          child: LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const NeverScrollableScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Text(l10n.statusPaneText, key: const Key('statusPane')),
+                        if (hasDocument && widget.check != null) ...[
+                          const SizedBox(width: 16),
+                          _jsonStatus(l10n, theme),
+                        ],
+                        if (hasDocument && _caret.isNotEmpty) ...[
+                          const SizedBox(width: 16),
+                          _StatusButton(
+                            key: const Key('caretPosition'),
+                            label: _caret,
+                            color: theme.colorScheme.onSurfaceVariant,
+                            tooltip: l10n.goToLineTitle,
+                            onPressed: widget.onGoToLine,
+                          ),
+                        ],
                       ],
-                      if (hasDocument && _caret.isNotEmpty) ...[
+                    ),
+                    Row(
+                      children: [
                         const SizedBox(width: 16),
-                        _StatusButton(
-                          key: const Key('caretPosition'),
-                          label: _caret,
-                          color: theme.colorScheme.onSurfaceVariant,
-                          tooltip: l10n.goToLineTitle,
-                          onPressed: widget.onGoToLine,
-                        ),
+                        if (hasDocument) ...[
+                          _Pill(
+                            key: const Key('wrapPill'),
+                            segments: [(l10n.statusWrap, widget.onToggleWrap)],
+                            selected: widget.wordWrap ? 0 : null,
+                          ),
+                          const SizedBox(width: 8),
+                          _Pill(
+                            key: const Key('formatPill'),
+                            segments: [
+                              (l10n.statusFormat, widget.onFormat),
+                              (l10n.statusMinify, widget.onMinify),
+                            ],
+                          ),
+                          const SizedBox(width: 8),
+                          _Pill(
+                            key: const Key('foldPill'),
+                            segments: [
+                              (l10n.statusFoldAll, widget.onFoldAll),
+                              (l10n.statusUnfoldAll, widget.onUnfoldAll),
+                            ],
+                          ),
+                        ],
+                        const SizedBox(width: 16),
+                        if (hasDocument)
+                          Text(
+                            l10n.statusSize(_lines, formatSize(_bytes)),
+                            key: const Key('statusSize'),
+                          ),
                       ],
-                    ],
-                  ),
-                ),
-              ),
-              if (hasDocument) ...[
-                _Pill(
-                  key: const Key('wrapPill'),
-                  segments: [(l10n.statusWrap, widget.onToggleWrap)],
-                  selected: widget.wordWrap ? 0 : null,
-                ),
-                const SizedBox(width: 8),
-                _Pill(
-                  key: const Key('formatPill'),
-                  segments: [
-                    (l10n.statusFormat, widget.onFormat),
-                    (l10n.statusMinify, widget.onMinify),
+                    ),
                   ],
                 ),
-              ],
-              const SizedBox(width: 16),
-              if (hasDocument)
-                Text(
-                  l10n.statusSize(_lines, formatSize(_bytes)),
-                  key: const Key('statusSize'),
-                ),
-            ],
+              ),
+            ),
           ),
         ),
       ),

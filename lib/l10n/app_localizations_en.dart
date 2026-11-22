@@ -249,5 +249,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusMinify => 'Minify';
 
   @override
+  String get statusFoldAll => 'Fold all';
+
+  @override
+  String get statusUnfoldAll => 'Unfold all';
+
+  @override
   String get unknownError => 'An unknown error occurred.';
 }
