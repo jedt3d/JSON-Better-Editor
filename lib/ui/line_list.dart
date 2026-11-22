@@ -8,3 +8,28 @@ final _lists = Expando<List<CodeLine>>();
 List<CodeLine> lineList(CodeLines lines) => _lists[lines] ??= [
   for (final segment in lines.segments) ...segment.codeLines,
 ];
+
+/// Whether [a] and [b] hold the same text, folded parts included.
+bool sameText(CodeLines a, CodeLines b) {
+  final left = <String>[];
+  final right = <String>[];
+  _texts(a, left);
+  _texts(b, right);
+  if (left.length != right.length) return false;
+  for (var i = 0; i < left.length; i++) {
+    // Unchanged lines are the same String object: a cheap check.
+    if (left[i] != right[i]) return false;
+  }
+  return true;
+}
+
+void _texts(CodeLines lines, List<String> out) {
+  void add(CodeLine line) {
+    out.add(line.text);
+    line.chunks.forEach(add);
+  }
+
+  for (final segment in lines.segments) {
+    segment.codeLines.forEach(add);
+  }
+}

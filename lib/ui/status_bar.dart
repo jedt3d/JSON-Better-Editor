@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:material_ui/material_ui.dart';
 import 'package:re_editor/re_editor.dart';
 
+import '../document/json_document.dart';
 import '../l10n/app_localizations.dart';
 import 'line_list.dart';
 
@@ -11,16 +12,50 @@ import 'line_list.dart';
 /// (toggles and actions: #102, #103) ······ (line endings: #104) · document
 /// size. Its height comes from the text style, never fixed pixels.
 class StatusBar extends StatefulWidget {
-  const StatusBar({super.key, required this.controller});
+  const StatusBar({
+    super.key,
+    required this.controller,
+    this.check,
+    this.onValidate,
+  });
 
   /// The open document's editor, or null when nothing is open.
   final CodeLineEditingController? controller;
+
+  /// The last check of the text (Validate JSON, Open or Save), shown as the
+  /// JSON status (#99). There is no live validation (decision #87).
+  final JsonCheck? check;
+
+  /// Runs Validate JSON; called when the status says the text changed since
+  /// the last check.
+  final VoidCallback? onValidate;
 
   @override
   State<StatusBar> createState() => _StatusBarState();
 }
 
 class _StatusBarState extends State<StatusBar> {
+  /// Whether the text changed since [StatusBar.check]. Once changed it stays
+  /// changed until a new check, except that undo back to the checked text
+  /// brings back the checked lines object itself.
+  bool _changedSinceCheck = false;
+
+  bool _computeChanged() {
+    final check = widget.check;
+    final lines = widget.controller?.codeLines;
+    if (check == null || lines == null || identical(lines, check.lines)) {
+      return false;
+    }
+    return _changedSinceCheck || !sameText(lines, check.lines);
+  }
+
+  void _updateCheckState() {
+    final changed = _computeChanged();
+    if (changed != _changedSinceCheck) {
+      setState(() => _changedSinceCheck = changed);
+    }
+  }
+
   int _lines = 0;
   int _bytes = 0;
   Timer? _debounce;
@@ -41,6 +76,10 @@ class _StatusBarState extends State<StatusBar> {
       widget.controller?.addListener(_onChanged);
       _count();
     }
+    if (!identical(old.check, widget.check)) {
+      _changedSinceCheck = false;
+      _changedSinceCheck = _computeChanged();
+    }
   }
 
   @override
@@ -53,6 +92,7 @@ class _StatusBarState extends State<StatusBar> {
   // ponytail: counts the whole text 250 ms after the last change (about
   // 20 ms at 20 MB); keep running totals per line if Phase 5 needs it.
   void _onChanged() {
+    _updateCheckState();
     if (identical(widget.controller?.codeLines, _counted)) return; // Caret.
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 250), _count);
@@ -101,6 +141,10 @@ class _StatusBarState extends State<StatusBar> {
         child: Row(
           children: [
             Text(l10n.statusPaneText, key: const Key('statusPane')),
+            if (hasDocument && widget.check != null) ...[
+              const SizedBox(width: 16),
+              _jsonStatus(l10n, theme),
+            ],
             const Spacer(),
             if (hasDocument)
               Text(
@@ -112,6 +156,71 @@ class _StatusBarState extends State<StatusBar> {
       ),
     );
   }
+}
+
+/// The JSON status item (#99).
+extension on _StatusBarState {
+  Widget _jsonStatus(AppLocalizations l10n, ThemeData theme) {
+    final check = widget.check!;
+    final colors = theme.colorScheme;
+    if (_changedSinceCheck) {
+      return _StatusButton(
+        key: const Key('jsonStatus'),
+        label: l10n.statusNotChecked,
+        color: colors.onSurfaceVariant.withValues(alpha: 0.7),
+        tooltip: l10n.statusValidateTooltip,
+        onPressed: widget.onValidate,
+      );
+    }
+    final errors = check.errors.length;
+    return _StatusButton(
+      key: const Key('jsonStatus'),
+      label: errors == 0 ? l10n.statusValid : l10n.statusInvalid(errors),
+      color: errors == 0 ? colors.primary : colors.error,
+    );
+  }
+}
+
+/// A small text button in the Status Bar.
+class _StatusButton extends StatelessWidget {
+  const _StatusButton({
+    super.key,
+    required this.label,
+    required this.color,
+    this.tooltip,
+    this.onPressed,
+  });
+
+  final String label;
+  final Color color;
+  final String? tooltip;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Text(label, style: TextStyle(color: color));
+    if (onPressed == null) return text;
+    return Tooltip(
+      message: tooltip ?? '',
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(4),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: text,
+        ),
+      ),
+    );
+  }
+}
+
+/// The result of checking the text once: the lines checked and the errors
+/// found (empty when valid).
+class JsonCheck {
+  const JsonCheck(this.lines, this.errors);
+
+  final CodeLines lines;
+  final List<JsonParseError> errors;
 }
 
 /// Bytes of [text] in UTF-8, without building the encoded copy.

@@ -196,5 +196,25 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get statusValid => '✓ Valid JSON';
+
+  @override
+  String statusInvalid(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count errors',
+      one: '1 error',
+    );
+    return '✗ Invalid JSON · $_temp0';
+  }
+
+  @override
+  String get statusNotChecked => 'Not checked since edit';
+
+  @override
+  String get statusValidateTooltip => 'Validate JSON now';
+
+  @override
   String get unknownError => 'An unknown error occurred.';
 }

@@ -196,7 +196,7 @@
 ### 3.12 Status Bar (decision #88)
 - [x] A Status Bar along the bottom of the window, native macOS look, height from the system font; View › Hide / Show Status Bar (⌘/). #98
 - [x] Pane label (`TEXT`; `NODE` when the Node pane has focus) and `N lines · S KB`. #98
-- [ ] Result of the last Validate JSON, Open or Save (`✓ Valid JSON` / `✗ Invalid JSON`), or `Not checked since edit` after a change; no live validation. #99
+- [x] Result of the last Validate JSON, Open or Save (`✓ Valid JSON` / `✗ Invalid JSON`), or `Not checked since edit` after a change; no live validation. #99
 - [ ] Clicking an invalid result opens an error list popover (Location, Error message); a row jumps to the error. First error only for now; more than one is Phase 5 (#106). #101
 - [ ] Caret `Ln L, Col C` and `(N selected)`; clicking opens Go to Line. #100
 - [ ] Wrap toggle (in sync with View › Word Wrap) and Format / Minify buttons. #102

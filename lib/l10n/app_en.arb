@@ -271,6 +271,27 @@
       }
     }
   },
+  "statusValid": "✓ Valid JSON",
+  "@statusValid": {
+    "description": "Status Bar: the last check found no error."
+  },
+  "statusInvalid": "✗ Invalid JSON · {count, plural, =1{1 error} other{{count} errors}}",
+  "@statusInvalid": {
+    "description": "Status Bar: the last check found errors.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statusNotChecked": "Not checked since edit",
+  "@statusNotChecked": {
+    "description": "Status Bar: the text changed since the last check."
+  },
+  "statusValidateTooltip": "Validate JSON now",
+  "@statusValidateTooltip": {
+    "description": "Tooltip of the Status Bar item when the text was not checked since an edit."
+  },
   "unknownError": "An unknown error occurred.",
   "@unknownError": {
     "description": "Dialog body when the system gives no error message."
