@@ -150,7 +150,7 @@
 - [x] Save reformats the JSON (pretty-print, 2-space indent) before writing, and the file ends with a newline (decisions #28, #47).
 - [x] A failed write shows an error dialog, keeps the document open, and puts the file's previous contents back (decision #42).
 - [ ] One document per window. The app can run multiple instances.
-- [ ] Target for now: files under 5 MB: open and show in 2 s or less, no visible lag when typing, scrolling or searching (decision #59). Progressive loading/rendering is future work.
+- [ ] Target for now: files under 5 MB: open and show in 2 s or less, no visible lag when typing, scrolling or searching (decision #59). The largest file that opens within 2–3 s is measured and recorded as the current upper limit. Progressive loading/rendering is future work.
 
 ### 3.5 Undo / redo
 - [ ] Undo and redo are required (Cmd+Z / Cmd+Shift+Z).

@@ -63,4 +63,4 @@
 | 56 | 2026-11-22 | Open from Finder | Opening a `.json` from Finder while the app runs replaces the window's document, after the unsaved-changes prompt. A second instance can still be started with `open -n` (#32). Confirmed by the maintainer. |
 | 57 | 2026-11-22 | Text indent unit | Tab and Shift+Tab in Text mode indent and de-indent by 2 spaces, the same as Save's pretty-print (#37). Confirmed by the maintainer. |
 | 58 | 2026-11-22 | Word wrap toggle | Word wrap is a View menu item (Opt+Z), off by default. There is no toolbar button (#39). Confirmed by the maintainer. |
-| 59 | 2026-11-22 | Performance targets | A 5 MB file opens and is shown in 2 s or less; typing, scrolling and search show no visible lag (frame time 16 ms or less in a profile build) (#44). Confirmed by the maintainer. |
+| 59 | 2026-11-22 | Performance targets | A 5 MB file opens and is shown in 2 s or less; typing, scrolling and search show no visible lag (frame time 16 ms or less in a profile build). #44 also measures the upper limit: the largest file that still opens and shows within 2–3 s on the test Mac, recorded as the current capacity (#44). Confirmed by the maintainer. |
