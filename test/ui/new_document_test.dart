@@ -81,4 +81,60 @@ void main() {
     expect(root.members.single.key, 'a');
     expect((root.members.single.value as JsonNumber).text, '1');
   }, variant: macOS);
+
+  group('Save on an Untitled document (#29)', () {
+    late Map<String, String> files;
+    late List<String> asked;
+    String? nextPath;
+
+    Future<void> pumpSaving(WidgetTester tester) {
+      files = {};
+      asked = [];
+      return tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: appLocalizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: MainWindow(
+            chooseSavePath: (name) async {
+              asked.add(name);
+              return nextPath;
+            },
+            writeTextFile: (path, text) async => files[path] = text,
+          ),
+        ),
+      );
+    }
+
+    testWidgets('Cmd+S opens the save panel; Cancel keeps it unsaved', (
+      tester,
+    ) async {
+      nextPath = null;
+      await pumpSaving(tester);
+      await pressCmd(tester, LogicalKeyboardKey.keyN);
+
+      await pressCmd(tester, LogicalKeyboardKey.keyS);
+
+      expect(asked, ['Untitled']);
+      expect(files, isEmpty);
+      expect(documentTitle(tester), 'Untitled');
+      expect(editorShowing('{}'), findsOneWidget);
+    }, variant: macOS);
+
+    testWidgets('after saving, the title is the file name and the next '
+        'Cmd+S writes without a panel', (tester) async {
+      nextPath = '/d/new.json';
+      await pumpSaving(tester);
+      await pressCmd(tester, LogicalKeyboardKey.keyN);
+
+      await pressCmd(tester, LogicalKeyboardKey.keyS);
+      expect(files['/d/new.json'], '{}\n');
+      expect(documentTitle(tester), 'new.json');
+      expect(titles.last, 'new.json');
+
+      files.clear();
+      await pressCmd(tester, LogicalKeyboardKey.keyS);
+      expect(asked, ['Untitled'], reason: 'no second panel');
+      expect(files['/d/new.json'], '{}\n');
+    }, variant: macOS);
+  });
 }
