@@ -35,20 +35,22 @@ Goal: every Text-mode feature and the file/editor basics, on top of the Phase 1 
 
 Tracked in issue #25 (sub-issues #26–#45, about 2–3 acceptance criteria each; decision #52).
 
-- [ ] Syntax highlighting, line numbers, bracket and quote matching (§1.1).
-- [ ] Fold/unfold objects and arrays from the gutter (§1.1).
-- [ ] Key autocomplete from existing keys, accepted with Enter/Return (§1.3).
-- [ ] Tab / Shift+Tab indent and de-indent text (§1.4).
-- [ ] Copy, cut and paste with normal text-editor behavior (§1.4).
-- [ ] Word wrap toggle for Text mode (§1.5).
-- [ ] Search keys and values with Next / Previous (§3.3), Text mode side.
-- [ ] Undo / redo in Text mode (§3.5). The shared Text/Node history is Phase 3 (decision #53).
-- [ ] New creates an editable document; Save with no file yet behaves like Save As (§3.4, decision #43). Pretty-printing on Save is already done in Phase 1.
-- [ ] Standard File menu: New, Open, Save, Save As, Close; one document per window, multiple instances (§3.4).
-- [ ] Register as a `.json` handler in "Open With" (§3.9).
-- [ ] Check performance with files under 5 MB (§3.4).
+- [x] Syntax highlighting, line numbers, bracket and quote matching (§1.1). #33, #34, #35; editor component re_editor (#26, decision #60).
+- [x] Fold/unfold objects and arrays from the gutter (§1.1). #36; a folded block is one line (decision #72).
+- [x] Key autocomplete from existing keys, accepted with Enter/Return (§1.3). #40 (decision #75).
+- [x] Tab / Shift+Tab indent and de-indent text (§1.4). #37.
+- [x] Copy, cut and paste with normal text-editor behavior (§1.4). #38; the template Edit menu now reaches the Text pane (decision #73).
+- [x] Word wrap toggle for Text mode (§1.5). #39, View › Word Wrap (Opt+Z) (decision #74).
+- [x] Search keys and values with Next / Previous (§3.3), Text mode side. #41, #42 (decision #76).
+- [x] Undo / redo in Text mode (§3.5). #43; skips caret-only and fold steps (decision #78). The shared Text/Node history is Phase 3 (decision #53).
+- [x] New creates an editable document; Save with no file yet behaves like Save As (§3.4, decision #43). #28, #29. Unsaved-changes prompt and edited marker: #30 (decision #55).
+- [x] Standard File menu: New, Open, Save, Save As, Close; one document per window, multiple instances (§3.4). #31, #32 (decisions #67, #68).
+- [x] Register as a `.json` handler in "Open With" (§3.9). #32 (decisions #56, #69).
+- [x] Check performance with files under 5 MB (§3.4). #44: 5 MB opens in 0.5 s, capacity about 30 MB (`docs/performance.md`, decision #79). Remaining gaps in #67 (outside Phase 2).
 
-**Done when:** the app works as a complete JSON text editor on its own.
+Built beyond the original list, found while checking the real app: the Edit menu items were greyed out (#38), Opt+Z typed "Ω" (#39), menu shortcuts reached the document behind a dialog (#54), and quadratic line loops in re_editor (#44). Every choice made without the maintainer is listed in `docs/phase-2-review.md`.
+
+**Done when:** the app works as a complete JSON text editor on its own. ✅ Confirmed in the Release app on 2026-11-22 (#45, `docs/screenshots/45-phase2-done.jpg`).
 
 ---
 
