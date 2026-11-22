@@ -192,6 +192,17 @@
 - [ ] If a default font is not installed, fall back to the macOS default monospace font.
 - [ ] Default value view for the document: single-line or multi-line (see 2.3).
 
+### 3.12 Status Bar (decision #88)
+- [ ] A Status Bar along the bottom of the window, native macOS look, height from the system font; View › Hide / Show Status Bar (⌘/). #98
+- [ ] Pane label (`TEXT`; `NODE` when the Node pane has focus) and `N lines · S KB`. #98
+- [ ] Result of the last Validate JSON, Open or Save (`✓ Valid JSON` / `✗ Invalid JSON`), or `Not checked since edit` after a change; no live validation. #99
+- [ ] Clicking an invalid result opens an error list popover (Location, Error message); a row jumps to the error. First error only for now; more than one is Phase 5 (#106). #101
+- [ ] Caret `Ln L, Col C` and `(N selected)`; clicking opens Go to Line. #100
+- [ ] Wrap toggle (in sync with View › Word Wrap) and Format / Minify buttons. #102
+- [ ] Fold all / Unfold all, also in the View menu. #103
+- [ ] LF / CRLF shown and changeable. #104
+- [ ] Phase 3: JSON path at the caret or selected node (click to copy), and the selected node's type and child count. #105
+
 ### 3.11 Licensing and release (closed-source commercial)
 - [x] The app is sold closed-source; every dependency must allow that (MIT, BSD or Apache-2.0; no GPL, LGPL or AGPL). Audited on 2026-11-22 (decision #83).
 - [ ] An About item in the macOS app menu, and a licenses page that lists the notices of every bundled package, including the forked re_editor and highlight.js (BSD-3, which re_highlight is ported from).
