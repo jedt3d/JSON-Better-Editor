@@ -17,6 +17,7 @@ class StatusBar extends StatefulWidget {
     required this.controller,
     this.check,
     this.onValidate,
+    this.onGoToLine,
   });
 
   /// The open document's editor, or null when nothing is open.
@@ -29,6 +30,9 @@ class StatusBar extends StatefulWidget {
   /// Runs Validate JSON; called when the status says the text changed since
   /// the last check.
   final VoidCallback? onValidate;
+
+  /// Opens Go to Line; called when the caret position is clicked (#100).
+  final VoidCallback? onGoToLine;
 
   @override
   State<StatusBar> createState() => _StatusBarState();
@@ -56,6 +60,37 @@ class _StatusBarState extends State<StatusBar> {
     }
   }
 
+  /// `Ln L, Col C` and `(N selected)` (#100); both 1-based, logical lines
+  /// (folded lines counted), columns in characters.
+  String _caret = '';
+
+  void _updateCaret() {
+    final controller = widget.controller;
+    var caret = '';
+    if (controller != null) {
+      final l10n = AppLocalizations.of(context)!;
+      final selection = controller.selection;
+      final line = controller.index2lineIndex(selection.extentIndex) + 1;
+      final text = lineList(controller.codeLines)[selection.extentIndex].text;
+      final column =
+          text
+              .substring(0, selection.extentOffset.clamp(0, text.length))
+              .runes
+              .length +
+          1;
+      caret = l10n.statusCaret(line, column);
+      if (!selection.isCollapsed) {
+        // ponytail: builds the selected text to count it; slow for a huge
+        // selection (Cmd+A on 20 MB), Phase 5 (#82).
+        caret = l10n.statusCaretSelected(
+          caret,
+          controller.selectedText.runes.length,
+        );
+      }
+    }
+    if (caret != _caret) setState(() => _caret = caret);
+  }
+
   int _lines = 0;
   int _bytes = 0;
   Timer? _debounce;
@@ -66,6 +101,9 @@ class _StatusBarState extends State<StatusBar> {
     super.initState();
     widget.controller?.addListener(_onChanged);
     _count();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _updateCaret();
+    });
   }
 
   @override
@@ -75,6 +113,9 @@ class _StatusBarState extends State<StatusBar> {
       old.controller?.removeListener(_onChanged);
       widget.controller?.addListener(_onChanged);
       _count();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _updateCaret();
+      });
     }
     if (!identical(old.check, widget.check)) {
       _changedSinceCheck = false;
@@ -93,6 +134,7 @@ class _StatusBarState extends State<StatusBar> {
   // 20 ms at 20 MB); keep running totals per line if Phase 5 needs it.
   void _onChanged() {
     _updateCheckState();
+    _updateCaret();
     if (identical(widget.controller?.codeLines, _counted)) return; // Caret.
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 250), _count);
@@ -138,14 +180,35 @@ class _StatusBarState extends State<StatusBar> {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
       child: DefaultTextStyle.merge(
         style: style,
+        // A narrow window cuts the left items off instead of overflowing.
         child: Row(
           children: [
-            Text(l10n.statusPaneText, key: const Key('statusPane')),
-            if (hasDocument && widget.check != null) ...[
-              const SizedBox(width: 16),
-              _jsonStatus(l10n, theme),
-            ],
-            const Spacer(),
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const NeverScrollableScrollPhysics(),
+                child: Row(
+                  children: [
+                    Text(l10n.statusPaneText, key: const Key('statusPane')),
+                    if (hasDocument && widget.check != null) ...[
+                      const SizedBox(width: 16),
+                      _jsonStatus(l10n, theme),
+                    ],
+                    if (hasDocument && _caret.isNotEmpty) ...[
+                      const SizedBox(width: 16),
+                      _StatusButton(
+                        key: const Key('caretPosition'),
+                        label: _caret,
+                        color: theme.colorScheme.onSurfaceVariant,
+                        tooltip: l10n.goToLineTitle,
+                        onPressed: widget.onGoToLine,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
             if (hasDocument)
               Text(
                 l10n.statusSize(_lines, formatSize(_bytes)),

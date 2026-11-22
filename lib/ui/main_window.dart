@@ -788,6 +788,7 @@ class _MainWindowState extends State<MainWindow> {
               controller: open?.controller,
               check: _check,
               onValidate: _validate,
+              onGoToLine: _goToLine,
             ),
         ],
       ),
