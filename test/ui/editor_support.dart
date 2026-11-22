@@ -64,6 +64,61 @@ Future<void> typeText(WidgetTester tester, String text) async {
   await tester.pumpAndSettle();
 }
 
+/// Types [text] one character at a time, like a person: each character is
+/// its own delta, so re_editor's auto-closing and type-over (#91) apply.
+/// re_editor only sends its editing state back when it changed the text
+/// itself, so the state is tracked here between characters.
+Future<void> typeChars(WidgetTester tester, String text) async {
+  final input = tester.testTextInput;
+  final clientId =
+      input.log.lastWhere((c) => c.method == 'TextInput.setClient').arguments[0]
+          as int;
+  var state = Map<String, dynamic>.of(input.editingState!);
+  for (final char in text.split('')) {
+    final before = input.editingState;
+    final offset = state['selectionExtent'] as int;
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall('TextInputClient.updateEditingStateWithDeltas', [
+          clientId,
+          {
+            'deltas': [
+              {
+                'oldText': state['text'],
+                'deltaText': char,
+                'deltaStart': offset,
+                'deltaEnd': offset,
+                'selectionBase': offset + 1,
+                'selectionExtent': offset + 1,
+                'selectionAffinity': 'TextAffinity.downstream',
+                'selectionIsDirectional': false,
+                'composingBase': -1,
+                'composingExtent': -1,
+              },
+            ],
+          },
+        ]),
+      ),
+      (_) {},
+    );
+    await tester.pump();
+    final after = input.editingState!;
+    if (!identical(after, before)) {
+      state = Map<String, dynamic>.of(after); // re_editor sent its own.
+    } else {
+      final old = state['text'] as String;
+      state = {
+        ...state,
+        'text': old.substring(0, offset) + char + old.substring(offset),
+        'selectionBase': offset + 1,
+        'selectionExtent': offset + 1,
+      };
+    }
+  }
+  await tester.pumpAndSettle();
+}
+
 /// Presses [key] with the Command key held, plus Shift when [shift].
 Future<void> pressCmd(
   WidgetTester tester,
