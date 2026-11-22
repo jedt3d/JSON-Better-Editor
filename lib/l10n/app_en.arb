@@ -83,5 +83,18 @@
   "openFailed": "Can't open the file",
   "@openFailed": {
     "description": "Error dialog title when the open panel itself fails."
+  },
+  "saveFailedTitle": "Can't save {fileName}",
+  "@saveFailedTitle": {
+    "description": "Error dialog title when a file cannot be written.",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "saveFailed": "Can't save the file",
+  "@saveFailed": {
+    "description": "Error dialog title when the save panel itself fails."
   }
 }

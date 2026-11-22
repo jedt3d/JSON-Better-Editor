@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../app/native_window.dart';
 import '../document/json_document.dart';
@@ -7,9 +8,16 @@ import 'file_access.dart';
 
 /// Main window: toolbar on top, content area below.
 class MainWindow extends StatefulWidget {
-  const MainWindow({super.key, this.pickJsonFile = pickJsonFileFromDisk});
+  const MainWindow({
+    super.key,
+    this.pickJsonFile = pickJsonFileFromDisk,
+    this.chooseSavePath = chooseSavePathOnDisk,
+    this.writeTextFile = writeTextFileOnDisk,
+  });
 
   final PickJsonFile pickJsonFile;
+  final ChooseSavePath chooseSavePath;
+  final WriteTextFile writeTextFile;
 
   @override
   State<MainWindow> createState() => _MainWindowState();
@@ -64,6 +72,50 @@ class _MainWindowState extends State<MainWindow> {
     }
   }
 
+  /// Cmd+S. Every open document has a file in Phase 1 (New gives the empty
+  /// state), so Save always writes to it.
+  Future<void> _save() async {
+    final open = _open;
+    if (open != null) await _writeTo(open.file.path);
+  }
+
+  /// Cmd+Shift+S.
+  Future<void> _saveAs() async {
+    final open = _open;
+    if (open == null) return;
+    final String? path;
+    try {
+      path = await widget.chooseSavePath(open.file.name);
+    } on FileAccessException catch (e) {
+      if (!mounted) return;
+      return _showError(
+        AppLocalizations.of(context)!.saveFailed,
+        e.osMessage ?? '',
+      );
+    }
+    if (path != null && mounted) await _writeTo(path);
+  }
+
+  /// Writes the pretty-printed document (decision #28) and makes [path] the
+  /// current file.
+  Future<void> _writeTo(String path) async {
+    final open = _open!;
+    final text = open.document.toText();
+    try {
+      await widget.writeTextFile(path, text);
+    } on FileAccessException catch (e) {
+      if (!mounted) return;
+      return _showError(
+        AppLocalizations.of(context)!.saveFailedTitle(e.name),
+        e.osMessage ?? '',
+      );
+    }
+    if (!mounted) return;
+    final saved = PickedFile(path: path, text: text);
+    setState(() => _open = _OpenFile(saved, open.document));
+    setWindowTitle(saved.name);
+  }
+
   void _newDocument() {
     setState(() => _open = null);
     setWindowTitle(AppLocalizations.of(context)!.appTitle);
@@ -90,6 +142,17 @@ class _MainWindowState extends State<MainWindow> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final open = _open;
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.keyS, meta: true): _save,
+        const SingleActivator(LogicalKeyboardKey.keyS, meta: true, shift: true):
+            _saveAs,
+      },
+      child: Focus(autofocus: true, child: _scaffold(open, l10n)),
+    );
+  }
+
+  Widget _scaffold(_OpenFile? open, AppLocalizations l10n) {
     return Scaffold(
       body: Column(
         children: [

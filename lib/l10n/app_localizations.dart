@@ -195,6 +195,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Can\'t open the file'**
   String get openFailed;
+
+  /// Error dialog title when a file cannot be written.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t save {fileName}'**
+  String saveFailedTitle(String fileName);
+
+  /// Error dialog title when the save panel itself fails.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t save the file'**
+  String get saveFailed;
 }
 
 class _AppLocalizationsDelegate

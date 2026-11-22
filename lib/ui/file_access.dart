@@ -30,14 +30,7 @@ class FileAccessException implements Exception {
 typedef PickJsonFile = Future<PickedFile?> Function();
 
 Future<PickedFile?> pickJsonFileFromDisk() async {
-  final String? path;
-  try {
-    path = await showOpenJsonPanel();
-  } on PlatformException catch (e) {
-    throw FileAccessException('', e.message ?? e.code);
-  } on MissingPluginException catch (e) {
-    throw FileAccessException('', e.message);
-  }
+  final path = await _panel(showOpenJsonPanel);
   if (path == null) return null;
   try {
     return PickedFile(path: path, text: await File(path).readAsString());
@@ -45,5 +38,38 @@ Future<PickedFile?> pickJsonFileFromDisk() async {
     throw FileAccessException(path, e.osError?.message ?? e.message);
   } on FormatException {
     throw FileAccessException(path);
+  }
+}
+
+/// Asks the user where to save, pre-filled with [suggestedName]. Null if
+/// cancelled.
+typedef ChooseSavePath = Future<String?> Function(String suggestedName);
+
+/// Writes [text] to [path], throwing [FileAccessException] on failure.
+typedef WriteTextFile = Future<void> Function(String path, String text);
+
+Future<String?> chooseSavePathOnDisk(String suggestedName) =>
+    _panel(() => showSaveJsonPanel(suggestedName));
+
+// ponytail: writes in place (the sandbox only grants the chosen file, not a
+// sibling temp file), so a crash mid-write can truncate it. Revisit with
+// NSFileCoordinator / replaceItemAt if that matters.
+Future<void> writeTextFileOnDisk(String path, String text) async {
+  try {
+    await File(path).writeAsString(text, flush: true);
+  } on FileSystemException catch (e) {
+    throw FileAccessException(path, e.osError?.message ?? e.message);
+  }
+}
+
+/// Runs a native panel call; channel failures become [FileAccessException]
+/// with an empty path.
+Future<String?> _panel(Future<String?> Function() show) async {
+  try {
+    return await show();
+  } on PlatformException catch (e) {
+    throw FileAccessException('', e.message ?? e.code);
+  } on MissingPluginException catch (e) {
+    throw FileAccessException('', e.message);
   }
 }
