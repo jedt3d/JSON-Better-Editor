@@ -17,3 +17,9 @@ Future<void> setWindowTitle(String title) async {
 /// window. Returns the chosen path, or null if the user cancelled.
 Future<String?> showOpenJsonPanel() =>
     _channel.invokeMethod<String>('openJsonFile');
+
+/// Shows the macOS save panel for a .json file, as a sheet on the window,
+/// pre-filled with [suggestedName]. Returns the chosen path, or null if
+/// the user cancelled.
+Future<String?> showSaveJsonPanel(String suggestedName) =>
+    _channel.invokeMethod<String>('saveJsonFile', suggestedName);

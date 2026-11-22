@@ -29,6 +29,13 @@ class MainFlutterWindow: NSWindow {
         panel.beginSheetModal(for: self) { response in
           result(response == .OK ? panel.url?.path : nil)
         }
+      case "saveJsonFile":
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.json]
+        panel.nameFieldStringValue = call.arguments as? String ?? "Untitled.json"
+        panel.beginSheetModal(for: self) { response in
+          result(response == .OK ? panel.url?.path : nil)
+        }
       default:
         result(FlutterMethodNotImplemented)
       }
