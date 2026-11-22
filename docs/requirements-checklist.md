@@ -29,11 +29,11 @@
 - [ ] Accept the selected suggestion from the popup list with **Enter/Return** only (Tab is not used to accept).
 
 ### 1.4 Keyboard and clipboard
-- [ ] **Tab** / **Shift+Tab** indent and de-indent text, as in a normal code editor.
+- [ ] **Tab** / **Shift+Tab** indent and de-indent text by 2 spaces, as in a normal code editor (decision #57).
 - [ ] Copy, cut and paste follow normal text-editor behavior (no node-aware paste in Text mode).
 
 ### 1.5 Word wrap
-- [ ] Word-wrap toggle.
+- [ ] Word-wrap toggle: View menu item (Opt+Z), off by default (decision #58).
 - [ ] When on, long lines wrap to the pane's width.
 
 ---
@@ -145,10 +145,12 @@
 - [x] Open, Save (Cmd+S) and Save As (Cmd+Shift+S, save panel limited to `.json`); Save As makes the new path the current file.
 - [ ] Save with no file yet behaves like Save As. Applies once New creates an editable document (Phase 2, decision #43).
 - [ ] Standard File menu items with normal macOS behavior: New, Open, Save, Save As, Close.
+- [ ] Save with invalid JSON in the Text pane shows the error dialog with line and column and does not write the file (decision #54).
+- [ ] Unsaved changes are marked in the window; New, Open, Close and Quit ask Save / Don't Save / Cancel, default Save (decision #55).
 - [x] Save reformats the JSON (pretty-print, 2-space indent) before writing, and the file ends with a newline (decisions #28, #47).
 - [x] A failed write shows an error dialog, keeps the document open, and puts the file's previous contents back (decision #42).
 - [ ] One document per window. The app can run multiple instances.
-- [ ] Target for now: files under 5 MB. Progressive loading/rendering is future work.
+- [ ] Target for now: files under 5 MB: open and show in 2 s or less, no visible lag when typing, scrolling or searching (decision #59). Progressive loading/rendering is future work.
 
 ### 3.5 Undo / redo
 - [ ] Undo and redo are required (Cmd+Z / Cmd+Shift+Z).
@@ -168,7 +170,7 @@
 - [x] Sizes are never fixed in pixels, because HiDPI scaling differs per machine; they are fractions of the usable work area (future Windows: minus the taskbar; Linux/Ubuntu: minus the dock).
 
 ### 3.9 OS integration
-- [ ] Register as a handler for `.json` on macOS, so it appears in "Open With" and can be set as the default editor.
+- [ ] Register as a handler for `.json` on macOS, so it appears in "Open With" and can be set as the default editor. Opening a file from Finder while the app runs replaces the window's document after the unsaved-changes prompt (decision #56).
 
 ### 3.10 Settings (gear icon, top-right)
 - [ ] Theme: Atom **One Light** and **One Dark**. Follows the macOS appearance by default; the toolbar toggle overrides it.
