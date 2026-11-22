@@ -42,3 +42,4 @@
 | 35 | 2026-11-22 | Work tracking | Feature-branch workflow, one branch and PR per ticket. Phase 1 tickets are GitHub sub-issues of the phase issue #2; blockers are listed as `Blocked by:` lines in each ticket. |
 | 36 | 2026-11-22 | Minimum macOS | macOS 14.0 is the minimum supported version (`MACOSX_DEPLOYMENT_TARGET = 14.0`). Xcode 27 cannot build below 12.0. |
 | 37 | 2026-11-22 | Merging PRs | The maintainer never merges. The main agent chat reviews each PR against its acceptance criteria and merges it when they pass; failing tests are fixed until green. A conflict between acceptance criteria, feature intent and a bug goes to the maintainer. Each ticket branches from `main` after the previous PR is merged. |
+| 38 | 2026-11-22 | Minimum window size | The main window cannot be resized below 640×400, so the toolbar row always fits. |
