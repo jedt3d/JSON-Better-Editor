@@ -214,6 +214,42 @@ abstract class AppLocalizations {
   /// **'Untitled'**
   String get untitled;
 
+  /// Document title while it has unsaved changes (macOS style).
+  ///
+  /// In en, this message translates to:
+  /// **'{fileName} — Edited'**
+  String editedTitle(String fileName);
+
+  /// Unsaved-changes prompt title.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to save the changes made to “{fileName}”?'**
+  String unsavedTitle(String fileName);
+
+  /// Unsaved-changes prompt body.
+  ///
+  /// In en, this message translates to:
+  /// **'Your changes will be lost if you don\'t save them.'**
+  String get unsavedMessage;
+
+  /// Button: save the document.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// Button: discard unsaved changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t Save'**
+  String get dontSave;
+
+  /// Button: cancel the action.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
   /// Dialog body when the system gives no error message.
   ///
   /// In en, this message translates to:

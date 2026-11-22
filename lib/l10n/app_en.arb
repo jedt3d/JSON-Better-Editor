@@ -101,6 +101,40 @@
   "@untitled": {
     "description": "Title of a new document that has not been saved yet."
   },
+  "editedTitle": "{fileName} — Edited",
+  "@editedTitle": {
+    "description": "Document title while it has unsaved changes (macOS style).",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "unsavedTitle": "Do you want to save the changes made to “{fileName}”?",
+  "@unsavedTitle": {
+    "description": "Unsaved-changes prompt title.",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "unsavedMessage": "Your changes will be lost if you don't save them.",
+  "@unsavedMessage": {
+    "description": "Unsaved-changes prompt body."
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Button: save the document."
+  },
+  "dontSave": "Don't Save",
+  "@dontSave": {
+    "description": "Button: discard unsaved changes."
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Button: cancel the action."
+  },
   "unknownError": "An unknown error occurred.",
   "@unknownError": {
     "description": "Dialog body when the system gives no error message."

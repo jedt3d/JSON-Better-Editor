@@ -34,3 +34,17 @@ Future<String?> showOpenJsonPanel() =>
 /// the user cancelled.
 Future<String?> showSaveJsonPanel(String suggestedName) =>
     _channel.invokeMethod<String>('saveJsonFile', suggestedName);
+
+/// Shows the document as edited: the dot in the window's close button.
+Future<void> setDocumentEdited(bool edited) => _fire('setEdited', edited);
+
+/// Close (red button, Cmd+W) and Quit ask [confirm] first while the
+/// document is edited; the window closes or the app quits only when it
+/// returns true. Null removes the handler.
+void onCloseRequest(Future<bool> Function()? confirm) {
+  _channel.setMethodCallHandler(
+    confirm == null
+        ? null
+        : (call) async => call.method == 'confirmClose' ? confirm() : null,
+  );
+}
