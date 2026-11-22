@@ -29,7 +29,7 @@
 - [ ] Accept the selected suggestion from the popup list with **Enter/Return** only (Tab is not used to accept).
 
 ### 1.4 Keyboard and clipboard
-- [ ] **Tab** / **Shift+Tab** indent and de-indent text by 2 spaces, as in a normal code editor (decision #57).
+- [x] **Tab** / **Shift+Tab** indent and de-indent text by 2 spaces, as in a normal code editor (decision #57).
 - [ ] Copy, cut and paste follow normal text-editor behavior (no node-aware paste in Text mode).
 
 ### 1.5 Word wrap
