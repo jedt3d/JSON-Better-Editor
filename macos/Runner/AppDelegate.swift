@@ -110,6 +110,10 @@ class AppDelegate: FlutterAppDelegate {
     }
     item("New", #selector(MainFlutterWindow.fileNew(_:)), "n")
     item("Open…", #selector(MainFlutterWindow.fileOpen(_:)), "o")
+    let recent = NSMenuItem(title: "Open Recent", action: nil, keyEquivalent: "")
+    recent.submenu = recentMenu
+    menu.addItem(recent)
+    rebuildRecentMenu(RecentFiles.paths)
     menu.addItem(.separator())
     item("Close", #selector(NSWindow.performClose(_:)), "w")
     item("Save", #selector(MainFlutterWindow.fileSave(_:)), "s")
@@ -117,6 +121,36 @@ class AppDelegate: FlutterAppDelegate {
     let top = NSMenuItem(title: "File", action: nil, keyEquivalent: "")
     top.submenu = menu
     NSApp.mainMenu?.insertItem(top, at: 1)
+  }
+
+  /// File › Open Recent (#92): the paths Dart keeps, newest first, then
+  /// Clear Menu.
+  let recentMenu = NSMenu(title: "Open Recent")
+
+  func rebuildRecentMenu(_ paths: [String]) {
+    recentMenu.removeAllItems()
+    for path in paths {
+      let entry = NSMenuItem(
+        title: (path as NSString).lastPathComponent,
+        action: #selector(MainFlutterWindow.openRecent(_:)), keyEquivalent: "")
+      entry.representedObject = path
+      entry.toolTip = path
+      recentMenu.addItem(entry)
+    }
+    if !paths.isEmpty { recentMenu.addItem(.separator()) }
+    let clear = NSMenuItem(
+      title: "Clear Menu", action: #selector(MainFlutterWindow.clearRecent(_:)), keyEquivalent: "")
+    recentMenu.addItem(clear)
+  }
+
+  // With no window showing, these reach the app delegate (#93).
+  @objc func openRecent(_ sender: NSMenuItem) {
+    window?.show()
+    window?.openRecent(sender)
+  }
+
+  @objc func clearRecent(_ sender: Any?) {
+    window?.clearRecent(sender)
   }
 
   /// Files opened from Finder ("Open With", double-click when the app is

@@ -382,6 +382,12 @@ abstract class AppLocalizations {
   /// **'Overwrite'**
   String get overwrite;
 
+  /// Error body when an Open Recent entry points to a missing file.
+  ///
+  /// In en, this message translates to:
+  /// **'The file is no longer there. It was removed from Open Recent.'**
+  String get recentMissing;
+
   /// Dialog body when the system gives no error message.
   ///
   /// In en, this message translates to:

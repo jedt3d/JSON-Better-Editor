@@ -73,6 +73,18 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
           .compactMap { $0.items.first(where: { $0.action == #selector(self.toggleWordWrap(_:)) }) }
           .forEach { $0.state = on ? .on : .off }
         result(nil)
+      case "loadRecentFiles":
+        result(RecentFiles.paths)
+      case "saveRecentFiles":
+        let paths = call.arguments as? [String] ?? []
+        RecentFiles.paths = paths
+        (NSApp.delegate as? AppDelegate)?.rebuildRecentMenu(paths)
+        result(nil)
+      case "rememberRecent":
+        if let path = call.arguments as? String { RecentFiles.remember(path) }
+        result(nil)
+      case "accessRecent":
+        result(RecentFiles.access(call.arguments as? String ?? ""))
       case "setEdited":
         // The dot in the close button for unsaved changes (decision #55).
         self.isDocumentEdited = call.arguments as? Bool ?? false
@@ -197,6 +209,15 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
     windowChannel?.invokeMethod("menu", arguments: "wordWrap")
   }
 
+  /// File › Open Recent entries and Clear Menu (#92).
+  @objc func openRecent(_ sender: NSMenuItem) {
+    windowChannel?.invokeMethod("openRecent", arguments: sender.representedObject as? String)
+  }
+
+  @objc func clearRecent(_ sender: Any?) {
+    windowChannel?.invokeMethod("menu", arguments: "clearRecent")
+  }
+
   /// Close button and Cmd+W: ask first, then close for real.
   /// The window is never really closed: Flutter's engine lives in it. It is
   /// hidden and its document cleared, and the app keeps running (#93);
@@ -223,5 +244,56 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
   /// equivalent (the work area without the taskbar or the Ubuntu dock).
   private func usableWorkArea() -> NSRect? {
     (NSScreen.main ?? self.screen)?.visibleFrame
+  }
+}
+
+/// File › Open Recent storage (#92). Dart owns the order and the limit; this
+/// keeps the list and a security-scoped bookmark per file in UserDefaults,
+/// because the sandbox only lets the app reopen a file after a restart
+/// through such a bookmark.
+enum RecentFiles {
+  private static let pathsKey = "recentFiles"
+  private static let bookmarksKey = "recentBookmarks"
+
+  static var paths: [String] {
+    get { UserDefaults.standard.stringArray(forKey: pathsKey) ?? [] }
+    set {
+      UserDefaults.standard.set(newValue, forKey: pathsKey)
+      // Drop bookmarks of files no longer listed.
+      let kept = bookmarks.filter { newValue.contains($0.key) }
+      UserDefaults.standard.set(kept, forKey: bookmarksKey)
+    }
+  }
+
+  private static var bookmarks: [String: Data] {
+    UserDefaults.standard.dictionary(forKey: bookmarksKey) as? [String: Data] ?? [:]
+  }
+
+  /// Called while the app can read the file (just opened or saved).
+  static func remember(_ path: String) {
+    guard let data = try? URL(fileURLWithPath: path).bookmarkData(
+      options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
+    else { return }
+    var all = bookmarks
+    all[path] = data
+    UserDefaults.standard.set(all, forKey: bookmarksKey)
+  }
+
+  /// Regains access through the bookmark and returns the file's current
+  /// path, or nil if it is gone. Access stays open while the app runs.
+  static func access(_ path: String) -> String? {
+    var url = URL(fileURLWithPath: path)
+    if let data = bookmarks[path] {
+      var stale = false
+      if let resolved = try? URL(
+        resolvingBookmarkData: data, options: .withSecurityScope, relativeTo: nil,
+        bookmarkDataIsStale: &stale)
+      {
+        _ = resolved.startAccessingSecurityScopedResource()
+        url = resolved
+        if stale { remember(resolved.path) }
+      }
+    }
+    return FileManager.default.fileExists(atPath: url.path) ? url.path : nil
   }
 }
