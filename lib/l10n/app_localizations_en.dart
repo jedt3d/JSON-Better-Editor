@@ -98,5 +98,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancel => 'Cancel';
 
   @override
+  String get searchHint => 'Search keys and values';
+
+  @override
+  String searchCount(int current, int total) {
+    return '$current of $total';
+  }
+
+  @override
+  String get searchNoResults => 'No results';
+
+  @override
+  String get searchClose => 'Close search';
+
+  @override
   String get unknownError => 'An unknown error occurred.';
 }

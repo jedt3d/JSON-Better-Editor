@@ -137,7 +137,7 @@
 - [x] Document title shown under the toolbar (file name, or the app name when nothing is open).
 
 ### 3.3 Search
-- [ ] Search both keys and values.
+- [x] Search both keys and values (Text mode; Node mode in Phase 3).
 - [ ] Jump to the first match, with **Next** / **Previous** to move between matches.
 - [ ] Works in both Text and Node mode.
 

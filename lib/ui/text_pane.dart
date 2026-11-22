@@ -29,10 +29,13 @@ class TextPane extends StatefulWidget {
   final bool wordWrap;
 
   @override
-  State<TextPane> createState() => _TextPaneState();
+  State<TextPane> createState() => TextPaneState();
 }
 
-class _TextPaneState extends State<TextPane> {
+class TextPaneState extends State<TextPane> {
+  /// Gives the keyboard back to the text (after the search field closes).
+  void focus() => _focus.requestFocus();
+
   final _focus = FocusNode(debugLabel: 'TextPane');
   late final _keyPrompts = JsonKeyPrompts(widget.controller);
 
