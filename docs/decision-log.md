@@ -47,3 +47,4 @@
 | 40 | 2026-11-22 | Nesting limit | JSON nested deeper than 512 levels is rejected with a parse error instead of risking a stack overflow. |
 | 41 | 2026-11-22 | Native file dialogs | Open/Save panels are shown by the app's own Swift code over the `json_better_editor/window` method channel, not a plugin (no new dependency). The sandbox grants `files.user-selected.read-write` (Save needs write). |
 | 42 | 2026-11-22 | Save behaviour | Cmd+S saves to the current file; Cmd+Shift+S (Save As) writes to a new path and makes it the current file. Files are written in place (the sandbox grants only the chosen file); a failed write restores the previous contents, but a crash mid-write can still truncate the file until a native atomic save replaces it. |
+| 43 | 2026-11-22 | Save with no file | Moved to Phase 2: "Cmd+S with no file behaves like Save As" applies once New creates an editable document. In Phase 1, Save with nothing open does nothing. |
