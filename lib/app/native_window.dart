@@ -43,6 +43,8 @@ Future<void> setDocumentEdited(bool edited) => _fire('setEdited', edited);
 ///   first; answer true when the window may close or the app may quit.
 /// - `menu` with `new`, `open`, `save` or `saveAs`: a File menu item.
 /// - `openPath` with a file path: a .json opened from Finder (#32).
+/// - `edit` with `undo`, `redo`, `cut`, `copy`, `paste` or `selectAll`: an
+///   Edit menu item (#38, #43).
 void onNativeRequest(
   Future<Object?> Function(String method, Object? arguments)? handler,
 ) {

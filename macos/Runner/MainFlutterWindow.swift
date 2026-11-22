@@ -141,6 +141,12 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
   @objc func fileSave(_ sender: Any?) { windowChannel?.invokeMethod("menu", arguments: "save") }
   @objc func fileSaveAs(_ sender: Any?) { windowChannel?.invokeMethod("menu", arguments: "saveAs") }
 
+  /// Edit menu items (AppDelegate.retargetEditMenu): undo, redo, cut,
+  /// copy, paste or selectAll in the Text pane.
+  @objc func edit(_ sender: NSMenuItem) {
+    windowChannel?.invokeMethod("edit", arguments: sender.representedObject as? String)
+  }
+
   /// Close button and Cmd+W: ask first, then close for real.
   func windowShouldClose(_ sender: NSWindow) -> Bool {
     guard isDocumentEdited else { return true }
