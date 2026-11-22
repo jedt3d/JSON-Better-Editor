@@ -152,7 +152,7 @@
 - [x] Save with invalid JSON in the Text pane shows the error dialog with line and column and does not write the file (decision #54).
 - [x] Unsaved changes are marked in the window; New, Open, Close and Quit ask Save / Don't Save / Cancel, default Save (decision #55).
 - [x] Save reformats the JSON (pretty-print, 2-space indent) before writing, and the file ends with a newline (decisions #28, #47).
-- [x] A failed write shows an error dialog, keeps the document open, and puts the file's previous contents back (decision #42).
+- [x] A failed write shows an error dialog, keeps the document open, and leaves the file as it was: Save writes a temporary file and swaps it in (`replaceItemAt` on macOS), keeping the file's permissions (decision #89, #87; supersedes the in-place write of #42).
 - [ ] Save writes a temporary file and swaps it in, so a crash cannot truncate the file; one writer interface with a per-OS implementation (macOS now; Linux `rename`, Windows `ReplaceFileW` later) (#87, decision #87).
 - [ ] When another program changes or deletes the open file, ask Reload / Keep Mine; Save over a file changed on disk asks first, default Cancel (#88, decision #87).
 - [ ] File › Open Recent: last 10 files, kept between launches through security-scoped bookmarks, with Clear Menu (#92, decision #87).

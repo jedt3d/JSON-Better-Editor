@@ -92,6 +92,17 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
         panel.beginSheetModal(for: self) { response in
           result(response == .OK ? panel.url?.path : nil)
         }
+      case "replaceFile":
+        // Safe save (#87, lib/ui/file_writer.dart).
+        guard let args = call.arguments as? [String: Any],
+          let path = args["path"] as? String, let text = args["text"] as? String
+        else { return result(FlutterError(code: "args", message: "Bad arguments", details: nil)) }
+        do {
+          try Self.replaceFile(at: URL(fileURLWithPath: path), with: Data(text.utf8))
+          result(nil)
+        } catch {
+          result(FlutterError(code: "write", message: error.localizedDescription, details: nil))
+        }
       case "startWindowDrag":
         // Only while the press that started it is still held.
         if let event = self.lastMouseDown, NSEvent.pressedMouseButtons & 1 != 0 {
@@ -129,6 +140,26 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
                            width: size.width, height: size.height),
                     display: true)
     }
+  }
+
+  /// Writes [data] to a temporary file, then swaps it in for the file at
+  /// [url] with `replaceItemAt`, which keeps the original's permissions and
+  /// metadata. If anything fails, the original is untouched. A file that
+  /// does not exist yet (Save As to a new name) is written directly: there
+  /// is nothing to lose.
+  static func replaceFile(at url: URL, with data: Data) throws {
+    let files = FileManager.default
+    guard files.fileExists(atPath: url.path) else {
+      try data.write(to: url)
+      return
+    }
+    let folder = try files.url(
+      for: .itemReplacementDirectory, in: .userDomainMask,
+      appropriateFor: url, create: true)
+    defer { try? files.removeItem(at: folder) }
+    let temp = folder.appendingPathComponent(url.lastPathComponent)
+    try data.write(to: temp)
+    _ = try files.replaceItemAt(url, withItemAt: temp)
   }
 
   /// Asks Dart's Save / Don't Save / Cancel prompt (decision #55) when the

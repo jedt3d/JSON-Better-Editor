@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 
 import '../app/native_window.dart';
+import 'file_writer.dart';
 
 /// A .json file chosen by the user, read as UTF-8 text.
 class PickedFile {
@@ -59,27 +60,9 @@ typedef WriteTextFile = Future<void> Function(String path, String text);
 Future<String?> chooseSavePathOnDisk(String suggestedName) =>
     _panel(() => showSaveJsonPanel(suggestedName));
 
-// ponytail: writes in place, because the sandbox grants only the chosen file
-// and not a sibling temp file to rename over it. A failed write puts the old
-// contents back, but a crash mid-write can still truncate the file
-// (decision #42). Upgrade path: native NSFileCoordinator / replaceItemAt.
-Future<void> writeTextFileOnDisk(String path, String text) async {
-  final file = File(path);
-  List<int>? previous;
-  try {
-    if (await file.exists()) previous = await file.readAsBytes();
-    await file.writeAsString(text, flush: true);
-  } on FileSystemException catch (e) {
-    if (previous != null) {
-      try {
-        await file.writeAsBytes(previous, flush: true);
-      } on FileSystemException {
-        // Nothing more we can do; the error below is still reported.
-      }
-    }
-    throw FileAccessException(path, e.osError?.message ?? e.message);
-  }
-}
+/// Saves through the platform's safe writer (#87, `file_writer.dart`).
+Future<void> writeTextFileOnDisk(String path, String text) =>
+    const MacFileWriter().write(path, text);
 
 /// Runs a native panel call; channel failures become [FileAccessException]
 /// with an empty path.
