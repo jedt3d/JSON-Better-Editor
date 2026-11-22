@@ -17,10 +17,13 @@ Every PR was reviewed against its acceptance criteria by the coordinator before 
    itself still leaves the pane as typed.
 2. **#68 — closing the only window quits the app.** Many macOS editors stay running with no window.
    Staying open needs a way to create a window from the Dock or menu, which does not exist yet.
+   *Update 2026-11-23:* superseded by #93 (maintainer): the app now keeps running; see the Phase 2
+   extras below.
 3. **#79 — performance trade-offs.** The "— Edited" mark stays on if typing happens to restore the
    saved text (undo clears it); key suggestions may miss a key added in the last 2 seconds.
 4. **#65 — no auto-closing quotes and brackets.** Turned off because typing `"x": 1` produced
    `"x": 1""` in the real app.
+   *Update 2026-11-23:* superseded by #92: auto-closing is back with type-over (fork patch 2).
 
 ## All autonomous decisions
 
@@ -46,6 +49,47 @@ Every PR was reviewed against its acceptance criteria by the coordinator before 
 | 77 | Undo granularity is re_editor's (a typing run = one step; cut, paste, indent = one step each). | Built in. | #43, PR #65 | A custom history would wrap `CodeLineEditingController`. |
 | 78 | Undo/redo skip caret-only and fold steps. | Review: Cmd+Z should only undo text changes. | #43, PR #65 | `undoTextChange` / `redoTextChange` in `lib/ui/text_pane.dart`. |
 | 79 | Performance trade-offs: edited-mark shortcut, 2 s key cache, own fold analyser; capacity about 30 MB. | Meet decision #59 at 5 MB (open 2.1 s → 0.5 s). | #44, PR #68, `docs/performance.md` | `_OpenFile.edited`; `JsonKeyPrompts._documentKeys`. |
+
+## Phase 2 extras and Status Bar (#85, PRs #108–#125)
+
+Built on 2026-11-23 after the maintainer approved the extras (decision #87) and the Status Bar
+(decision #88). Same rules: every choice beyond the tickets is a decision row marked **Autonomous
+default** and noted on its issue; every PR was approved by the coordinator against its acceptance
+criteria and checked in the Release app, also on a 20 MB file (decision #86).
+
+### Look at these first
+
+1. **#93 — how the app stays running.** The window is hidden, not destroyed (the Flutter engine lives
+   in it), and its document is cleared after the usual prompt. The Dock icon, New, Open, Open Recent
+   and Finder bring it back.
+2. **#91 — outside changes are checked only when the app comes back to the front**, not while it is
+   in front. Saving over a changed file asks Overwrite / Cancel, default Cancel.
+3. **#99 — the Status Bar now cuts off at its right edge on narrow windows** (the four pills do not
+   fit 800 px). Before #103 the left items were cut off instead.
+4. **#100 — the Status Bar size counts the LF text**, so a CRLF file shows less than its size on disk.
+
+### Autonomous decisions
+
+| # | What was decided | Where | How to change |
+|---|---|---|---|
+| 90 | Format / Minify in Edit after Select All, no shortcuts; Format = Save's 2-space text without the final newline; one undo step; caret to the start. | #89, PR #110 | `MainWindow._reformat`, `JsonDocument.toCompactText` |
+| 91 | Outside changes: compared on returning to the front; Reload (default if no edits) / Keep Mine; deleted file → notice; Save over a changed file asks Overwrite / Cancel. | #88, PR #112 | `MainWindow._checkOutsideChange`, `_confirmOverwriteChanged` |
+| 93 | Closing the window hides it and clears the document; Dock, New, Open and Finder show it again. | #93, PR #114 | `MainFlutterWindow.windowShouldClose` / `show`, `AppDelegate.applicationShouldHandleReopen` |
+| 94 | Open Recent: names with path tooltip, newest first, 10 max, Clear Menu; bookmarks in UserDefaults; a missing file is removed. | #92, PR #115 | `RecentFiles` (Swift), `MainWindow._openRecent` |
+| 95 | Line endings: on a tie CRLF wins over LF, and LF over CR. | #95, PR #117 | `LineEnding.detect` |
+| 96 | Status Bar shown by default, not remembered; size in B / KB / MB; counts update 250 ms after an edit. | #98, PR #119 | `StatusBar`, `formatSize` |
+| 97 | Open, Save and Validate count as checks; New counts as valid; undo back to checked text shows the old result. | #99, PR #120 | `StatusBar._jsonStatus`, `MainWindow._recordCheck` |
+| 98 | Error popover 60% wide, ≤ 35% high, arrow to the status; Return / double-click jumps; Esc closes. | #101, PR #122 | `lib/ui/error_popover.dart` |
+| 99 | Fold All analyses the text itself and folds in one pass (fork patch 3); caret moves to the fold line; Status Bar clips at the right. | #103, PR #124 | `TextPaneState.foldAll`, `CodeChunkController.collapseAll` |
+| 100 | Line ending pill shows LF / CRLF / CR; menu offers LF and CRLF; re-choosing the saved one clears Edited. | #104, PR #125 | `MainWindow._chooseLineEnding` |
+
+Decisions #89 (safe save) and #92 (auto-close) were the maintainer's; their details follow the tickets.
+
+### Found while checking the real app
+
+- Clicking a Status Bar pill took the keyboard from the Text pane, so ⌥Z and ⌘Z stopped working (#102).
+- Folding every block one by one would take hours on a 23 MB file; the first one-pass version still
+  took 27 s because of a quadratic lookup, now 2.6 s (#103).
 
 ## Bugs found by checking the real app (all fixed in Phase 2)
 
