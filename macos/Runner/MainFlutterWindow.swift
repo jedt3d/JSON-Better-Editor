@@ -83,17 +83,25 @@ class MainFlutterWindow: NSWindow {
 
     super.awakeFromNib()
 
-    // Open at 60% × 80% of the screen, centred; shrink to 20% × 20% (#46).
-    if let screen = NSScreen.main ?? self.screen {
-      let area = screen.visibleFrame
+    // Sizes are fractions of the usable work area, never fixed pixels:
+    // HiDPI scaling differs per machine (decision #48). Open at 60% × 80%,
+    // centred; shrink to about 20% × 20% (#46).
+    if let area = usableWorkArea() {
       let size = NSSize(width: (area.width * 0.6).rounded(),
                         height: (area.height * 0.8).rounded())
       self.minSize = NSSize(width: (area.width * 0.2).rounded(),
                             height: (area.height * 0.2).rounded())
-      let frame = NSRect(x: area.midX - size.width / 2,
-                         y: area.midY - size.height / 2,
-                         width: size.width, height: size.height)
-      self.setFrame(frame, display: true)
+      self.setFrame(NSRect(x: area.midX - size.width / 2,
+                           y: area.midY - size.height / 2,
+                           width: size.width, height: size.height),
+                    display: true)
     }
+  }
+
+  /// The part of the screen windows may use: the screen minus the menu bar
+  /// and the Dock, in points. Future Windows / Linux runners use their own
+  /// equivalent (the work area without the taskbar or the Ubuntu dock).
+  private func usableWorkArea() -> NSRect? {
+    (NSScreen.main ?? self.screen)?.visibleFrame
   }
 }
