@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 # Local build-and-test check for macOS. Stops at the first failing step.
 set -uo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/.." || exit 1
 
-steps=(
-  "flutter pub get"
-  "flutter analyze"
-  "flutter test"
-  "flutter build macos --debug"
-  "flutter test integration_test -d macos"
-)
-
-for step in "${steps[@]}"; do
-  echo "==> $step"
-  if ! $step; then
-    echo "FAIL: $step"
+count=0
+run() {
+  echo "==> $*"
+  if ! "$@"; then
+    echo "FAIL: $*"
     exit 1
   fi
-done
+  count=$((count + 1))
+}
 
-echo "PASS: all ${#steps[@]} steps"
+run flutter pub get
+run flutter analyze
+run flutter test
+run flutter build macos --debug
+run flutter test integration_test -d macos
+
+echo "PASS: all $count steps"
