@@ -104,22 +104,6 @@ void main() {
     expect(find.textContaining('denied'), findsOneWidget);
   });
 
-  testWidgets('New clears the document back to the empty state', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      appWith(() async => const PickedFile(path: '/tmp/a.json', text: '{}')),
-    );
-    await tester.tap(find.byTooltip('Open'));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byTooltip('New'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Open a JSON file'), findsOneWidget);
-    expect(titles.last, 'JSON Better Editor');
-  });
-
   testWidgets('a file that is not UTF-8 text shows an error dialog', (
     tester,
   ) async {

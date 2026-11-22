@@ -97,6 +97,10 @@
   "@saveFailed": {
     "description": "Error dialog title when the save panel itself fails."
   },
+  "untitled": "Untitled",
+  "@untitled": {
+    "description": "Title of a new document that has not been saved yet."
+  },
   "unknownError": "An unknown error occurred.",
   "@unknownError": {
     "description": "Dialog body when the system gives no error message."
