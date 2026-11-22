@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../ui/main_window.dart';
 import 'theme.dart';
-import 'window_title.dart';
+import 'native_window.dart';
 
 /// Root widget of JSON Better Editor.
 class JsonBetterEditorApp extends StatelessWidget {
