@@ -36,3 +36,5 @@
 | 29 | 2026-11-22 | Missing fonts | Fall back to the macOS default monospace font. |
 | 30 | 2026-11-22 | Default UI language | Always English on first launch. |
 | 31 | 2026-11-22 | Node-mode paste shortcuts (final) | Cmd+V = paste as child; Cmd+Shift+V = paste sibling after; Cmd+Opt+V = paste sibling before. Cmd+Opt+Shift+V removed. Supersedes the shortcut parts of #5 and #25. |
+| 32 | 2026-11-22 | Development phases | Four phases: 1 Bootstrap (app runs on macOS + very basic features), 2 Text mode complete ("tech base"), 3 Node Visualization, 4 Settings. Details in `development-phases.md`. |
+| 33 | 2026-11-22 | Split view and sync placement | Split view and Text/Node sync belong to Phase 3, because that is where Node Visualization is introduced. |

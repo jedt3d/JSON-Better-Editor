@@ -6,6 +6,10 @@ Instructions for AI coding agents working in this repository. `CLAUDE.md` points
 
 JSON Better Editor: a Flutter desktop app (macOS first) for editing JSON in two switchable modes, **Text** (code editor) and **Node** (tree editor). Mockups and the original brief live in `docs/`.
 
+## Decision log
+
+`docs/decision-log.md` is the project's decision log. Append every new decision as a new row at the bottom of its table, numbered after the last row. Never edit or delete past rows; if a decision is reversed, add a new row that says which row it supersedes.
+
 ## Messages to the maintainer
 
 Every message you send back for the maintainer to read falls into exactly one of three groups. Mark it with the label at the very start of the message.
