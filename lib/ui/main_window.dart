@@ -136,11 +136,27 @@ class _MainWindowState extends State<MainWindow> {
     });
   }
 
+  /// No dialog is covering the window.
+  bool get _onTop => ModalRoute.of(context)?.isCurrent ?? true;
+
+  // ponytail: polls every 200 ms while a dialog is open; a route observer
+  // would avoid the polling if more requests ever need queuing.
+  Future<void> _openWhenOnTop(String path) async {
+    while (mounted && !_onTop) {
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    }
+    if (mounted) await _openPath(path);
+  }
+
   /// Close/Quit confirmation and the File menu (MainFlutterWindow.swift).
   Future<Object?> _nativeRequest(String method, Object? arguments) async {
     // The native menus keep working while a Flutter dialog is open; their
     // actions must not reach the document behind it (#54).
-    if (!(ModalRoute.of(context)?.isCurrent ?? true)) {
+    if (!_onTop) {
+      // A file from Finder waits until the dialog is closed (#54).
+      if ((method, arguments) case ('openPath', final String path)) {
+        _openWhenOnTop(path);
+      }
       return method == 'confirmClose' ? false : null;
     }
     switch ((method, arguments)) {

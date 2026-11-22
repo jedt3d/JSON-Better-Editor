@@ -82,4 +82,46 @@ void main() {
     await pressCmd(tester, LogicalKeyboardKey.keyZ);
     expect(c.text, '{"a": 1}');
   }, variant: macOS);
+
+  testWidgets('a file from Finder waits until the dialog is closed', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: appLocalizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: MainWindow(
+          pickJsonFile: () async =>
+              const PickedFile(path: '/d/a.json', text: '{"a": 1}'),
+          readJsonFile: (path) async => PickedFile(path: path, text: '[2]'),
+          writeTextFile: (_, _) async {},
+        ),
+      ),
+    );
+    await pressCmd(tester, LogicalKeyboardKey.keyO);
+    await tester.tap(textEditor);
+    await tester.pumpAndSettle();
+    editorController(tester).selection = const CodeLineSelection.collapsed(
+      index: 0,
+      offset: 1,
+    );
+    await tester.pump();
+    await typeText(tester, 'xyz');
+    await pressCmd(tester, LogicalKeyboardKey.keyS); // Error dialog.
+
+    await menu(tester, 'openPath', '/d/b.json');
+    expect(editorController(tester).text, '{xyz"a": 1}', reason: 'waits');
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter); // OK
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Do you want to save the changes made to “a.json”?'),
+      findsOneWidget,
+      reason: 'then opens, asking about the edits first',
+    );
+    await tester.tap(find.text("Don't Save"));
+    await tester.pumpAndSettle();
+    expect(editorController(tester).text, '[2]');
+  }, variant: macOS);
 }
