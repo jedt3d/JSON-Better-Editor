@@ -88,6 +88,50 @@ void main() {
     );
   });
 
+  group('native-looking macOS toolbar buttons', () {
+    ButtonStyle styleOf(WidgetTester tester, String tooltip) => tester
+        .widget<IconButton>(
+          find.ancestor(
+            of: find.byTooltip(tooltip),
+            matching: find.byType(IconButton),
+          ),
+        )
+        .style!;
+
+    testWidgets('are borderless with a fill only on hover and press', (
+      tester,
+    ) async {
+      await tester.pumpWidget(const JsonBetterEditorApp());
+
+      final style = styleOf(tester, 'Open');
+      Color? fill(Set<WidgetState> states) =>
+          style.backgroundColor!.resolve(states);
+
+      expect(style.side?.resolve({}), anyOf(isNull, BorderSide.none));
+      expect(fill({})!.a, 0);
+      expect(fill({WidgetState.hovered})!.a, greaterThan(0));
+      expect(
+        fill({WidgetState.pressed})!.a,
+        greaterThan(fill({WidgetState.hovered})!.a),
+      );
+      final shape = style.shape!.resolve({}) as RoundedRectangleBorder;
+      expect(shape.borderRadius, BorderRadius.circular(6));
+    });
+
+    testWidgets('are 28 pt targets centred in the 52 pt title bar', (
+      tester,
+    ) async {
+      await tester.pumpWidget(const JsonBetterEditorApp());
+
+      final button = find.ancestor(
+        of: find.byTooltip('Open'),
+        matching: find.byType(IconButton),
+      );
+      expect(tester.getSize(button), const Size(28, 28));
+      expect(tester.getCenter(button).dy, 26);
+    });
+  });
+
   group('empty toolbar area acts like a title bar', () {
     const channel = MethodChannel('json_better_editor/window');
     final calls = <String>[];
