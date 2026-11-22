@@ -1,6 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:re_editor/re_editor.dart';
 
+import 'json_highlight.dart';
+
 /// Indent unit for Tab, Shift+Tab and Save's pretty-print (decision #57).
 const indentSize = 2;
 
@@ -65,6 +67,17 @@ class _TextPaneState extends State<TextPane> {
         selectionColor: colors.primary.withValues(alpha: 0.3),
         highlightColor: colors.tertiary.withValues(alpha: 0.3),
         cursorLineColor: colors.onSurface.withValues(alpha: 0.04),
+        codeTheme: CodeHighlightTheme(
+          languages: {
+            'json': CodeHighlightThemeMode(
+              mode: jsonMode,
+              // ponytail: 4 MB default would switch highlighting off before
+              // the 5 MB target (decision #59); #44 measures the cost.
+              maxSize: 64 << 20,
+            ),
+          },
+          theme: jsonHighlightTheme(colors),
+        ),
       ),
     );
   }
