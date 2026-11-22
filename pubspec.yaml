@@ -13,7 +13,9 @@ dependencies:
     sdk: flutter
   intl: any
   material_ui: ^1.11.1
-  re_editor: ^0.10.0
+  re_editor:
+    # Our fork of re_editor 0.10.0; changes listed in packages/re_editor/JBE_CHANGES.md.
+    path: packages/re_editor
   re_highlight: ^0.0.3
 
 dev_dependencies:
