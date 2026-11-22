@@ -19,13 +19,16 @@ class AppDelegate: FlutterAppDelegate {
   private func addValidateItem() {
     guard let edit = NSApp.mainMenu?.items.first(where: { $0.submenu?.title == "Edit" })?.submenu
     else { return }
-    let item = NSMenuItem(title: "Validate JSON",
-                          action: #selector(MainFlutterWindow.validateJson(_:)),
-                          keyEquivalent: "")
-    // After Select All, before the Find submenu.
+    // After Select All, before the Find submenu: Validate JSON (#86),
+    // Format and Minify (#89), no shortcuts.
     let at = edit.items.firstIndex(where: { $0.submenu?.title == "Find" }) ?? edit.items.count
     edit.insertItem(.separator(), at: at)
-    edit.insertItem(item, at: at)
+    for (title, name) in [("Minify", "minify"), ("Format", "format"), ("Validate JSON", "validate")] {
+      let item = NSMenuItem(title: title, action: #selector(MainFlutterWindow.jsonCommand(_:)),
+                            keyEquivalent: "")
+      item.representedObject = name
+      edit.insertItem(item, at: at)
+    }
   }
 
   /// View › Word Wrap (Opt+Z), off by default (decision #58). Dart holds the
