@@ -54,4 +54,15 @@ void main() {
 
     expect(find.text('Open a JSON file'), findsOneWidget);
   });
+
+  testWidgets('toolbar fits at the minimum window size (640x400)',
+      (tester) async {
+    tester.view.physicalSize = const Size(640, 400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(const JsonBetterEditorApp());
+
+    expect(tester.takeException(), isNull);
+  });
 }

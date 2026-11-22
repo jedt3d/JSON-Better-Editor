@@ -7,6 +7,8 @@ class MainFlutterWindow: NSWindow {
     let windowFrame = self.frame
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
+    // Narrowest width at which the toolbar row still fits.
+    self.minSize = NSSize(width: 640, height: 400)
 
     // Lets Dart set the window title from the localized app name.
     let windowChannel = FlutterMethodChannel(

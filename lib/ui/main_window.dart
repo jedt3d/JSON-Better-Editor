@@ -27,24 +27,36 @@ class _Toolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    Widget button(IconData icon, String tooltip) =>
-        _ToolbarButton(icon: icon, tooltip: tooltip);
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         children: [
-          button(Icons.note_add_outlined, l10n.toolbarNew),
-          button(Icons.folder_open_outlined, l10n.toolbarOpen),
+          _ToolbarButton(
+            icon: Icons.note_add_outlined,
+            tooltip: l10n.toolbarNew,
+          ),
+          _ToolbarButton(
+            icon: Icons.folder_open_outlined,
+            tooltip: l10n.toolbarOpen,
+          ),
           const SizedBox(height: 24, child: VerticalDivider(width: 16)),
-          button(Icons.search, l10n.toolbarSearch),
+          _ToolbarButton(icon: Icons.search, tooltip: l10n.toolbarSearch),
           const Spacer(),
-          button(Icons.notes, l10n.toolbarLayoutText),
-          button(Icons.account_tree_outlined, l10n.toolbarLayoutNode),
-          button(Icons.vertical_split_outlined, l10n.toolbarLayoutSplit),
-          button(Icons.translate, l10n.toolbarLanguage),
-          button(Icons.contrast, l10n.toolbarTheme),
-          button(Icons.settings_outlined, l10n.toolbarSettings),
+          _ToolbarButton(icon: Icons.notes, tooltip: l10n.toolbarLayoutText),
+          _ToolbarButton(
+            icon: Icons.account_tree_outlined,
+            tooltip: l10n.toolbarLayoutNode,
+          ),
+          _ToolbarButton(
+            icon: Icons.vertical_split_outlined,
+            tooltip: l10n.toolbarLayoutSplit,
+          ),
+          _ToolbarButton(icon: Icons.translate, tooltip: l10n.toolbarLanguage),
+          _ToolbarButton(icon: Icons.contrast, tooltip: l10n.toolbarTheme),
+          _ToolbarButton(
+            icon: Icons.settings_outlined,
+            tooltip: l10n.toolbarSettings,
+          ),
         ],
       ),
     );
