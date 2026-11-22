@@ -127,5 +127,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get validateInvalid => 'Invalid JSON';
 
   @override
+  String get goToLineTitle => 'Go to Line';
+
+  @override
+  String goToLineHint(int count) {
+    return 'Line number (1–$count)';
+  }
+
+  @override
+  String get goToLineGo => 'Go';
+
+  @override
   String get unknownError => 'An unknown error occurred.';
 }

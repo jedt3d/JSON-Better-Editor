@@ -304,6 +304,24 @@ abstract class AppLocalizations {
   /// **'Invalid JSON'**
   String get validateInvalid;
 
+  /// Title of the Go to Line dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Line'**
+  String get goToLineTitle;
+
+  /// Placeholder in the Go to Line field.
+  ///
+  /// In en, this message translates to:
+  /// **'Line number (1–{count})'**
+  String goToLineHint(int count);
+
+  /// Button that moves to the line.
+  ///
+  /// In en, this message translates to:
+  /// **'Go'**
+  String get goToLineGo;
+
   /// Dialog body when the system gives no error message.
   ///
   /// In en, this message translates to:

@@ -42,7 +42,7 @@ Future<void> setDocumentEdited(bool edited) => _fire('setEdited', edited);
 /// - `confirmClose`: Close (red button, File › Close, Cmd+W) and Quit ask
 ///   first; answer true when the window may close or the app may quit.
 /// - `menu` with `new`, `open`, `save`, `saveAs` (File menu), `wordWrap`
-///   (View menu), `validate`, `format`, `minify` (Edit menu), `find`,
+///   (View menu), `validate`, `format`, `minify`, `goToLine` (Edit menu), `find`,
 ///   `findNext` or `findPrevious` (Edit › Find).
 /// - `openPath` with a file path: a .json opened from Finder (#32).
 /// - `edit` with `undo`, `redo`, `cut`, `copy`, `paste` or `selectAll`: an

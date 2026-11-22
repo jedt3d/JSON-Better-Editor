@@ -186,6 +186,8 @@ class _MainWindowState extends State<MainWindow> {
         await _reformat((document) => document.toText());
       case ('menu', 'minify'):
         await _reformat((document) => document.toCompactText());
+      case ('menu', 'goToLine'):
+        await _goToLine();
       case ('menu', 'find'):
         _openSearch();
       case ('menu', 'findNext'):
@@ -430,6 +432,30 @@ class _MainWindowState extends State<MainWindow> {
     );
   }
 
+  /// Edit › Go to Line… (#90): asks for a line number and puts the caret at
+  /// the start of that line, unfolding it if it is folded. Numbers past the
+  /// end go to the last line.
+  Future<void> _goToLine() async {
+    final open = _open;
+    if (open == null) return;
+    final controller = open.controller;
+    final total = controller.codeLines.lineCount;
+    final line = await showDialog<int>(
+      context: context,
+      builder: (context) => _GoToLineDialog(lineCount: total),
+    );
+    if (line == null || !mounted || !identical(open, _open)) return;
+    var target = controller.lineIndex2Index(line.clamp(1, total) - 1);
+    // Inside a folded block: open the folds around it (nested ones too).
+    while (target.chunkIndex >= 0) {
+      controller.expandChunk(target.index);
+      target = controller.lineIndex2Index(line.clamp(1, total) - 1);
+    }
+    controller
+      ..selection = CodeLineSelection.collapsed(index: target.index, offset: 0)
+      ..makeCursorVisible();
+  }
+
   /// Edit › Format and Minify (#89): rewrite the Text pane from the parsed
   /// document as one undoable edit. Invalid JSON shows where it is and
   /// changes nothing.
@@ -573,6 +599,55 @@ void _texts(CodeLines lines, List<String> out) {
 
   for (final segment in lines.segments) {
     segment.codeLines.forEach(add);
+  }
+}
+
+/// Asks for a line number (#90); pops it, or null on Cancel.
+class _GoToLineDialog extends StatefulWidget {
+  const _GoToLineDialog({required this.lineCount});
+
+  final int lineCount;
+
+  @override
+  State<_GoToLineDialog> createState() => _GoToLineDialogState();
+}
+
+class _GoToLineDialogState extends State<_GoToLineDialog> {
+  final _field = TextEditingController();
+
+  @override
+  void dispose() {
+    _field.dispose();
+    super.dispose();
+  }
+
+  void _submit() => Navigator.of(context).pop(int.tryParse(_field.text));
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return AlertDialog(
+      title: Text(l10n.goToLineTitle),
+      content: TextField(
+        key: const Key('goToLineField'),
+        controller: _field,
+        autofocus: true,
+        keyboardType: TextInputType.number,
+        // Only digits can be typed (#90).
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        decoration: InputDecoration(
+          hintText: l10n.goToLineHint(widget.lineCount),
+        ),
+        onSubmitted: (_) => _submit(),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(onPressed: _submit, child: Text(l10n.goToLineGo)),
+      ],
+    );
   }
 }
 
