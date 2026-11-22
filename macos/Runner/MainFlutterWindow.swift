@@ -67,6 +67,12 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
         self.dartReady = true
         result(self.pendingOpenPaths)
         self.pendingOpenPaths = []
+      case "setWordWrapChecked":
+        let on = call.arguments as? Bool ?? false
+        NSApp.mainMenu?.items.compactMap(\.submenu)
+          .compactMap { $0.items.first(where: { $0.action == #selector(self.toggleWordWrap(_:)) }) }
+          .forEach { $0.state = on ? .on : .off }
+        result(nil)
       case "setEdited":
         // The dot in the close button for unsaved changes (decision #55).
         self.isDocumentEdited = call.arguments as? Bool ?? false
@@ -145,6 +151,12 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
   /// copy, paste or selectAll in the Text pane.
   @objc func edit(_ sender: NSMenuItem) {
     windowChannel?.invokeMethod("edit", arguments: sender.representedObject as? String)
+  }
+
+  /// View › Word Wrap: Dart flips the setting and reports it back with
+  /// setWordWrapChecked (Opt+Z itself is handled in Dart, see main_window).
+  @objc func toggleWordWrap(_ sender: NSMenuItem) {
+    windowChannel?.invokeMethod("menu", arguments: "wordWrap")
   }
 
   /// Close button and Cmd+W: ask first, then close for real.

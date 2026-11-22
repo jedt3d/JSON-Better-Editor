@@ -72,6 +72,9 @@ class _MainWindowState extends State<MainWindow> {
   /// Whether the window shows the document as edited (decision #55).
   bool _edited = false;
 
+  /// View › Word Wrap (Opt+Z), off by default (decision #58).
+  bool _wordWrap = false;
+
   /// Replaces the open document, disposing the old editor controller.
   void _setOpen(_OpenFile? open) {
     final old = _open;
@@ -118,12 +121,22 @@ class _MainWindowState extends State<MainWindow> {
         await _save();
       case ('menu', 'saveAs'):
         await _saveAs();
+      case ('menu', 'wordWrap'):
+        _toggleWordWrap();
       case ('openPath', final String path):
         await _openPath(path);
       case ('edit', final String action):
         _edit(action);
     }
     return null;
+  }
+
+  /// View › Word Wrap and Opt+Z. Opt+Z is a shortcut here rather than only
+  /// the menu's key equivalent, because the text input would otherwise type
+  /// "Ω" before the menu sees the key.
+  void _toggleWordWrap() {
+    setState(() => _wordWrap = !_wordWrap);
+    setWordWrapChecked(_wordWrap);
   }
 
   /// Edit menu items act on the Text pane, as their shortcuts do there.
@@ -348,6 +361,8 @@ class _MainWindowState extends State<MainWindow> {
             _newDocument,
         const SingleActivator(LogicalKeyboardKey.keyO, meta: true): _openFile,
         const SingleActivator(LogicalKeyboardKey.keyS, meta: true): _save,
+        const SingleActivator(LogicalKeyboardKey.keyZ, alt: true):
+            _toggleWordWrap,
         const SingleActivator(LogicalKeyboardKey.keyS, meta: true, shift: true):
             _saveAs,
       },
@@ -384,6 +399,7 @@ class _MainWindowState extends State<MainWindow> {
                 : TextPane(
                     key: ObjectKey(open.controller),
                     controller: open.controller,
+                    wordWrap: _wordWrap,
                   ),
           ),
         ],
