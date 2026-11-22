@@ -255,5 +255,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusUnfoldAll => 'Unfold all';
 
   @override
+  String get lineEndingLf => 'LF (macOS, Linux)';
+
+  @override
+  String get lineEndingCrlf => 'CRLF (Windows)';
+
+  @override
   String get unknownError => 'An unknown error occurred.';
 }

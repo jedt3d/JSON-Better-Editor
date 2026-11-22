@@ -201,7 +201,7 @@
 - [x] Caret `Ln L, Col C` and `(N selected)`; clicking opens Go to Line. #100
 - [x] Wrap toggle (in sync with View › Word Wrap) and Format / Minify buttons. #102
 - [x] Fold all / Unfold all, also in the View menu. #103
-- [ ] LF / CRLF shown and changeable. #104
+- [x] LF / CRLF shown and changeable. #104
 - [ ] Phase 3: JSON path at the caret or selected node (click to copy), and the selected node's type and child count. #105
 
 ### 3.11 Licensing and release (closed-source commercial)
