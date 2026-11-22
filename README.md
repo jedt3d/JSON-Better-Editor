@@ -37,6 +37,11 @@ native plugin). There is no GitHub Actions CI; this script is the build check (d
 Builds `tool/perf/perf_main.dart` as a profile build and prints open, typing, scrolling, search and
 folding times for generated files of each size in MB. Results and targets: [`docs/performance.md`](docs/performance.md).
 
+## Keyboard shortcuts
+
+Every shortcut, its action and where it is defined: [`docs/shortcuts.md`](docs/shortcuts.md). Update it
+whenever a shortcut changes.
+
 ## Folder structure
 
 | Path | What goes there |
