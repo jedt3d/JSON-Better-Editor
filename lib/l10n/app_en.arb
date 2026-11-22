@@ -316,6 +316,30 @@
       }
     }
   },
+  "statusShowErrorsTooltip": "Show the errors",
+  "@statusShowErrorsTooltip": {
+    "description": "Tooltip of the Status Bar item when the JSON is invalid."
+  },
+  "errorsLocation": "Location",
+  "@errorsLocation": {
+    "description": "Column header in the error list."
+  },
+  "errorsMessage": "Error message",
+  "@errorsMessage": {
+    "description": "Column header in the error list."
+  },
+  "errorsAt": "Line {line}, Col {column}",
+  "@errorsAt": {
+    "description": "Where an error is, in the error list.",
+    "placeholders": {
+      "line": {
+        "type": "int"
+      },
+      "column": {
+        "type": "int"
+      }
+    }
+  },
   "unknownError": "An unknown error occurred.",
   "@unknownError": {
     "description": "Dialog body when the system gives no error message."

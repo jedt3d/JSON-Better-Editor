@@ -436,6 +436,30 @@ abstract class AppLocalizations {
   /// **'{position} ({count} selected)'**
   String statusCaretSelected(String position, int count);
 
+  /// Tooltip of the Status Bar item when the JSON is invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the errors'**
+  String get statusShowErrorsTooltip;
+
+  /// Column header in the error list.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get errorsLocation;
+
+  /// Column header in the error list.
+  ///
+  /// In en, this message translates to:
+  /// **'Error message'**
+  String get errorsMessage;
+
+  /// Where an error is, in the error list.
+  ///
+  /// In en, this message translates to:
+  /// **'Line {line}, Col {column}'**
+  String errorsAt(int line, int column);
+
   /// Dialog body when the system gives no error message.
   ///
   /// In en, this message translates to:
