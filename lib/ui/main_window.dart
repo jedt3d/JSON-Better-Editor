@@ -120,8 +120,30 @@ class _MainWindowState extends State<MainWindow> {
         await _saveAs();
       case ('openPath', final String path):
         await _openPath(path);
+      case ('edit', final String action):
+        _edit(action);
     }
     return null;
+  }
+
+  /// Edit menu items act on the Text pane, as their shortcuts do there.
+  void _edit(String action) {
+    final controller = _open?.controller;
+    if (controller == null) return;
+    switch (action) {
+      case 'undo':
+        controller.undo();
+      case 'redo':
+        controller.redo();
+      case 'cut':
+        controller.cut();
+      case 'copy':
+        controller.copy();
+      case 'paste':
+        controller.paste();
+      case 'selectAll':
+        controller.selectAll();
+    }
   }
 
   @override

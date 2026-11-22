@@ -30,7 +30,7 @@
 
 ### 1.4 Keyboard and clipboard
 - [x] **Tab** / **Shift+Tab** indent and de-indent text by 2 spaces, as in a normal code editor (decision #57).
-- [ ] Copy, cut and paste follow normal text-editor behavior (no node-aware paste in Text mode).
+- [x] Copy, cut and paste follow normal text-editor behavior (no node-aware paste in Text mode).
 
 ### 1.5 Word wrap
 - [ ] Word-wrap toggle: View menu item (Opt+Z), off by default (decision #58).

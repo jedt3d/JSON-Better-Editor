@@ -9,6 +9,24 @@ class AppDelegate: FlutterAppDelegate {
 
   override func applicationWillFinishLaunching(_ notification: Notification) {
     addFileMenu()
+    retargetEditMenu()
+  }
+
+  /// The template's Edit items (Undo … Select All) send AppKit selectors
+  /// that nothing in a Flutter window answers, so they were greyed out.
+  /// They now go to MainFlutterWindow.edit(_:), which runs the Text pane's
+  /// own action in Dart (#38, #43). Keeps their titles and shortcuts.
+  private func retargetEditMenu() {
+    let actions = ["undo:": "undo", "redo:": "redo", "cut:": "cut",
+                   "copy:": "copy", "paste:": "paste", "selectAll:": "selectAll"]
+    guard let edit = NSApp.mainMenu?.items.first(where: { $0.submenu?.title == "Edit" })?.submenu
+    else { return }
+    for item in edit.items {
+      guard let action = item.action, let name = actions[NSStringFromSelector(action)] else { continue }
+      item.action = #selector(MainFlutterWindow.edit(_:))
+      item.target = nil
+      item.representedObject = name
+    }
   }
 
   /// The standard File menu (§3.4, decision #21), after the app menu. Items
