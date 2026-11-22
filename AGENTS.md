@@ -15,6 +15,7 @@ JSON Better Editor: a Flutter desktop app (macOS first) for editing JSON in two 
 - `docs/requirements-checklist.md` is the only requirements file; it has no version suffix. Update it in the same PR whenever a decision or a merged ticket changes a requirement, and tick items that are built. Never add versioned copies.
 - `docs/decision-log.md`: append decisions as described above.
 - `docs/development-phases.md`: review it at the end of every phase and update it to what was actually built.
+- `docs/manual/reference.th.md` is the user reference manual, written in Thai by the maintainer's request (an exception to the English-docs rule). Review it against the code at the end of every phase: add every new menu item, toolbar button, shortcut and behaviour, remove or correct anything that changed, update the status line at the top, and add a row to its review log. Derive it from the code (`lib/`, `macos/Runner/`, `packages/re_editor/`), not only the spec.
 
 ## Checkboxes, PRs and issues
 
