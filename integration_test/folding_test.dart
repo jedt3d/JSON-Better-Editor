@@ -49,15 +49,17 @@ void main() {
     for (var i = 0; i < 50 && chunks().value.isEmpty; i++) {
       await tester.pump(const Duration(milliseconds: 100));
     }
-    if (holdForScreenshot)
+    if (holdForScreenshot) {
       await Future<void>.delayed(const Duration(seconds: 4));
+    }
 
     chunks().collapse(1);
     await tester.pumpAndSettle();
     final controller = editorController(tester);
     expect(controller.codeLines.length, 4);
     expect(controller.text, text);
-    if (holdForScreenshot)
+    if (holdForScreenshot) {
       await Future<void>.delayed(const Duration(seconds: 4));
+    }
   }, variant: macOS);
 }
