@@ -33,6 +33,8 @@ Goal: the application is up and running on macOS with very basic features, and t
 
 Goal: every Text-mode feature and the file/editor basics, on top of the Phase 1 base.
 
+Tracked in issue #25 (sub-issues #26–#45, about 2–3 acceptance criteria each; decision #52).
+
 - [ ] Syntax highlighting, line numbers, bracket and quote matching (§1.1).
 - [ ] Fold/unfold objects and arrays from the gutter (§1.1).
 - [ ] Key autocomplete from existing keys, accepted with Enter/Return (§1.3).
@@ -40,7 +42,7 @@ Goal: every Text-mode feature and the file/editor basics, on top of the Phase 1 
 - [ ] Copy, cut and paste with normal text-editor behavior (§1.4).
 - [ ] Word wrap toggle for Text mode (§1.5).
 - [ ] Search keys and values with Next / Previous (§3.3), Text mode side.
-- [ ] Undo / redo in Text mode (§3.5).
+- [ ] Undo / redo in Text mode (§3.5). The shared Text/Node history is Phase 3 (decision #53).
 - [ ] New creates an editable document; Save with no file yet behaves like Save As (§3.4, decision #43). Pretty-printing on Save is already done in Phase 1.
 - [ ] Standard File menu: New, Open, Save, Save As, Close; one document per window, multiple instances (§3.4).
 - [ ] Register as a `.json` handler in "Open With" (§3.9).
@@ -76,7 +78,7 @@ Goal: introduce the Node pane, and with it the split view and two-way sync.
 - [ ] Side-by-side 50/50 layout with splitter; Text only / Node only / Split toggles (§3.1).
 - [ ] Two-way content sync, scroll percentage and selection sync (§3.1).
 - [ ] Blank node while Text has invalid JSON, sync delay ≤250 ms (§3.1).
-- [ ] One shared undo history across both panes (§3.5).
+- [ ] One shared undo history across both panes (§3.5, decision #53).
 - [ ] Search works in Node mode too (§3.3).
 
 ### 3e. Rich value previews
