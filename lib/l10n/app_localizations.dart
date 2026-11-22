@@ -400,6 +400,30 @@ abstract class AppLocalizations {
   /// **'{lines, plural, =1{1 line} other{{lines} lines}} · {size}'**
   String statusSize(int lines, String size);
 
+  /// Status Bar: the last check found no error.
+  ///
+  /// In en, this message translates to:
+  /// **'✓ Valid JSON'**
+  String get statusValid;
+
+  /// Status Bar: the last check found errors.
+  ///
+  /// In en, this message translates to:
+  /// **'✗ Invalid JSON · {count, plural, =1{1 error} other{{count} errors}}'**
+  String statusInvalid(int count);
+
+  /// Status Bar: the text changed since the last check.
+  ///
+  /// In en, this message translates to:
+  /// **'Not checked since edit'**
+  String get statusNotChecked;
+
+  /// Tooltip of the Status Bar item when the text was not checked since an edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate JSON now'**
+  String get statusValidateTooltip;
+
   /// Dialog body when the system gives no error message.
   ///
   /// In en, this message translates to:

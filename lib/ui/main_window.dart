@@ -72,7 +72,7 @@ class _OpenFile {
       // (#44: comparing on every keystroke cost tens of ms at 5 MB). Only
       // the step from unedited (a fold, or a first edit) is compared; undo
       // back to the saved text brings back savedLines itself.
-      _checkedEdited = _checkedEdited || !_sameText(lines, savedLines);
+      _checkedEdited = _checkedEdited || !sameText(lines, savedLines);
       _checkedLines = lines;
     }
     return _checkedEdited;
@@ -101,6 +101,20 @@ class _MainWindowState extends State<MainWindow> {
 
   /// View › Word Wrap (Opt+Z), off by default (decision #58).
   bool _wordWrap = false;
+
+  /// The last check of the text: Validate JSON, Open or Save (#99).
+  JsonCheck? _check;
+
+  void _recordCheck(
+    _OpenFile open,
+    CodeLines lines,
+    List<JsonParseError> errors,
+  ) {
+    if (identical(open, _open) ||
+        identical(open.controller, _open?.controller)) {
+      setState(() => _check = JsonCheck(lines, errors));
+    }
+  }
 
   /// View › Hide / Show Status Bar (⌘/), shown by default (#98).
   bool _statusBarShown = true;
@@ -488,6 +502,7 @@ class _MainWindowState extends State<MainWindow> {
             LineEnding.detect(picked.text),
           ),
         );
+        _recordCheck(_open!, _open!.controller.codeLines, const []);
         _rememberDiskTime(_open!);
         _addRecent(picked.path);
         setWindowTitle(picked.name);
@@ -536,10 +551,13 @@ class _MainWindowState extends State<MainWindow> {
   Future<bool> _writeTo(_OpenFile open, String path) async {
     final l10n = AppLocalizations.of(context)!;
     final JsonDocument document;
+    final checkedLines = open.controller.codeLines;
     switch (parse(open.controller.text)) {
       case ParseSuccess(document: final parsed):
         document = parsed;
+        _recordCheck(open, checkedLines, const []);
       case ParseFailure(:final error):
+        _recordCheck(open, checkedLines, [error]);
         await _showError(
           l10n.saveFailedTitle(path.split('/').last),
           l10n.invalidJsonPosition(error.line, error.column, error.message),
@@ -590,6 +608,7 @@ class _MainWindowState extends State<MainWindow> {
     if (!await _confirmDiscard() || !mounted) return;
     final untitled = AppLocalizations.of(context)!.untitled;
     _setOpen(_OpenFile(null, textPaneController('{}'), LineEnding.osDefault));
+    _recordCheck(_open!, _open!.controller.codeLines, const []);
     setWindowTitle(untitled);
   });
 
@@ -601,6 +620,7 @@ class _MainWindowState extends State<MainWindow> {
     final l10n = AppLocalizations.of(context)!;
     final controller = open.controller;
     final errors = validateJson(controller.text);
+    _recordCheck(open, controller.codeLines, errors);
     if (errors.isEmpty) {
       return _showError(l10n.validateValid, l10n.validateValidMessage);
     }
@@ -763,35 +783,15 @@ class _MainWindowState extends State<MainWindow> {
                     wordWrap: _wordWrap,
                   ),
           ),
-          if (_statusBarShown) StatusBar(controller: open?.controller),
+          if (_statusBarShown)
+            StatusBar(
+              controller: open?.controller,
+              check: _check,
+              onValidate: _validate,
+            ),
         ],
       ),
     );
-  }
-}
-
-/// Whether [a] and [b] hold the same text, folded parts included.
-bool _sameText(CodeLines a, CodeLines b) {
-  final left = <String>[];
-  final right = <String>[];
-  _texts(a, left);
-  _texts(b, right);
-  if (left.length != right.length) return false;
-  for (var i = 0; i < left.length; i++) {
-    // Unchanged lines are the same String object: a cheap check.
-    if (left[i] != right[i]) return false;
-  }
-  return true;
-}
-
-void _texts(CodeLines lines, List<String> out) {
-  void add(CodeLine line) {
-    out.add(line.text);
-    line.chunks.forEach(add);
-  }
-
-  for (final segment in lines.segments) {
-    segment.codeLines.forEach(add);
   }
 }
 
