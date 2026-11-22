@@ -322,6 +322,66 @@ abstract class AppLocalizations {
   /// **'Go'**
   String get goToLineGo;
 
+  /// Title when the open file changed on disk.
+  ///
+  /// In en, this message translates to:
+  /// **'“{fileName}” was changed by another program'**
+  String fileChangedTitle(String fileName);
+
+  /// Body when the open file changed on disk and there are no unsaved edits.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload it from disk, or keep the version shown here?'**
+  String get fileChangedMessage;
+
+  /// Body when the open file changed on disk and there are unsaved edits.
+  ///
+  /// In en, this message translates to:
+  /// **'Reloading it drops your unsaved changes. Reload it from disk, or keep your version?'**
+  String get fileChangedDropEdits;
+
+  /// Button: read the file again from disk.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get reload;
+
+  /// Button: keep the version shown in the editor.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Mine'**
+  String get keepMine;
+
+  /// Title when the open file is no longer on disk.
+  ///
+  /// In en, this message translates to:
+  /// **'“{fileName}” was moved or deleted'**
+  String fileDeletedTitle(String fileName);
+
+  /// Body when the open file is no longer on disk.
+  ///
+  /// In en, this message translates to:
+  /// **'The document stays open. Save writes it again.'**
+  String get fileDeletedMessage;
+
+  /// Title when saving over a file that another program changed.
+  ///
+  /// In en, this message translates to:
+  /// **'“{fileName}” changed on disk since you opened it'**
+  String overwriteChangedTitle(String fileName);
+
+  /// Body when saving over a file that another program changed.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving replaces the other program\'s changes.'**
+  String get overwriteChangedMessage;
+
+  /// Button: save over the changed file.
+  ///
+  /// In en, this message translates to:
+  /// **'Overwrite'**
+  String get overwrite;
+
   /// Dialog body when the system gives no error message.
   ///
   /// In en, this message translates to:

@@ -138,5 +138,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goToLineGo => 'Go';
 
   @override
+  String fileChangedTitle(String fileName) {
+    return '“$fileName” was changed by another program';
+  }
+
+  @override
+  String get fileChangedMessage =>
+      'Reload it from disk, or keep the version shown here?';
+
+  @override
+  String get fileChangedDropEdits =>
+      'Reloading it drops your unsaved changes. Reload it from disk, or keep your version?';
+
+  @override
+  String get reload => 'Reload';
+
+  @override
+  String get keepMine => 'Keep Mine';
+
+  @override
+  String fileDeletedTitle(String fileName) {
+    return '“$fileName” was moved or deleted';
+  }
+
+  @override
+  String get fileDeletedMessage =>
+      'The document stays open. Save writes it again.';
+
+  @override
+  String overwriteChangedTitle(String fileName) {
+    return '“$fileName” changed on disk since you opened it';
+  }
+
+  @override
+  String get overwriteChangedMessage =>
+      'Saving replaces the other program\'s changes.';
+
+  @override
+  String get overwrite => 'Overwrite';
+
+  @override
   String get unknownError => 'An unknown error occurred.';
 }

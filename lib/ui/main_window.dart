@@ -21,12 +21,14 @@ class MainWindow extends StatefulWidget {
     this.chooseSavePath = chooseSavePathOnDisk,
     this.writeTextFile = writeTextFileOnDisk,
     this.readJsonFile = readJsonFileFromDisk,
+    this.fileModifiedTime = fileModifiedTimeOnDisk,
   });
 
   final PickJsonFile pickJsonFile;
   final ChooseSavePath chooseSavePath;
   final WriteTextFile writeTextFile;
   final ReadJsonFile readJsonFile;
+  final FileModifiedTime fileModifiedTime;
 
   @override
   State<MainWindow> createState() => _MainWindowState();
@@ -67,6 +69,14 @@ class _OpenFile {
     }
     return _checkedEdited;
   }
+
+  /// The file's modification time when it was opened or last saved, to
+  /// notice changes made by other programs (#88). Null for a new document.
+  DateTime? diskModified;
+
+  /// The modification time last checked against (null: the file was gone),
+  /// so one outside change is only reported once.
+  DateTime? seenModified;
 
   /// The file name, or [untitled] for a new document.
   String name(String untitled) => file?.name ?? untitled;
@@ -134,9 +144,98 @@ class _MainWindowState extends State<MainWindow> {
     setDocumentEdited(edited);
   }
 
+  /// Checks the open file when the app comes back to the front (#88).
+  late final AppLifecycleListener _lifecycle;
+
+  Future<void> _rememberDiskTime(_OpenFile open) async {
+    final path = open.file?.path;
+    if (path == null) return;
+    open.diskModified = open.seenModified = await widget.fileModifiedTime(path);
+  }
+
+  /// The window got focus: if another program changed or deleted the file,
+  /// say so. Changed: Reload / Keep Mine (with a warning when there are
+  /// unsaved edits). Deleted: a notice; Save writes it again.
+  Future<void> _checkOutsideChange() async {
+    final open = _open;
+    final path = open?.file?.path;
+    if (open == null || path == null || !_onTop || _busy) return;
+    final now = await widget.fileModifiedTime(path);
+    if (!mounted || !identical(open, _open) || now == open.seenModified) return;
+    open.seenModified = now;
+    final l10n = AppLocalizations.of(context)!;
+    final name = open.name(l10n.untitled);
+    if (now == null) {
+      return _showError(l10n.fileDeletedTitle(name), l10n.fileDeletedMessage);
+    }
+    final reload = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.fileChangedTitle(name)),
+        content: Text(
+          open.edited ? l10n.fileChangedDropEdits : l10n.fileChangedMessage,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.keepMine),
+          ),
+          FilledButton(
+            autofocus: !open.edited,
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.reload),
+          ),
+        ],
+      ),
+    );
+    if (reload == true && mounted && identical(open, _open)) {
+      await _exclusive(() => _confirmThenOpenWithoutPrompt(path));
+    }
+  }
+
+  /// Reload after the user chose it (no unsaved-changes prompt: the dialog
+  /// already warned).
+  Future<void> _confirmThenOpenWithoutPrompt(String path) async {
+    final open = _open;
+    if (open == null) return;
+    // Mark unedited so the open does not ask again.
+    _setOpen(_OpenFile(open.file, open.controller));
+    await _confirmThenOpen(() => widget.readJsonFile(path));
+  }
+
+  /// Save over a file that changed on disk since it was opened or saved:
+  /// Overwrite or Cancel (default). True when it is fine to write.
+  Future<bool> _confirmOverwriteChanged(_OpenFile open) async {
+    final path = open.file?.path;
+    if (path == null || open.diskModified == null) return true;
+    final now = await widget.fileModifiedTime(path);
+    if (now == null || now == open.diskModified || !mounted) return true;
+    final l10n = AppLocalizations.of(context)!;
+    final overwrite = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.overwriteChangedTitle(open.name(l10n.untitled))),
+        content: Text(l10n.overwriteChangedMessage),
+        actions: [
+          TextButton(
+            autofocus: true, // Default: Cancel.
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.overwrite),
+          ),
+        ],
+      ),
+    );
+    return overwrite == true;
+  }
+
   @override
   void initState() {
     super.initState();
+    _lifecycle = AppLifecycleListener(onResume: _checkOutsideChange);
     onNativeRequest(_nativeRequest);
     // A file that launched the app from Finder (#32).
     takePendingOpenPaths().then((paths) {
@@ -232,6 +331,7 @@ class _MainWindowState extends State<MainWindow> {
 
   @override
   void dispose() {
+    _lifecycle.dispose();
     onNativeRequest(null);
     _open?.controller.dispose();
     super.dispose();
@@ -316,6 +416,7 @@ class _MainWindowState extends State<MainWindow> {
     switch (parse(picked.text)) {
       case ParseSuccess():
         _setOpen(_OpenFile(picked, textPaneController(picked.text)));
+        _rememberDiskTime(_open!);
         setWindowTitle(picked.name);
       case ParseFailure(:final error):
         _showError(
@@ -372,6 +473,11 @@ class _MainWindowState extends State<MainWindow> {
         );
         return false;
     }
+    // Saving over a file another program changed since we read or wrote it
+    // asks first, default Cancel (#88). Save As to another file does not.
+    if (path == open.file?.path && !await _confirmOverwriteChanged(open)) {
+      return false;
+    }
     // Ending with a newline (decision #47).
     final text = '${document.toText()}\n';
     try {
@@ -391,6 +497,7 @@ class _MainWindowState extends State<MainWindow> {
     // typing during a slow write would be counted as saved. Capture the lines
     // before parsing if writes ever become slow enough to matter.
     _setOpen(_OpenFile(saved, open.controller));
+    _rememberDiskTime(_open!);
     setWindowTitle(saved.name);
     return true;
   }
