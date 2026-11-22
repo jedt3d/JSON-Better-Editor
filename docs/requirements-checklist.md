@@ -153,7 +153,7 @@
 - [ ] Target for now: files under 5 MB: open and show in 2 s or less, no visible lag when typing, scrolling or searching (decision #59). The largest file that opens within 2–3 s is measured and recorded as the current upper limit. Progressive loading/rendering is future work.
 
 ### 3.5 Undo / redo
-- [ ] Undo and redo are required (Cmd+Z / Cmd+Shift+Z).
+- [x] Undo and redo are required (Cmd+Z / Cmd+Shift+Z). Text pane only for now (decision #53).
 - [ ] One shared undo history across the Text and Node panes.
 
 ### 3.6 Design system
