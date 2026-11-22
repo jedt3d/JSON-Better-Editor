@@ -62,3 +62,16 @@ with a `// JBE:` comment naming the patch.
 - **How to re-apply:** in the new upstream `_smartInsertion`, add the `// JBE: patch 2` check at the top
   of the quote loop and copy `_shouldSkipQuote`. Check: `test/ui/auto_close_test.dart`.
 
+### Patch 3 — fold or unfold many blocks at once (#103, 2026-11-23)
+
+- **File / function:** `lib/src/code_chunk.dart`, new `CodeChunkController.collapseAll` and
+  `CodeChunkController.expandAll`.
+- **Why:** upstream folds one block per call, and each call copies every line. Fold All on a 23 MB file
+  folds about 100,000 blocks, which would take hours that way.
+- **Change:** `collapseAll(indexes)` builds the folded lines, the shifted fold markers and the moved
+  caret in one pass (one editing value, like `collapse`); `expandAll()` opens every fold, nested ones
+  too, in one pass. Upstream methods are unchanged.
+- **Result:** 23 MB, 1.57 M lines, Release app: Fold All 2.6 s, Unfold All 2.1 s.
+- **How to re-apply:** copy both `// JBE: patch 3` methods into the new upstream `CodeChunkController`;
+  check that `collapse` / `expand` still use the same `CodeChunk` and `copyWith(chunks:)` model. Check:
+  `test/ui/fold_all_test.dart`.

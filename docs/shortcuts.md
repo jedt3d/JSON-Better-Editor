@@ -48,6 +48,7 @@ action; both are listed. ⌘ Command, ⇧ Shift, ⌥ Option, ⌃ Control.
 |---|---|---|
 | ⌥Z | Word Wrap on/off | Menu (AppDelegate `addWordWrapItem`) + App (`main_window.dart`, so it does not type "Ω", decision #74) |
 | ⌘/ | Hide / Show Status Bar (#98) | Menu (AppDelegate) + App (`main_window.dart`) |
+| — | Fold All, Unfold All (#103) | Menu (AppDelegate `addWordWrapItem`), no shortcuts |
 | ⌃⌘F | Enter Full Screen | Menu (xib) |
 | ⌘M | Minimize | Menu (xib) |
 | ⌘H / ⌥⌘H | Hide the app / Hide Others | Menu (xib) |

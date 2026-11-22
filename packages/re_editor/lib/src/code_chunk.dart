@@ -82,6 +82,165 @@ class CodeChunkController extends ValueNotifier<List<CodeChunk>> {
     }
   }
 
+  // JBE: patch 3 — fold or unfold many blocks in one pass (#103). Calling
+  // collapse or expand once per block copies every line each time, which is
+  // hours for the tens of thousands of blocks in a large file.
+
+  /// Folds the blocks starting at [indexes] (visible line numbers) at once.
+  /// A block inside another one in the set is skipped. The caret moves to
+  /// the fold line when its line is hidden. One editing step, as [collapse].
+  void collapseAll(Iterable<int> indexes) {
+    final Set<int> wanted = indexes.toSet();
+    final List<CodeChunk> targets = [];
+    for (final CodeChunk chunk in value) {
+      if (!wanted.contains(chunk.index) || !chunk.canCollapse) {
+        continue;
+      }
+      if (targets.isNotEmpty && chunk.index < targets.last.end - 1) {
+        continue; // inside the previous target
+      }
+      targets.add(chunk);
+    }
+    if (targets.isEmpty) {
+      return;
+    }
+    final List<CodeLine> lines = [
+      for (final CodeLineSegment segment in _controller.codeLines.segments)
+        ...segment.codeLines,
+    ];
+    if (targets.last.end > lines.length) {
+      return; // the analysis is behind the text
+    }
+    // Visible lines before each new index are shifted up by the hidden
+    // lines of the targets before them.
+    final List<CodeLine> newLines = [];
+    int t = 0;
+    for (int i = 0; i < lines.length; i++) {
+      if (t < targets.length && targets[t].index == i) {
+        final CodeChunk chunk = targets[t++];
+        newLines
+            .add(lines[i].copyWith(chunks: lines.sublist(i + 1, chunk.end)));
+        i = chunk.end - 1;
+      } else {
+        newLines.add(lines[i]);
+      }
+    }
+    // Hidden lines of the first k targets, for shift() in O(log n).
+    final List<int> hiddenBefore = [0];
+    for (final CodeChunk chunk in targets) {
+      hiddenBefore.add(hiddenBefore.last + chunk.collapseSize);
+    }
+    // Number of targets that start before [position].
+    int countBefore(int position) {
+      int low = 0;
+      int high = targets.length;
+      while (low < high) {
+        final int mid = (low + high) >> 1;
+        if (targets[mid].index < position) {
+          low = mid + 1;
+        } else {
+          high = mid;
+        }
+      }
+      return low;
+    }
+
+    int shift(int position) => hiddenBefore[countBefore(position)];
+    // The target that hides line [index], if any (targets never overlap).
+    CodeChunk? hiding(int index) {
+      final int k = countBefore(index);
+      if (k == 0) {
+        return null;
+      }
+      final CodeChunk chunk = targets[k - 1];
+      return index < chunk.end ? chunk : null;
+    }
+
+    final List<CodeChunk> newChunks = [];
+    for (final CodeChunk e in value) {
+      final CodeChunk? owner = hiding(e.index);
+      if (owner != null) {
+        continue; // folded away with its block
+      }
+      newChunks.add(CodeChunk(e.index - shift(e.index), e.end - shift(e.end)));
+    }
+    CodeLinePosition move(int index, int offset) {
+      final CodeChunk? owner = hiding(index);
+      if (owner != null) {
+        final int line = owner.index - shift(owner.index);
+        return CodeLinePosition(
+            index: line, offset: lines[owner.index].text.length);
+      }
+      return CodeLinePosition(index: index - shift(index), offset: offset);
+    }
+
+    final CodeLineSelection selection = _controller.selection;
+    final CodeLinePosition base =
+        move(selection.baseIndex, selection.baseOffset);
+    final CodeLinePosition extent =
+        move(selection.extentIndex, selection.extentOffset);
+    value = newChunks;
+    _shouldNotUpdateChunks = true;
+    _controller.value = _controller.value.copyWith(
+      codeLines: CodeLines.of(newLines),
+      selection: selection.copyWith(
+        baseIndex: base.index,
+        baseOffset: base.offset,
+        extentIndex: extent.index,
+        extentOffset: extent.offset,
+      ),
+      composing: TextRange.empty,
+    );
+    _shouldNotUpdateChunks = false;
+  }
+
+  /// Unfolds every folded block, nested ones too, at once. The markers of
+  /// blocks inside them come back when the analysis runs again, as with
+  /// [expand].
+  void expandAll() {
+    final List<CodeLine> lines = [
+      for (final CodeLineSegment segment in _controller.codeLines.segments)
+        ...segment.codeLines,
+    ];
+    if (!lines.any((e) => e.chunkParent)) {
+      return;
+    }
+    final List<CodeLine> newLines = [];
+    final List<int> newIndex = [];
+    final List<CodeChunk> opened = [];
+    void add(CodeLine line) {
+      if (!line.chunkParent) {
+        newLines.add(line);
+        return;
+      }
+      final int start = newLines.length;
+      newLines.add(line.copyWith(chunks: const []));
+      line.chunks.forEach(add);
+      opened.add(CodeChunk(start, newLines.length));
+    }
+
+    for (final CodeLine line in lines) {
+      newIndex.add(newLines.length);
+      add(line);
+    }
+    newIndex.add(newLines.length);
+    final List<CodeChunk> newChunks = [
+      for (final CodeChunk e in value)
+        if (e.index < lines.length && !lines[e.index].chunkParent)
+          CodeChunk(newIndex[e.index], newIndex[e.end.clamp(0, lines.length)]),
+      ...opened,
+    ]..sort((a, b) => a.index - b.index);
+    final CodeLineSelection selection = _controller.selection;
+    value = newChunks;
+    _controller.value = _controller.value.copyWith(
+      codeLines: CodeLines.of(newLines),
+      selection: selection.copyWith(
+        baseIndex: newIndex[selection.baseIndex],
+        extentIndex: newIndex[selection.extentIndex],
+      ),
+    );
+  }
+
   CodeChunk? findByIndex(int index) {
     for (final CodeChunk chunk in value) {
       if (chunk.index == index) {
