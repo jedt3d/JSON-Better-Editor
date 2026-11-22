@@ -103,4 +103,9 @@ Goal: the Settings screen and everything it controls.
 - [ ] Document-wide default for single-line or multi-line values (§3.10, §2.3).
 - [ ] Full Thai translation and the toolbar language switch; English on first launch (§3.7).
 
-**Done when:** every setting in §3.10 works and persists between launches.
+### Release readiness (closed-source sale)
+- [ ] About menu and licenses page listing every bundled package, including the forked re_editor (§3.11). #78
+- [ ] highlight.js BSD-3 notice registered with `LicenseRegistry.addLicense`, because re_highlight is a port of it (§3.11). #78
+- [ ] Replace the default Flutter app icon with the app's own icon (§3.11). #78
+
+**Done when:** every setting in §3.10 works and persists between launches, and the release items in §3.11 are done.
