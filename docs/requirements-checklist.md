@@ -181,3 +181,8 @@
   - [ ] Value: IBM Plex Sans Thai Looped.
 - [ ] If a default font is not installed, fall back to the macOS default monospace font.
 - [ ] Default value view for the document: single-line or multi-line (see 2.3).
+
+### 3.11 Licensing and release (closed-source commercial)
+- [x] The app is sold closed-source; every dependency must allow that (MIT, BSD or Apache-2.0; no GPL, LGPL or AGPL). Audited on 2026-11-22 (decision #83).
+- [ ] An About item in the macOS app menu, and a licenses page that lists the notices of every bundled package, including the forked re_editor and highlight.js (BSD-3, which re_highlight is ported from).
+- [ ] The app uses its own icon, not the Flutter logo.

@@ -3,7 +3,7 @@
 > Rough task breakdown by phase, agreed with Jedt on 2026-11-22.
 > Section numbers (e.g. §1.3) refer to [`requirements-checklist.md`](requirements-checklist.md). Phase decisions are logged in [`decision-log.md`](decision-log.md).
 > Platform: Flutter desktop, macOS only (macOS 14+, Flutter 3.50.1+).
-> Reviewed at the end of every phase so it matches what was actually built. The Thai user reference manual, [`manual/reference.th.md`](manual/reference.th.md), is reviewed at the same time (decision #83).
+> Reviewed at the end of every phase so it matches what was actually built. The Thai user reference manual, [`manual/reference.th.md`](manual/reference.th.md), is reviewed at the same time (decision #84).
 
 Each phase ends with an app that builds and runs on macOS. A phase starts only after the previous one works.
 
@@ -103,4 +103,9 @@ Goal: the Settings screen and everything it controls.
 - [ ] Document-wide default for single-line or multi-line values (§3.10, §2.3).
 - [ ] Full Thai translation and the toolbar language switch; English on first launch (§3.7).
 
-**Done when:** every setting in §3.10 works and persists between launches.
+### Release readiness (closed-source sale)
+- [ ] About menu and licenses page listing every bundled package, including the forked re_editor (§3.11). #78
+- [ ] highlight.js BSD-3 notice registered with `LicenseRegistry.addLicense`, because re_highlight is a port of it (§3.11). #78
+- [ ] Replace the default Flutter app icon with the app's own icon (§3.11). #78
+
+**Done when:** every setting in §3.10 works and persists between launches, and the release items in §3.11 are done.
