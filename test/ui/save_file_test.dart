@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:json_better_editor/document/json_document.dart';
+import 'package:json_better_editor/app/app.dart';
 import 'package:json_better_editor/l10n/app_localizations.dart';
 import 'package:json_better_editor/ui/file_access.dart';
 import 'package:json_better_editor/ui/main_window.dart';
@@ -32,7 +33,7 @@ class FakeDisk {
 Future<void> pumpApp(WidgetTester tester, FakeDisk disk, String openPath) =>
     tester.pumpWidget(
       MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: MainWindow(
           pickJsonFile: disk.opener(openPath),

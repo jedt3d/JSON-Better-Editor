@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 // Phase 4 replaces these with Atom One Light / One Dark (decision #18).
 const _seed = Colors.blue;

@@ -5,7 +5,7 @@ Requirements, mockups and the decision log live in [`docs/`](docs/).
 
 ## Run
 
-Needs the Flutter SDK (stable) and Xcode.
+Needs Flutter 3.50.1 or later (stable) and Xcode 27. Flutter 3.41 cannot make Release builds with Xcode 27.
 
 ```bash
 flutter run -d macos
