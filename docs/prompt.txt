@@ -1,0 +1,30 @@
+I've a mockup image file @JSON Visual Editor Mockup.webp which i want you to describe it in detail as the requirement of a JSON text editor which have this major features like this
+
+1. Editor side
+- open json source file and display as syntax highlight and collapsible hierarchy
+- understand the key-value,array, datatype
+- can auto complete the `key` which already exist
+- can drag and drop tree node(s) and have an insertion line to where they are going to insert
+- copy,paste : copy multiple sibling nodes is prevented, paste can paste to before and after the selected node
+- word wrap toggle feature, for the node content must be wrap to the window's width
+
+2. Visual side
+- show visulization node-based for the source code
+- can show/hide the collapsible node in multi-level all at once
+- in each node it should be display as `+[ data type icon | json key : json value ----- (# of children) | delete icon ]. by `+` is the expand/collapse icon and `-----` is the auto expanded space which make left-right sides of it align to left and right side respectively.
+- single click the data type icon to show dropdown menu of data type selection
+- single click the node will show value from single line to multiple line always which show all data up to 10 lines + scrollbar.
+- double clicking the key to change to name, as well as the value
+- can show thumbnail & popup to show image which encoded as base64. it may have an initial function to detect if it's available and build thumbnail preview
+- can show HTML, Markdown content in the popup viewer which will be preview render by default and toggle to edit the source (with syntax highlighted)
+
+3. General features
+- toolbar may be like the screenshot
+- other design should be a conventional design from Material 3 design system
+- must support Thai and English language
+- can register to macOS, Windows to be the default .json editor app
+- setting icon (gear) on the top right toolbar
+1. set theme similar to one light, one dark
+   2. choose monospace font from system.
+   3. default font will be the IBM Plex Sans family, the Key,Data type will be IBM Plex Mono and the value must be IBM Plex Thai Looped
+   4. toggle to show multiple line of node's value or single line.
