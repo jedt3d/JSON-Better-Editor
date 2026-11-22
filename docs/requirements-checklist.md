@@ -16,7 +16,7 @@
 ### 1.1 Open and display
 - [x] Open a `.json` source file from disk (native file picker limited to `.json`).
 - [x] Syntax highlighting: keys, strings, numbers, booleans, null, brackets and punctuation in distinct colors.
-- [ ] Bracket matching and quote matching (highlight the matching `{}` / `[]` / `""`).
+- [x] Bracket matching and quote matching (highlight the matching `{}` / `[]` / `""`).
 - [x] Line numbers in a gutter.
 - [ ] Collapsible hierarchy: fold/unfold objects `{}` and arrays `[]` from the gutter.
 
