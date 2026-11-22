@@ -6,6 +6,8 @@ import 'package:json_better_editor/l10n/app_localizations.dart';
 import 'package:json_better_editor/ui/file_access.dart';
 import 'package:json_better_editor/ui/main_window.dart';
 
+import 'editor_support.dart';
+
 const windowChannel = MethodChannel('json_better_editor/window');
 
 Widget appWith(PickJsonFile pick) => MaterialApp(
@@ -44,7 +46,7 @@ void main() {
     await tester.tap(find.byTooltip('Open'));
     await tester.pumpAndSettle();
 
-    expect(find.text(text), findsOneWidget);
+    expect(editorShowing(text), findsOneWidget);
     expect(find.text('Open a JSON file'), findsNothing);
     expect(titles.last, 'people.json');
     expect(
@@ -72,7 +74,7 @@ void main() {
 
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
-    expect(find.text('[1]'), findsOneWidget);
+    expect(editorShowing('[1]'), findsOneWidget);
     expect(titles.last, 'good.json');
   });
 

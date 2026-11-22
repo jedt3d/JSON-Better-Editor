@@ -7,6 +7,8 @@ import 'package:json_better_editor/l10n/app_localizations.dart';
 import 'package:json_better_editor/ui/file_access.dart';
 import 'package:json_better_editor/ui/main_window.dart';
 
+import 'editor_support.dart';
+
 const windowChannel = MethodChannel('json_better_editor/window');
 
 /// In-memory stand-in for the disk and the save panel.
@@ -94,7 +96,11 @@ void main() {
       );
       expect(modelText(saved), modelText(original));
       expect(disk.askedNames, isEmpty, reason: 'Save must not ask for a path');
-      expect(find.text(saved), findsOneWidget, reason: 'view shows saved text');
+      expect(
+        editorShowing(original),
+        findsOneWidget,
+        reason: 'the editor keeps the text as typed (decision #61)',
+      );
     },
   );
 
@@ -149,7 +155,7 @@ void main() {
     expect(find.textContaining('Operation not permitted'), findsOneWidget);
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
-    expect(find.text('[1]'), findsOneWidget);
+    expect(editorShowing('[1]'), findsOneWidget);
   });
 
   testWidgets('saving with no document open does nothing', (tester) async {
@@ -189,7 +195,7 @@ void main() {
     await pumpApp(tester, disk, '/d/a.json');
     await open(tester);
 
-    await tester.tap(find.text('[1]'));
+    await tester.tap(textEditor);
     await tester.pumpAndSettle();
     await pressSave(tester);
 
