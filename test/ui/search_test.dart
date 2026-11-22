@@ -107,4 +107,89 @@ void main() {
       const CodeLineSelection.collapsed(index: 2, offset: 3),
     );
   }, variant: macOS);
+
+  group('Next and Previous (#42)', () {
+    // "a" matches: n[a]me, [A]d[a], [a]n[a]lyst, d[a]t[a], m[a]th, [a]ge.
+    Future<CodeLineEditingController> searchA(WidgetTester tester) async {
+      final controller = await openDoc(tester);
+      await pressCmd(tester, LogicalKeyboardKey.keyF);
+      await tester.enterText(field, 'a');
+      await tester.pumpAndSettle();
+      return controller;
+    }
+
+    (int, int) at(CodeLineEditingController c) =>
+        (c.selection.startIndex, c.selection.startOffset);
+
+    Future<void> key(
+      WidgetTester tester,
+      LogicalKeyboardKey k, {
+      bool shift = false,
+    }) async {
+      if (shift) await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyEvent(k);
+      if (shift) await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('Enter goes to the next match, Shift+Enter back', (
+      tester,
+    ) async {
+      final controller = await searchA(tester);
+      expect(at(controller), (1, 4));
+      await key(tester, LogicalKeyboardKey.enter);
+      expect(at(controller), (1, 11));
+      expect(status(tester), '2 of 10');
+      await key(tester, LogicalKeyboardKey.enter, shift: true);
+      expect(at(controller), (1, 4));
+      expect(status(tester), '1 of 10');
+    }, variant: macOS);
+
+    testWidgets('Cmd+G and Cmd+Shift+G do the same and wrap at the ends', (
+      tester,
+    ) async {
+      final controller = await searchA(tester);
+      await pressCmd(tester, LogicalKeyboardKey.keyG, shift: true);
+      expect(at(controller), (4, 3), reason: 'wrapped to the last: [a]ge');
+      expect(status(tester), '10 of 10');
+      await pressCmd(tester, LogicalKeyboardKey.keyG);
+      expect(at(controller), (1, 4), reason: 'wrapped to the first');
+      expect(status(tester), '1 of 10');
+    }, variant: macOS);
+
+    testWidgets('a match below the visible area is scrolled into view', (
+      tester,
+    ) async {
+      final long = '[\n${List.filled(300, '  1').join(',\n')},\n  "needle"\n]';
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: appLocalizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: MainWindow(
+            pickJsonFile: () async => PickedFile(path: '/d/l.json', text: long),
+          ),
+        ),
+      );
+      await pressCmd(tester, LogicalKeyboardKey.keyO);
+      await pressCmd(tester, LogicalKeyboardKey.keyF);
+      await tester.enterText(field, 'needle');
+      await tester.pumpAndSettle();
+      final visible = tester
+          .widget<DefaultCodeLineNumber>(find.byType(DefaultCodeLineNumber))
+          .notifier
+          .value!
+          .paragraphs
+          .map((p) => p.index);
+      expect(visible, contains(301));
+    }, variant: macOS);
+
+    testWidgets('Esc closes the field and keeps the selection', (tester) async {
+      final controller = await searchA(tester);
+      await key(tester, LogicalKeyboardKey.enter);
+      final selection = controller.selection;
+      await key(tester, LogicalKeyboardKey.escape);
+      expect(field, findsNothing);
+      expect(controller.selection, selection);
+    }, variant: macOS);
+  });
 }

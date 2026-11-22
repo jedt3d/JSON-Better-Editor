@@ -109,6 +109,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchNoResults => 'No results';
 
   @override
+  String get searchNext => 'Next match (⌘G)';
+
+  @override
+  String get searchPrevious => 'Previous match (⇧⌘G)';
+
+  @override
   String get searchClose => 'Close search';
 
   @override

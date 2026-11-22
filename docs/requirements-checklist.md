@@ -138,7 +138,7 @@
 
 ### 3.3 Search
 - [x] Search both keys and values (Text mode; Node mode in Phase 3).
-- [ ] Jump to the first match, with **Next** / **Previous** to move between matches.
+- [x] Jump to the first match, with **Next** / **Previous** to move between matches (Text mode; Node mode in Phase 3).
 - [ ] Works in both Text and Node mode.
 
 ### 3.4 File operations

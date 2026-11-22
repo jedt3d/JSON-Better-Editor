@@ -146,7 +146,9 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
   @objc func fileOpen(_ sender: Any?) { windowChannel?.invokeMethod("menu", arguments: "open") }
   @objc func fileSave(_ sender: Any?) { windowChannel?.invokeMethod("menu", arguments: "save") }
   @objc func fileSaveAs(_ sender: Any?) { windowChannel?.invokeMethod("menu", arguments: "saveAs") }
-  @objc func fileFind(_ sender: Any?) { windowChannel?.invokeMethod("menu", arguments: "find") }
+  @objc func find(_ sender: NSMenuItem) {
+    windowChannel?.invokeMethod("menu", arguments: sender.representedObject as? String)
+  }
 
   /// Edit menu items (AppDelegate.retargetEditMenu): undo, redo, cut,
   /// copy, paste or selectAll in the Text pane.

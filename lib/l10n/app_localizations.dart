@@ -268,6 +268,18 @@ abstract class AppLocalizations {
   /// **'No results'**
   String get searchNoResults;
 
+  /// Tooltip of the next-match button.
+  ///
+  /// In en, this message translates to:
+  /// **'Next match (⌘G)'**
+  String get searchNext;
+
+  /// Tooltip of the previous-match button.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous match (⇧⌘G)'**
+  String get searchPrevious;
+
   /// Tooltip of the button that closes the search field.
   ///
   /// In en, this message translates to:

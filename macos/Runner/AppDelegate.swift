@@ -42,11 +42,15 @@ class AppDelegate: FlutterAppDelegate {
       item.target = nil
       item.representedObject = name
     }
-    // Edit › Find › Find… opens the app's search field (#41).
+    // Edit › Find: Find… (tag 1), Find Next (2) and Find Previous (3) use
+    // the app's search field (#41, #42).
     let find = edit.items.first(where: { $0.submenu?.title == "Find" })?.submenu
-    if let findItem = find?.items.first(where: { $0.tag == 1 }) {
-      findItem.action = #selector(MainFlutterWindow.fileFind(_:))
-      findItem.target = nil
+    let findActions = [1: "find", 2: "findNext", 3: "findPrevious"]
+    for item in find?.items ?? [] {
+      guard let name = findActions[item.tag] else { continue }
+      item.action = #selector(MainFlutterWindow.find(_:))
+      item.target = nil
+      item.representedObject = name
     }
   }
 
