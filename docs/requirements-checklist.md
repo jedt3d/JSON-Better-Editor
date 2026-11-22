@@ -1,10 +1,12 @@
-# JSON Better Editor — Requirements Checklist (v0.3)
+# JSON Better Editor — Requirements Checklist
 
 > Sources: `prompt.txt`, `JSON Visual Editor Mockup.webp`, `Toolbar.png`, and Jedt's edits and answers (2026-11-22).
 > Mockup and toolbar are **references only**, not strict designs.
 > This file holds requirements only. Decisions and their history are in [`decision-log.md`](decision-log.md).
+> This is the single, current version (no version suffix). `[x]` means built and merged; update it whenever a decision or a merged ticket changes a requirement.
+> Last updated: 2026-11-22, end of Phase 1.
 
-**Platform:** Flutter desktop app, **macOS only**.
+**Platform:** Flutter desktop app, **macOS only** (macOS 14 or later). Built with Flutter 3.50.1+ and the `material_ui` package (decisions #1, #36, #44, #45). Windows and Linux may come later with their own OS-specific code.
 **Core idea:** one document shown as **Text** (code editor) and **Node** (visual tree editor). Side-by-side by default, with toggles for Text only and Node only.
 
 ---
@@ -12,15 +14,15 @@
 ## 1. Text mode (code editor)
 
 ### 1.1 Open and display
-- [ ] Open a `.json` source file from disk.
+- [x] Open a `.json` source file from disk (native file picker limited to `.json`).
 - [ ] Syntax highlighting: keys, strings, numbers, booleans, null, brackets and punctuation in distinct colors.
 - [ ] Bracket matching and quote matching (highlight the matching `{}` / `[]` / `""`).
 - [ ] Line numbers in a gutter.
 - [ ] Collapsible hierarchy: fold/unfold objects `{}` and arrays `[]` from the gutter.
 
 ### 1.2 JSON understanding and validation
-- [ ] Parse key-value pairs, objects, arrays, and data types: String, Number, Boolean, Object, Array, Null.
-- [ ] If a file being opened is invalid JSON, show the error position in a dialog and do **not** open the file.
+- [x] Parse key-value pairs, objects, arrays, and data types: String, Number, Boolean, Object, Array, Null. Key order, duplicate keys and number text are kept as written; nesting deeper than 512 levels is rejected (decisions #39, #40).
+- [x] If a file being opened is invalid JSON, show the error position (line and column) in a dialog and do **not** open the file; the document already open stays.
 
 ### 1.3 Autocomplete
 - [ ] Autocomplete a `key` from keys that already exist in the document.
@@ -67,7 +69,7 @@
 - [ ] Single-click a node selects it (for copy, cut, paste, drag, delete, indent).
 - [ ] Single-click also toggles that node's value between single-line and multi-line view.
 - [ ] Multi-line view shows up to **10 lines** (fixed) plus a scrollbar.
-- [ ] The setting in 3.6 sets the default (single or multi-line) for the whole document; clicking a node toggles that node only.
+- [ ] The setting in 3.10 sets the default (single or multi-line) for the whole document; clicking a node toggles that node only.
 
 ### 2.4 Editing in the tree
 - [ ] Double-click the key to rename it.
@@ -119,18 +121,20 @@
 - [ ] While Text contains invalid JSON, Node mode shows a **blank node** (not a partial tree). Sync delay up to 250 ms is acceptable.
 
 ### 3.2 Toolbar (based on Toolbar.png)
-- [ ] Rounded, pill-shaped icon buttons, sharing the title-bar row with the macOS window controls.
-- [ ] Left group:
-  - [ ] New (file icon).
-  - [ ] Open file (folder icon).
-  - [ ] Divider.
-  - [ ] Search.
-- [ ] Right group (left to right):
-  - [ ] Layout toggles: Text only / Node only / Split 50/50.
-  - [ ] Language switch (Thai / English).
-  - [ ] Theme toggle (half-filled circle), light/dark.
-  - [ ] Settings (gear), at the far right.
-- [ ] Document title shown under the toolbar.
+- [x] The toolbar shares the title-bar row with the macOS window controls (traffic lights), vertically centred on them (decision #46).
+- [x] Native macOS look: borderless icon buttons that show a rounded fill only on hover and press, like Xcode, Finder and Safari (decision #50). Other OSes get their own toolbar style later.
+- [x] Empty toolbar space behaves like a title bar: drag to move the window; double-click follows the system setting (zoom by default).
+- [x] Left group:
+  - [x] New (file icon).
+  - [x] Open file (folder icon).
+  - [x] Divider.
+  - [x] Search (button in place; search itself is §3.3).
+- [x] Right group (left to right), buttons in place; their features are in the sections named:
+  - [x] Layout toggles: Text only / Node only / Split 50/50 (§3.1).
+  - [x] Language switch (Thai / English) (§3.7).
+  - [x] Theme toggle (half-filled circle), light/dark (§3.9).
+  - [x] Settings (gear), at the far right (§3.9).
+- [x] Document title shown under the toolbar (file name, or the app name when nothing is open).
 
 ### 3.3 Search
 - [ ] Search both keys and values.
@@ -138,8 +142,11 @@
 - [ ] Works in both Text and Node mode.
 
 ### 3.4 File operations
+- [x] Open, Save (Cmd+S) and Save As (Cmd+Shift+S, save panel limited to `.json`); Save As makes the new path the current file.
+- [ ] Save with no file yet behaves like Save As. Applies once New creates an editable document (Phase 2, decision #43).
 - [ ] Standard File menu items with normal macOS behavior: New, Open, Save, Save As, Close.
-- [ ] Save reformats the JSON (pretty-print) before writing.
+- [x] Save reformats the JSON (pretty-print, 2-space indent) before writing, and the file ends with a newline (decisions #28, #47).
+- [x] A failed write shows an error dialog, keeps the document open, and puts the file's previous contents back (decision #42).
 - [ ] One document per window. The app can run multiple instances.
 - [ ] Target for now: files under 5 MB. Progressive loading/rendering is future work.
 
@@ -148,17 +155,22 @@
 - [ ] One shared undo history across the Text and Node panes.
 
 ### 3.6 Design system
-- [ ] All other UI follows conventional Material 3 design.
+- [x] All other UI follows conventional Material 3 design (basic light and dark theme following the system; One Light / One Dark in §3.9).
 
 ### 3.7 Language
 - [ ] UI supports Thai and English, switched from the toolbar button.
-- [ ] UI language is always English on first launch.
+- [x] UI language is always English on first launch (all UI strings go through the localization files).
 - [ ] Thai text renders correctly in keys and values.
 
-### 3.8 OS integration
+### 3.8 Window
+- [x] The window opens at 60% of the width × 80% of the height of the usable work area (screen minus menu bar and Dock), centred, on the main screen (decisions #46, #48).
+- [x] It can be shrunk to about 20% × 20% of the usable work area; below the toolbar's natural width the toolbar is cut off without errors. On macOS the height stops at about 216 pt.
+- [x] Sizes are never fixed in pixels, because HiDPI scaling differs per machine; they are fractions of the usable work area (future Windows: minus the taskbar; Linux/Ubuntu: minus the dock).
+
+### 3.9 OS integration
 - [ ] Register as a handler for `.json` on macOS, so it appears in "Open With" and can be set as the default editor.
 
-### 3.9 Settings (gear icon, top-right)
+### 3.10 Settings (gear icon, top-right)
 - [ ] Theme: Atom **One Light** and **One Dark**. Follows the macOS appearance by default; the toolbar toggle overrides it.
 - [ ] Monospace font chosen from fonts installed on the system. It replaces IBM Plex Mono in **both** the Text mode editor and Node mode keys/types.
 - [ ] Default fonts (not bundled with the app, loaded from the system):
