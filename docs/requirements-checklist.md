@@ -1,165 +1,169 @@
-# JSON Better Editor — Requirements Checklist (Draft v0.1)
+# JSON Better Editor — Requirements Checklist (v0.3)
 
-> Source: `prompt.txt` (feature list), `JSON Visual Editor Mockup.webp`, `Toolbar.png`.
+> Sources: `prompt.txt`, `JSON Visual Editor Mockup.webp`, `Toolbar.png`, and Jedt's edits and answers (2026-11-22).
 > Mockup and toolbar are **references only**, not strict designs.
-> Status: draft for review. Edit freely; items marked `(?)` link to an open question at the end.
+> This file holds requirements only. Decisions and their history are in [`decision-log.md`](decision-log.md).
 
-Platform: Flutter desktop app, macOS only.
-Core idea: one document, two switchable modes, **Text** (code editor) and **Node** (visual tree editor), similar to Markdown Code/Preview.
+**Platform:** Flutter desktop app, **macOS only**.
+**Core idea:** one document shown as **Text** (code editor) and **Node** (visual tree editor). Side-by-side by default, with toggles for Text only and Node only.
 
 ---
 
-## 1. Editor side (Text mode)
+## 1. Text mode (code editor)
 
 ### 1.1 Open and display
 - [ ] Open a `.json` source file from disk.
-- [ ] Display the source with syntax highlighting (keys, strings, numbers, booleans, null, brackets, punctuation in distinct colors), match parenthesis and quote, double quotes.
-- [ ] Show line numbers in a gutter (as in the mockup's dark code pane).
+- [ ] Syntax highlighting: keys, strings, numbers, booleans, null, brackets and punctuation in distinct colors.
+- [ ] Bracket matching and quote matching (highlight the matching `{}` / `[]` / `""`).
+- [ ] Line numbers in a gutter.
 - [ ] Collapsible hierarchy: fold/unfold objects `{}` and arrays `[]` from the gutter.
 
-### 1.2 JSON understanding
-- [ ] Parse and understand key-value pairs, objects, arrays, and data types (String, Number, Boolean, Object, Array, Null ).
-- [ ] Report invalid JSON (position of the error in a dialog box) without open the invalid file.
+### 1.2 JSON understanding and validation
+- [ ] Parse key-value pairs, objects, arrays, and data types: String, Number, Boolean, Object, Array, Null.
+- [ ] If a file being opened is invalid JSON, show the error position in a dialog and do **not** open the file.
 
 ### 1.3 Autocomplete
-- [ ] Autocomplete a `key` from keys that already exist in the document. Accept a key from popup list with Tab or Enter/Return key.
+- [ ] Autocomplete a `key` from keys that already exist in the document.
+- [ ] Accept the selected suggestion from the popup list with **Enter/Return** only (Tab is not used to accept).
 
-### 1.4 Drag and drop (?)
-- [ ] Drag and drop one tree node (one by one) to move them.
-- [ ] Show an insertion line indicating exactly where the dragged node will be inserted.
+### 1.4 Keyboard and clipboard
+- [ ] **Tab** / **Shift+Tab** indent and de-indent text, as in a normal code editor.
+- [ ] Copy, cut and paste follow normal text-editor behavior (no node-aware paste in Text mode).
 
-### 1.5 Copy and paste (?)
-- [ ] Copy a node.
-- [ ] Copying multiple sibling nodes at once is prohibited.
-- [ ] Paste can insert **before** or **after** or as Child the selected node. Pop up menu to choose or contextual menu items. Ctrl/Cmd+Shift+V for insert **after** and Ctrl/Cmd+Alt/Opt+V for insert **before** and Ctrl/Cmd+V to past **as child**
-
-### 1.6 Word wrap
+### 1.5 Word wrap
 - [ ] Word-wrap toggle.
-- [ ] When on, node content wraps to the window's width.
+- [ ] When on, long lines wrap to the pane's width.
 
 ---
 
-## 2. Visual side (Node mode)
+## 2. Node mode (visual tree editor)
 
 ### 2.1 Tree visualization
-- [ ] Show a node-based visualization of the source JSON.
+- [ ] Node-based visualization of the source JSON.
 - [ ] Nested nodes are indented, with vertical guide lines connecting children to their parent (as in the mockup).
-- [ ] Show/hide (expand/collapse) collapsible nodes across multiple levels at once (e.g. expand all, collapse all, expand to level N (?) ).
+- [ ] Expand/collapse across multiple levels at once:
+  - [ ] Expand all / collapse all.
+  - [ ] Expand to a chosen depth.
+  - [ ] Collapse siblings (e.g. all items of an array).
 
 ### 2.2 Node row layout
-- [ ] Each row follows this layout:
-  `+ [ data-type icon | json key : json value ------ (# of children) | delete icon ]`
-  - [ ] `+` is the expand/collapse control (chevron in the mockup), shown only for Object/Array nodes.
-  - [ ] `------` is flexible space, so the left group (icon, key, value) aligns left and the right group (child count, delete) aligns right.
-  - [ ] Child count badge for containers, e.g. `{2}` for objects and `[n]` for arrays (?).
+- [ ] Row layout: `+ [ data-type icon | json key : json value ------ (# of children) | delete icon ]`
+  - [ ] `+` is the expand/collapse chevron, shown only for Object/Array nodes.
+  - [ ] `------` is flexible space: left group (icon, key, value) aligns left, right group (child count, delete) aligns right.
+  - [ ] Child count badge: `{n}` for objects, `[n]` for arrays.
   - [ ] Delete icon (`×`) at the far right of every row.
-- [ ] Data-type icons with a color per type (from the mockup):
+- [ ] Data-type icons, one color per type:
   - [ ] Object: cube outline icon.
   - [ ] String: green "S" icon.
   - [ ] Number: blue "12" icon.
   - [ ] Array: purple `[ ]` icon.
   - [ ] Boolean: orange power icon.
-  - [ ] Null: gray icon with `?`.
-- [ ] Key text uses the type color for leaf nodes (green key for String, blue for Number, and so on), as in the mockup.
+  - [ ] Null: gray `?` icon.
+- [ ] Leaf key text uses its type color (green for String, blue for Number, and so on).
 - [ ] Leaf value shown in a muted color in its own column, aligned across sibling rows.
+- [ ] Word wrap (same toggle as 1.5) also wraps String and Number values that are longer than one line or overflow the right edge of the window.
 
-### 2.3 Editing in the tree
-- [ ] Single-click the data-type icon to open a dropdown menu to change the node's data type (Object, String, Number, Array, Boolean, Null ).
-- [ ] If the value changes from type conversion, it must pop up the current value for the user to define or convert manually. No data parsing or automatic conversion .
-- [ ] Single-click a node to show its value expanded from one line to multiple lines, showing up to 10 lines plus a scrollbar.
+### 2.3 Selecting and viewing
+- [ ] Single-click a node selects it (for copy, cut, paste, drag, delete, indent).
+- [ ] Single-click also toggles that node's value between single-line and multi-line view.
+- [ ] Multi-line view shows up to **10 lines** (fixed) plus a scrollbar.
+- [ ] The setting in 3.6 sets the default (single or multi-line) for the whole document; clicking a node toggles that node only.
+
+### 2.4 Editing in the tree
 - [ ] Double-click the key to rename it.
 - [ ] Double-click the value to edit it.
-- [ ] Delete a node with the `×` icon with confirmation and default button to Cancel.
+- [ ] While editing a key or value field, clipboard shortcuts behave as normal text paste inside the field.
+- [ ] Single-click the data-type icon to open a dropdown to change type: Object, String, Number, Array, Boolean, Null.
+- [ ] On a type change, no automatic parsing or conversion: show a popup with the current value so the user defines or converts the new value manually.
+- [ ] Delete with the `×` icon asks for confirmation. The default button is **Cancel**.
 
-### 2.4 Adding nodes (from the mockup)
+### 2.5 Adding nodes (from the mockup)
 - [ ] `+ ADD` row at the end of each container's children, aligned with that level's guide line.
 - [ ] Clicking `+ ADD` opens an inline new-node row with:
-  - [ ] Name field (key).
-  - [ ] Type dropdown (defaults to String), listing Object, String, Number, Array, Boolean.
+  - [ ] Name field (key). For an Array parent, the Name field is hidden and replaced by the index.
+  - [ ] Type dropdown (default String): Object, String, Number, Array, Boolean, Null.
   - [ ] Value field.
-  - [ ] Confirm button (blue check) and cancel (`×`) with default button to Confirm.
-- [ ] For an Array parent, the Name field is hidden or replaced by the index.
+  - [ ] Confirm (blue check) and cancel (`×`). The default button is **Confirm**.
 
-### 2.5 Rich value previews
-- [ ] Detect values that are base64-encoded images and build a thumbnail preview (an initial detection pass when the file loads).
+### 2.6 Moving nodes
+- [ ] Drag and drop to move a node, one node at a time (Node mode only).
+- [ ] An insertion line shows exactly where the dragged node will land.
+- [ ] **Tab** indents the selected node with its children: it becomes the last child of its previous sibling.
+- [ ] **Shift+Tab** de-indents the selected node with its children: it becomes a sibling of its parent, placed right after the parent.
+
+### 2.7 Copy, cut and paste
+- [ ] Copy or cut one node at a time (with its children). Multi-node copy/cut is not allowed.
+- [ ] Paste shortcuts:
+  - [ ] **Cmd+V**: paste as child of the selected node (when a node is selected and no field is being edited).
+  - [ ] **Cmd+Shift+V**: paste as sibling **after** the selected node.
+  - [ ] **Cmd+Opt+V**: paste as sibling **before** the selected node.
+- [ ] The same paste options are in the context menu.
+
+### 2.8 Rich value previews
+- [ ] On file load, detect String values that are images in data-URI form: `data:image/<type>;base64,<data>`. Raw base64 without the prefix is not detected.
+- [ ] Show a **64×64 px** thumbnail, center-cropped so the shorter side fits.
 - [ ] Click the thumbnail to open a popup with the full image.
-- [ ] Detect HTML and Markdown content in string values.
-- [ ] Open HTML/Markdown in a popup viewer that renders a preview by default.
-- [ ] The popup has a toggle to edit the source, with syntax highlighting.
+- [ ] Detect HTML and Markdown content in String values.
+- [ ] Open HTML/Markdown in a popup **syntax-highlighted text editor** only. No rendered preview, and scripts never run.
 - [ ] Edits in the popup are saved back to the node's value.
 
 ---
 
 ## 3. General features
 
-### 3.1 Modes and sync
-- [ ] The editor should be open side by side between text and node, base 50/50%, but be able to resize the splitter. The toolbar should have three mode toggles: text only, node only, and 50/50. 
-- [ ] Edits in either mode are reflected in the other also percentage of scroll bar and selected node/value.
+### 3.1 Layout and sync
+- [ ] Default layout: Text and Node side by side, 50/50, with a draggable splitter.
+- [ ] Toolbar has three layout toggles: **Text only**, **Node only**, **Split 50/50**.
+- [ ] Edits in either pane are reflected in the other.
+- [ ] Scroll position (by percentage) and the selected node/value are synced between panes.
+- [ ] While Text contains invalid JSON, Node mode shows a **blank node** (not a partial tree). Sync delay up to 250 ms is acceptable.
 
 ### 3.2 Toolbar (based on Toolbar.png)
-- [ ] Rounded, pill-shaped icon buttons on a toolbar sharing the title bar row with the macOS window controls.
+- [ ] Rounded, pill-shaped icon buttons, sharing the title-bar row with the macOS window controls.
 - [ ] Left group:
-  - [ ] New (file icon)
-  - [ ] Open file (folder icon)
-  - [ ] Divider
-  - [ ] Search
-- [ ] Right group:
-  - [ ] Theme toggle (half-filled circle icon), switching light/dark.
-  - [ ] Settings (gear), at the top right.
-- [ ] Document title shown under the toolbar (as in the reference).
+  - [ ] New (file icon).
+  - [ ] Open file (folder icon).
+  - [ ] Divider.
+  - [ ] Search.
+- [ ] Right group (left to right):
+  - [ ] Layout toggles: Text only / Node only / Split 50/50.
+  - [ ] Language switch (Thai / English).
+  - [ ] Theme toggle (half-filled circle), light/dark.
+  - [ ] Settings (gear), at the far right.
+- [ ] Document title shown under the toolbar.
 
-### 3.3 Design system
+### 3.3 Search
+- [ ] Search both keys and values.
+- [ ] Jump to the first match, with **Next** / **Previous** to move between matches.
+- [ ] Works in both Text and Node mode.
+
+### 3.4 File operations
+- [ ] Standard File menu items with normal macOS behavior: New, Open, Save, Save As, Close.
+- [ ] Save reformats the JSON (pretty-print) before writing.
+- [ ] One document per window. The app can run multiple instances.
+- [ ] Target for now: files under 5 MB. Progressive loading/rendering is future work.
+
+### 3.5 Undo / redo
+- [ ] Undo and redo are required (Cmd+Z / Cmd+Shift+Z).
+- [ ] One shared undo history across the Text and Node panes.
+
+### 3.6 Design system
 - [ ] All other UI follows conventional Material 3 design.
 
-### 3.4 Language
-- [ ] UI supports Thai and English.
+### 3.7 Language
+- [ ] UI supports Thai and English, switched from the toolbar button.
+- [ ] UI language is always English on first launch.
 - [ ] Thai text renders correctly in keys and values.
 
-### 3.5 OS integration
-- [ ] Register as a handler for `.json` on macOS so the user can set it as the default editor.
-- [ ] Same on Windows.
+### 3.8 OS integration
+- [ ] Register as a handler for `.json` on macOS, so it appears in "Open With" and can be set as the default editor.
 
-### 3.6 Settings (gear icon, top-right)
-- [ ] Theme: a light and a dark theme similar to One Light and One Dark.
-- [ ] Choose the monospace font from fonts installed on the system (?).
-- [ ] Default fonts:
-  - [ ] UI default: IBM Plex Sans family.
+### 3.9 Settings (gear icon, top-right)
+- [ ] Theme: Atom **One Light** and **One Dark**. Follows the macOS appearance by default; the toolbar toggle overrides it.
+- [ ] Monospace font chosen from fonts installed on the system. It replaces IBM Plex Mono in **both** the Text mode editor and Node mode keys/types.
+- [ ] Default fonts (not bundled with the app, loaded from the system):
+  - [ ] UI: IBM Plex Sans.
   - [ ] Key and data type: IBM Plex Mono.
-  - [ ] Value: IBM Plex Sans Thai Looped (?).
-- [ ] Toggle to show node values as multiple lines or a single line.
-
----
-
-## 4. Open questions and clarifications
-
-These came up while writing the checklist. I have not decided any of them. Please answer or edit inline.
-
-1. **Null type.** JSON has `null`, but the mockup's type list has only Object, String, Number, Array, Boolean. Should Null be a type with its own icon? : Yes, add Null type
-2. **Drag and drop location.** It is listed under Editor side, but it talks about "tree nodes". Is it meant for Node mode only, Text mode (folded blocks), or both? : Node mode only
-3. **Copy/paste rule.** "Copy multiple sibling nodes is prohibited" — does it mean only one node can be copied at a time? Is multi-select used for anything else (drag, delete)? Is copy/paste for Node mode, Text mode, or both? Paste "before/after": should "paste as child" also exist?
- : Yes, copy/cut one at a time
- : drag & drop only one at a time
- : Copy/Cut & Paste in both mode but drag and drop in Node mode only.
- : Paste can insert **before** or **after** or as Child the selected node. Pop up menu to choose or contextual menu items. Ctrl/Cmd+Shift+V for insert **after** and Ctrl/Cmd+Alt/Opt+V for insert **before** and Ctrl/Cmd+V to past **as child**
- : Selected Node and their children can be Indented and De-indented by using Tab and Shift+Tab respectively too.
-4. **Mode layout.** The goal says two *switchable* modes, but the mockup shows code and tree side by side. Switch only, side-by-side only, or both (with a layout option)?
- : answer above, 3 modes toggle button
-5. **Sync timing.** When Text mode contains invalid JSON, what should Node mode show? Block switching, show the last valid tree, or show the error?
- : show as a blank node or display only the correct part in Key or Value. 250ms delayed is acceptable.
-6. **Expand/collapse levels.** Which controls are wanted: expand all, collapse all, expand to a chosen depth, or collapse siblings? : Yes, all/chosen depth/collapse siblings such as array
-7. **Child count badge.** The mockup uses `{n}` for objects. Should arrays use `[n]`? : Yes
-8. **Single-click vs double-click.** Single-click on a node expands its value view, and double-click on the key or value edits it. Should single-click also select the node (for copy/drag/delete)? : Yes
-9. **Multi-line value.** Settings has a single-line/multi-line toggle, and single-click also expands to 10 lines. Is the 10-line limit fixed or a setting? Does the toggle apply to all nodes at once? : Fix, apply to each toggled node
-10. **Type change conversion.** When the type changes (e.g. String "123" to Number, or Object to Array), should the value convert, be cleared, or be blocked with a warning? : Answer above
-11. **Delete confirmation.** Delete a node immediately (with undo) or ask first? Is undo/redo required in general? : Answer above
-12. **HTML/Markdown detection.** Detect automatically by content, by key name, or let the user choose "Open as HTML/Markdown" from a menu? Should HTML preview run scripts (security)? : Ok, use only the syntax highlighted text editor only. Try to detect syntax but do not run the script at all
-13. **Base64 images.** Only `data:image/...;base64,` URIs, or also raw base64 strings? Any size limit for thumbnails? : Yes
-14. **Fonts.** "Choose monospace font from system" vs default IBM Plex Mono: does the chosen font replace IBM Plex Mono for keys/types, for the Text mode editor, or both? The prompt says "IBM Plex Thai Looped"; the actual family name is "IBM Plex Sans Thai Looped". Is that the one? Should these fonts be bundled with the app? : Yes that what I mean
-15. **Themes.** "One light, one dark" — the Atom/VS Code themes *One Light* and *One Dark*? The mockup's code pane is a dark purple, which is not One Dark. Which one wins? Does the theme toggle follow the OS setting by default? : Use the Atom One Light and One Dark theme
-16. **Toolbar buttons.** What should Star, Menu (hamburger), and New's dropdown do in this app? (For example: Star = favorites/recent files, Menu = sidebar, New dropdown = templates such as empty object / empty array.) : Answer above
-17. **Search.** Search keys only, values only, or both? Is replace needed? Does it work in both modes? : Both, then go to the first match only.
-18. **Save behavior.** Save, Save As, auto-save, and formatting on save (indent size, sort keys, minify) are not listed. Are they in scope? : Yes create standard menu items for these file operation as normal behaviors.
-19. **Multiple files.** One window per file, tabs, or a single document at a time? : Sigle document only. But... can run multiple instances.
-20. **Large files.** Is there a target file size (e.g. 10 MB, 100 MB) the app must handle smoothly? : At this moment, test with <5MB file first. Progressive load file and rendering will be the future tasks.
-21. **Language switch.** Thai/English: follow the OS language, or a setting in Settings, or both? : Add to the toolbar to switch
-22. **Windows default app.** On Windows, apps can register as a handler but the user picks the default in Settings. Is "appears in Open with and can be set as default" enough? : Yes, Enough
+  - [ ] Value: IBM Plex Sans Thai Looped.
+- [ ] If a default font is not installed, fall back to the macOS default monospace font.
+- [ ] Default value view for the document: single-line or multi-line (see 2.3).
