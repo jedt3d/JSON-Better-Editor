@@ -286,6 +286,24 @@ abstract class AppLocalizations {
   /// **'Close search'**
   String get searchClose;
 
+  /// Title of the Validate JSON result when the text is valid.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid JSON'**
+  String get validateValid;
+
+  /// Body of the Validate JSON result when the text is valid.
+  ///
+  /// In en, this message translates to:
+  /// **'The document is valid JSON.'**
+  String get validateValidMessage;
+
+  /// Title of the Validate JSON result when the text has an error.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid JSON'**
+  String get validateInvalid;
+
   /// Dialog body when the system gives no error message.
   ///
   /// In en, this message translates to:

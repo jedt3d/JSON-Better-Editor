@@ -8,6 +8,7 @@ import '../app/native_window.dart';
 import '../document/json_document.dart';
 import '../l10n/app_localizations.dart';
 import 'file_access.dart';
+import 'line_list.dart';
 import 'search_bar.dart';
 import 'text_pane.dart';
 import 'toolbar_metrics.dart';
@@ -179,6 +180,8 @@ class _MainWindowState extends State<MainWindow> {
         await _saveAs();
       case ('menu', 'wordWrap'):
         _toggleWordWrap();
+      case ('menu', 'validate'):
+        await _validate();
       case ('menu', 'find'):
         _openSearch();
       case ('menu', 'findNext'):
@@ -393,6 +396,32 @@ class _MainWindowState extends State<MainWindow> {
     _setOpen(_OpenFile(null, textPaneController('{}')));
     setWindowTitle(untitled);
   });
+
+  /// Edit › Validate JSON (#86): parses the Text pane and reports the
+  /// result; on an error the caret goes to its line and column.
+  Future<void> _validate() async {
+    final open = _open;
+    if (open == null) return;
+    final l10n = AppLocalizations.of(context)!;
+    final controller = open.controller;
+    switch (parse(controller.text)) {
+      case ParseSuccess():
+        await _showError(l10n.validateValid, l10n.validateValidMessage);
+      case ParseFailure(:final error):
+        final line = error.line - 1;
+        final text = lineList(controller.codeLines)[line].text;
+        controller
+          ..selection = CodeLineSelection.collapsed(
+            index: line,
+            offset: utf16Column(text, error.column),
+          )
+          ..makeCursorVisible();
+        await _showError(
+          l10n.validateInvalid,
+          l10n.invalidJsonPosition(error.line, error.column, error.message),
+        );
+    }
+  }
 
   Future<void> _showError(String title, String message) {
     final l10n = AppLocalizations.of(context)!;

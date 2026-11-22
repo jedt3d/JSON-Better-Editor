@@ -303,3 +303,16 @@ class _Parser {
     return JsonParseError(line, column, message);
   }
 }
+
+/// The UTF-16 offset of 1-based character [column] (as in [JsonParseError])
+/// on [line], for placing the editor caret.
+int utf16Column(String line, int column) {
+  var offset = 0;
+  var characters = 1;
+  for (final rune in line.runes) {
+    if (characters == column) return offset;
+    offset += rune > 0xFFFF ? 2 : 1;
+    characters++;
+  }
+  return offset;
+}
