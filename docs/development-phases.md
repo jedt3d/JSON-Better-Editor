@@ -3,7 +3,7 @@
 > Rough task breakdown by phase, agreed with Jedt on 2026-11-22.
 > Section numbers (e.g. §1.3) refer to [`requirements-checklist.md`](requirements-checklist.md). Phase decisions are logged in [`decision-log.md`](decision-log.md).
 > Platform: Flutter desktop, macOS only (macOS 14+, Flutter 3.50.1+).
-> Reviewed at the end of every phase so it matches what was actually built.
+> Reviewed at the end of every phase so it matches what was actually built. The Thai user reference manual, [`manual/reference.th.md`](manual/reference.th.md), is reviewed at the same time (decision #84).
 
 Each phase ends with an app that builds and runs on macOS. A phase starts only after the previous one works.
 
