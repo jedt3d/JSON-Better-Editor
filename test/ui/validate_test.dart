@@ -78,6 +78,12 @@ void main() {
     expect(c.selection.extentOffset, 8);
   }, variant: macOS);
 
+  test('validateJson returns the errors as a list', () {
+    expect(validateJson('{"a": 1}'), isEmpty);
+    final errors = validateJson('{\n  "a": 1,\n}');
+    expect(errors.map((e) => (e.line, e.column)), [(3, 1)]);
+  });
+
   test('columns count characters; the caret offset counts UTF-16 units', () {
     expect(utf16Column('a😀b', 3), 3, reason: 'the emoji is 2 units');
     expect(utf16Column('abc', 4), 3, reason: 'end of line');

@@ -404,23 +404,26 @@ class _MainWindowState extends State<MainWindow> {
     if (open == null) return;
     final l10n = AppLocalizations.of(context)!;
     final controller = open.controller;
-    switch (parse(controller.text)) {
-      case ParseSuccess():
-        await _showError(l10n.validateValid, l10n.validateValidMessage);
-      case ParseFailure(:final error):
-        final line = error.line - 1;
-        final text = lineList(controller.codeLines)[line].text;
-        controller
-          ..selection = CodeLineSelection.collapsed(
-            index: line,
-            offset: utf16Column(text, error.column),
-          )
-          ..makeCursorVisible();
-        await _showError(
-          l10n.validateInvalid,
-          l10n.invalidJsonPosition(error.line, error.column, error.message),
-        );
+    final errors = validateJson(controller.text);
+    if (errors.isEmpty) {
+      return _showError(l10n.validateValid, l10n.validateValidMessage);
     }
+    final error = errors.first;
+    final line = error.line - 1;
+    final text = lineList(controller.codeLines)[line].text;
+    controller
+      ..selection = CodeLineSelection.collapsed(
+        index: line,
+        offset: utf16Column(text, error.column),
+      )
+      ..makeCursorVisible();
+    await _showError(
+      l10n.validateInvalid,
+      [
+        for (final e in errors)
+          l10n.invalidJsonPosition(e.line, e.column, e.message),
+      ].join('\n'),
+    );
   }
 
   Future<void> _showError(String title, String message) {
