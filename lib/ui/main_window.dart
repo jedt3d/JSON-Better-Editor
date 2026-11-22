@@ -39,12 +39,25 @@ class _OpenFile {
   final PickedFile? file;
   final CodeLineEditingController controller;
 
-  /// The editor's lines when the document was opened or last saved. re_editor
-  /// replaces this object on every edit and puts it back on undo, so the
-  /// document is edited exactly when the current lines are another object.
+  /// The editor's lines when the document was opened or last saved.
+  /// re_editor replaces this object on every edit (and puts it back on
+  /// undo), but also on fold and unfold (#36), so a new object is compared
+  /// line by line. Folding keeps the same line strings, so that walk is
+  /// mostly identity checks.
   final CodeLines savedLines;
 
-  bool get edited => !identical(controller.codeLines, savedLines);
+  CodeLines? _checkedLines;
+  bool _checkedEdited = false;
+
+  bool get edited {
+    final lines = controller.codeLines;
+    if (identical(lines, savedLines)) return false;
+    if (!identical(lines, _checkedLines)) {
+      _checkedLines = lines;
+      _checkedEdited = !_sameText(lines, savedLines);
+    }
+    return _checkedEdited;
+  }
 
   /// The file name, or [untitled] for a new document.
   String name(String untitled) => file?.name ?? untitled;
@@ -354,6 +367,33 @@ class _MainWindowState extends State<MainWindow> {
         ],
       ),
     );
+  }
+}
+
+/// Whether [a] and [b] hold the same text, folded parts included.
+bool _sameText(CodeLines a, CodeLines b) {
+  final left = _lineTexts(a).iterator;
+  final right = _lineTexts(b).iterator;
+  while (true) {
+    final more = left.moveNext();
+    if (more != right.moveNext()) return false;
+    if (!more) return true;
+    if (left.current != right.current) return false;
+  }
+}
+
+Iterable<String> _lineTexts(CodeLines lines) sync* {
+  for (final segment in lines.segments) {
+    for (final line in segment.codeLines) {
+      yield* _withChunks(line);
+    }
+  }
+}
+
+Iterable<String> _withChunks(CodeLine line) sync* {
+  yield line.text;
+  for (final chunk in line.chunks) {
+    yield* _withChunks(chunk);
   }
 }
 

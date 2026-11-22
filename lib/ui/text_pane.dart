@@ -93,6 +93,7 @@ class _TextPaneState extends State<TextPane> {
       autocompleteSymbols: false,
       wordWrap: false,
       shortcutsActivatorsBuilder: const _TextPaneShortcuts(),
+      chunkAnalyzer: const _JsonChunkAnalyzer(),
       // Line numbers (#34): the gutter widens with the number of lines;
       // the caret's line number is drawn in full colour, the others at half.
       indicatorBuilder: (context, editing, chunks, notifier) {
@@ -100,7 +101,17 @@ class _TextPaneState extends State<TextPane> {
         return Padding(
           key: _gutterKey,
           padding: const EdgeInsets.only(left: 8, right: 4),
-          child: DefaultCodeLineNumber(controller: editing, notifier: notifier),
+          child: Row(
+            children: [
+              DefaultCodeLineNumber(controller: editing, notifier: notifier),
+              // Fold markers on lines that open a multi-line { or [ (#36).
+              DefaultCodeChunkIndicator(
+                width: 16,
+                controller: chunks,
+                notifier: notifier,
+              ),
+            ],
+          ),
         );
       },
       padding: const EdgeInsets.fromLTRB(8, 8, 16, 8),
@@ -207,6 +218,24 @@ class _PairPainter extends CustomPainter {
   @override
   bool shouldRepaint(_PairPainter old) =>
       old.color != color || old.border != border;
+}
+
+/// Foldable blocks: every multi-line `{ }` or `[ ]` (#36). re_editor keeps
+/// the closing line visible after folding; when that line holds only the
+/// closing bracket (and a comma), it is folded too, so the block shows as
+/// one line ending in the `…` marker.
+class _JsonChunkAnalyzer implements CodeChunkAnalyzer {
+  const _JsonChunkAnalyzer();
+
+  static final _closerOnly = RegExp(r'^\s*[}\]],?\s*$');
+
+  @override
+  List<CodeChunk> run(CodeLines codeLines) => [
+    for (final chunk in const DefaultCodeChunkAnalyzer().run(codeLines))
+      _closerOnly.hasMatch(codeLines[chunk.end].text)
+          ? CodeChunk(chunk.index, chunk.end + 1)
+          : chunk,
+  ];
 }
 
 /// re_editor's macOS shortcuts, minus the ones the app owns (Save goes to
