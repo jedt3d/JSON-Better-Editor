@@ -80,4 +80,15 @@ void main() {
     await menu(tester, 'saveAs');
     expect(calls, ['open', 'panel']);
   }, variant: macOS);
+
+  testWidgets('closing the window clears the document for the next show', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    await menu(tester, 'open');
+    expect(documentTitle(tester), 'a.json');
+    await menu(tester, 'closeDocument');
+    expect(documentTitle(tester), 'JSON Better Editor');
+    expect(find.text('Open a JSON file'), findsOneWidget);
+  }, variant: macOS);
 }

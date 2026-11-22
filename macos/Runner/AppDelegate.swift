@@ -3,8 +3,32 @@ import FlutterMacOS
 
 @main
 class AppDelegate: FlutterAppDelegate {
+  /// Closing the window leaves the app running, like other macOS editors
+  /// (#93, supersedes decision #68); Cmd+Q quits.
   override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+    return false
+  }
+
+  private var window: MainFlutterWindow? {
+    NSApp.windows.compactMap { $0 as? MainFlutterWindow }.first
+  }
+
+  /// Dock icon with no window showing: bring the window back.
+  override func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+    if !flag { window?.show() }
     return true
+  }
+
+  // File › New and Open… with no window showing reach the app delegate
+  // (the responder chain has no key window): show the window, then run them.
+  @objc func fileNew(_ sender: Any?) {
+    window?.show()
+    window?.fileNew(sender)
+  }
+
+  @objc func fileOpen(_ sender: Any?) {
+    window?.show()
+    window?.fileOpen(sender)
   }
 
   override func applicationWillFinishLaunching(_ notification: Notification) {
@@ -101,6 +125,7 @@ class AppDelegate: FlutterAppDelegate {
     guard let window = application.windows.compactMap({ $0 as? MainFlutterWindow }).first,
       let url = urls.last
     else { return }
+    window.show()
     window.openFromFinder(url.path)
   }
 
