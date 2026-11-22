@@ -6,6 +6,7 @@ import 'package:re_editor/re_editor.dart';
 
 import '../app/native_window.dart';
 import '../document/json_document.dart';
+import '../document/line_endings.dart';
 import '../document/recent_files.dart';
 import '../l10n/app_localizations.dart';
 import 'file_access.dart';
@@ -39,10 +40,15 @@ class MainWindow extends StatefulWidget {
 /// never-saved document), and the Text pane's editing controller, which
 /// holds the current (possibly edited) text.
 class _OpenFile {
-  _OpenFile(this.file, this.controller) : savedLines = controller.codeLines;
+  _OpenFile(this.file, this.controller, this.lineEnding)
+    : savedLines = controller.codeLines;
 
   final PickedFile? file;
   final CodeLineEditingController controller;
+
+  /// The file's line ending, written back on Save (#95). The editor itself
+  /// always works with LF.
+  final LineEnding lineEnding;
 
   /// The editor's lines when the document was opened or last saved.
   /// re_editor replaces this object on every edit (and puts it back on
@@ -200,7 +206,7 @@ class _MainWindowState extends State<MainWindow> {
     final open = _open;
     if (open == null) return;
     // Mark unedited so the open does not ask again.
-    _setOpen(_OpenFile(open.file, open.controller));
+    _setOpen(_OpenFile(open.file, open.controller, open.lineEnding));
     await _confirmThenOpen(() => widget.readJsonFile(path));
   }
 
@@ -464,7 +470,13 @@ class _MainWindowState extends State<MainWindow> {
 
     switch (parse(picked.text)) {
       case ParseSuccess():
-        _setOpen(_OpenFile(picked, textPaneController(picked.text)));
+        _setOpen(
+          _OpenFile(
+            picked,
+            textPaneController(LineEnding.toLf(picked.text)),
+            LineEnding.detect(picked.text),
+          ),
+        );
         _rememberDiskTime(_open!);
         _addRecent(picked.path);
         setWindowTitle(picked.name);
@@ -529,7 +541,8 @@ class _MainWindowState extends State<MainWindow> {
       return false;
     }
     // Ending with a newline (decision #47).
-    final text = '${document.toText()}\n';
+    // Written with the file's own line ending (#95).
+    final text = open.lineEnding.apply('${document.toText()}\n');
     try {
       await widget.writeTextFile(path, text);
     } on FileAccessException catch (e) {
@@ -546,7 +559,7 @@ class _MainWindowState extends State<MainWindow> {
     // ponytail: the saved state is the lines at the moment Save finished, so
     // typing during a slow write would be counted as saved. Capture the lines
     // before parsing if writes ever become slow enough to matter.
-    _setOpen(_OpenFile(saved, open.controller));
+    _setOpen(_OpenFile(saved, open.controller, open.lineEnding));
     _rememberDiskTime(_open!);
     _addRecent(path);
     setWindowTitle(saved.name);
@@ -565,7 +578,7 @@ class _MainWindowState extends State<MainWindow> {
   Future<void> _newDocument() => _exclusive(() async {
     if (!await _confirmDiscard() || !mounted) return;
     final untitled = AppLocalizations.of(context)!.untitled;
-    _setOpen(_OpenFile(null, textPaneController('{}')));
+    _setOpen(_OpenFile(null, textPaneController('{}'), LineEnding.osDefault));
     setWindowTitle(untitled);
   });
 
