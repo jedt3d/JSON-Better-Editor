@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:re_editor/re_editor.dart';
 
@@ -62,6 +63,29 @@ class JsonSearchBarState extends State<JsonSearchBar> {
     if (matches.isNotEmpty) _select(matches.first);
   }
 
+  /// Next (Enter, Cmd+G) or previous (Shift+Enter, Cmd+Shift+G) match from
+  /// the selection, wrapping around at the ends (#42). Searches again first,
+  /// so edits made since are taken into account.
+  void step({bool forward = true}) {
+    if (_query.text.isEmpty) return;
+    final controller = widget.controller;
+    final lines = controller.codeLines;
+    final matches = searchJson((i) => lines[i].text, lines.length, _query.text);
+    final selection = controller.selection;
+    final i = nextMatch(
+      matches,
+      forward
+          ? (line: selection.endIndex, column: selection.endOffset - 1)
+          : (line: selection.startIndex, column: selection.startOffset),
+      forward: forward,
+    );
+    setState(() {
+      _matches = matches;
+      _current = i;
+    });
+    if (i >= 0) _select(matches[i]);
+  }
+
   void _select(SearchMatch match) {
     widget.controller
       ..selection = CodeLineSelection(
@@ -87,21 +111,34 @@ class JsonSearchBarState extends State<JsonSearchBar> {
       child: Row(
         children: [
           Expanded(
-            child: TextField(
-              key: const Key('searchField'),
-              controller: _query,
-              focusNode: _field,
-              onChanged: _search,
-              style: const TextStyle(fontSize: 13),
-              decoration: InputDecoration(
-                isDense: true,
-                prefixIcon: const Icon(Icons.search, size: 16),
-                prefixIconConstraints: const BoxConstraints(minWidth: 28),
-                hintText: l10n.searchHint,
-                border: const OutlineInputBorder(),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 6,
+            child: CallbackShortcuts(
+              bindings: {
+                const SingleActivator(LogicalKeyboardKey.enter): step,
+                const SingleActivator(
+                  LogicalKeyboardKey.enter,
+                  shift: true,
+                ): () =>
+                    step(forward: false),
+                // Esc closes the field and keeps the selection (#42).
+                const SingleActivator(LogicalKeyboardKey.escape):
+                    widget.onClose,
+              },
+              child: TextField(
+                key: const Key('searchField'),
+                controller: _query,
+                focusNode: _field,
+                onChanged: _search,
+                style: const TextStyle(fontSize: 13),
+                decoration: InputDecoration(
+                  isDense: true,
+                  prefixIcon: const Icon(Icons.search, size: 16),
+                  prefixIconConstraints: const BoxConstraints(minWidth: 28),
+                  hintText: l10n.searchHint,
+                  border: const OutlineInputBorder(),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
                 ),
               ),
             ),
@@ -111,6 +148,16 @@ class JsonSearchBarState extends State<JsonSearchBar> {
             status,
             key: const Key('searchStatus'),
             style: TextStyle(fontSize: 12, color: colors.onSurfaceVariant),
+          ),
+          IconButton(
+            icon: const Icon(Icons.keyboard_arrow_up, size: 18),
+            tooltip: l10n.searchPrevious,
+            onPressed: _matches.isEmpty ? null : () => step(forward: false),
+          ),
+          IconButton(
+            icon: const Icon(Icons.keyboard_arrow_down, size: 18),
+            tooltip: l10n.searchNext,
+            onPressed: _matches.isEmpty ? null : step,
           ),
           IconButton(
             icon: const Icon(Icons.close, size: 16),

@@ -88,6 +88,13 @@ class _MainWindowState extends State<MainWindow> {
     setState(() => _searchOpen = true);
   }
 
+  /// Cmd+G / Cmd+Shift+G and Edit › Find › Find Next / Previous: move
+  /// between matches, opening the field first if it is closed.
+  void _findNext({bool forward = true}) {
+    if (!_searchOpen) return _openSearch();
+    _searchBar.currentState?.step(forward: forward);
+  }
+
   void _closeSearch() {
     setState(() => _searchOpen = false);
     final controller = _open?.controller;
@@ -146,6 +153,10 @@ class _MainWindowState extends State<MainWindow> {
         _toggleWordWrap();
       case ('menu', 'find'):
         _openSearch();
+      case ('menu', 'findNext'):
+        _findNext();
+      case ('menu', 'findPrevious'):
+        _findNext(forward: false);
       case ('openPath', final String path):
         await _openPath(path);
       case ('edit', final String action):
@@ -385,6 +396,13 @@ class _MainWindowState extends State<MainWindow> {
         const SingleActivator(LogicalKeyboardKey.keyZ, alt: true):
             _toggleWordWrap,
         const SingleActivator(LogicalKeyboardKey.keyF, meta: true): _openSearch,
+        const SingleActivator(LogicalKeyboardKey.keyG, meta: true): _findNext,
+        const SingleActivator(
+          LogicalKeyboardKey.keyG,
+          meta: true,
+          shift: true,
+        ): () =>
+            _findNext(forward: false),
         const SingleActivator(LogicalKeyboardKey.keyS, meta: true, shift: true):
             _saveAs,
       },

@@ -155,6 +155,14 @@
   "@searchNoResults": {
     "description": "Shown when the search text is not found."
   },
+  "searchNext": "Next match (⌘G)",
+  "@searchNext": {
+    "description": "Tooltip of the next-match button."
+  },
+  "searchPrevious": "Previous match (⇧⌘G)",
+  "@searchPrevious": {
+    "description": "Tooltip of the previous-match button."
+  },
   "searchClose": "Close search",
   "@searchClose": {
     "description": "Tooltip of the button that closes the search field."
