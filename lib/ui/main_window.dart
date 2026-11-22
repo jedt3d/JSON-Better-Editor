@@ -26,8 +26,19 @@ class _OpenFile {
 
 class _MainWindowState extends State<MainWindow> {
   _OpenFile? _open;
+  bool _opening = false;
 
   Future<void> _openFile() async {
+    if (_opening) return;
+    _opening = true;
+    try {
+      await _pickAndOpen();
+    } finally {
+      _opening = false;
+    }
+  }
+
+  Future<void> _pickAndOpen() async {
     final l10n = AppLocalizations.of(context)!;
     final PickedFile? picked;
     try {
@@ -35,7 +46,7 @@ class _MainWindowState extends State<MainWindow> {
     } on FileAccessException catch (e) {
       if (!mounted) return;
       return _showError(
-        l10n.openFailedTitle(e.name),
+        e.name.isEmpty ? l10n.openFailed : l10n.openFailedTitle(e.name),
         e.osMessage ?? l10n.fileNotText,
       );
     }
@@ -112,7 +123,11 @@ class _PlainTextView extends StatelessWidget {
           child: SelectableText(
             text,
             // macOS default monospace font (decisions #17, #29).
-            style: const TextStyle(fontFamily: 'Menlo', fontSize: 13),
+            style: const TextStyle(
+              fontFamily: 'Menlo',
+              fontFamilyFallback: ['Monaco', 'Courier'],
+              fontSize: 13,
+            ),
           ),
         ),
       ),

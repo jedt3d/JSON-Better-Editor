@@ -59,4 +59,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ok => 'OK';
+
+  @override
+  String get openFailed => 'Can\'t open the file';
 }

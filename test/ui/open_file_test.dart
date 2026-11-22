@@ -8,10 +8,10 @@ import 'package:json_better_editor/ui/main_window.dart';
 const windowChannel = MethodChannel('json_better_editor/window');
 
 Widget appWith(PickJsonFile pick) => MaterialApp(
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: MainWindow(pickJsonFile: pick),
-    );
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  home: MainWindow(pickJsonFile: pick),
+);
 
 void main() {
   final titles = <String>[];
@@ -20,9 +20,9 @@ void main() {
     titles.clear();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(windowChannel, (call) async {
-      if (call.method == 'setTitle') titles.add(call.arguments as String);
-      return null;
-    });
+          if (call.method == 'setTitle') titles.add(call.arguments as String);
+          return null;
+        });
   });
 
   tearDown(() {
@@ -30,11 +30,15 @@ void main() {
         .setMockMethodCallHandler(windowChannel, null);
   });
 
-  testWidgets('opening a valid file shows its text and sets the title',
-      (tester) async {
+  testWidgets('opening a valid file shows its text and sets the title', (
+    tester,
+  ) async {
     const text = '{\n  "name": "Ada"\n}';
-    await tester.pumpWidget(appWith(
-        () async => const PickedFile(path: '/tmp/people.json', text: text)));
+    await tester.pumpWidget(
+      appWith(
+        () async => const PickedFile(path: '/tmp/people.json', text: text),
+      ),
+    );
 
     await tester.tap(find.byTooltip('Open'));
     await tester.pumpAndSettle();
@@ -44,8 +48,9 @@ void main() {
     expect(titles.last, 'people.json');
   });
 
-  testWidgets('opening invalid JSON shows the error and keeps the old state',
-      (tester) async {
+  testWidgets('opening invalid JSON shows the error and keeps the old state', (
+    tester,
+  ) async {
     var next = const PickedFile(path: '/tmp/good.json', text: '[1]');
     await tester.pumpWidget(appWith(() async => next));
     await tester.tap(find.byTooltip('Open'));
@@ -76,10 +81,14 @@ void main() {
     expect(find.byType(AlertDialog), findsNothing);
   });
 
-  testWidgets('a file that cannot be read shows an error dialog',
-      (tester) async {
-    await tester.pumpWidget(appWith(
-        () async => throw const FileAccessException('/tmp/x.json', 'denied')));
+  testWidgets('a file that cannot be read shows an error dialog', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      appWith(
+        () async => throw const FileAccessException('/tmp/x.json', 'denied'),
+      ),
+    );
 
     await tester.tap(find.byTooltip('Open'));
     await tester.pumpAndSettle();
@@ -88,10 +97,12 @@ void main() {
     expect(find.textContaining('denied'), findsOneWidget);
   });
 
-  testWidgets('New clears the document back to the empty state',
-      (tester) async {
-    await tester.pumpWidget(appWith(
-        () async => const PickedFile(path: '/tmp/a.json', text: '{}')));
+  testWidgets('New clears the document back to the empty state', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      appWith(() async => const PickedFile(path: '/tmp/a.json', text: '{}')),
+    );
     await tester.tap(find.byTooltip('Open'));
     await tester.pumpAndSettle();
 
@@ -100,5 +111,37 @@ void main() {
 
     expect(find.text('Open a JSON file'), findsOneWidget);
     expect(titles.last, 'JSON Better Editor');
+  });
+
+  testWidgets('a file that is not UTF-8 text shows an error dialog', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      appWith(() async => throw const FileAccessException('/tmp/b.json')),
+    );
+
+    await tester.tap(find.byTooltip('Open'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('not UTF-8'), findsOneWidget);
+  });
+
+  testWidgets('Open is ignored while a previous Open is still running', (
+    tester,
+  ) async {
+    var calls = 0;
+    await tester.pumpWidget(
+      appWith(() async {
+        calls++;
+        await Future<void>.delayed(const Duration(seconds: 1));
+        return null;
+      }),
+    );
+
+    await tester.tap(find.byTooltip('Open'));
+    await tester.tap(find.byTooltip('Open'));
+    await tester.pump(const Duration(seconds: 2));
+
+    expect(calls, 1);
   });
 }

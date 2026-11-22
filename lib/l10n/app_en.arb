@@ -79,5 +79,9 @@
   "ok": "OK",
   "@ok": {
     "description": "Button that closes a dialog."
+  },
+  "openFailed": "Can't open the file",
+  "@openFailed": {
+    "description": "Error dialog title when the open panel itself fails."
   }
 }

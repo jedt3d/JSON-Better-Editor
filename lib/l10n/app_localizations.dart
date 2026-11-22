@@ -189,6 +189,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OK'**
   String get ok;
+
+  /// Error dialog title when the open panel itself fails.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t open the file'**
+  String get openFailed;
 }
 
 class _AppLocalizationsDelegate

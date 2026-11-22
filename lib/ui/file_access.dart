@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:flutter/services.dart';
+
 import '../app/native_window.dart';
 
 /// A .json file chosen by the user, read as UTF-8 text.
@@ -12,8 +14,8 @@ class PickedFile {
   String get name => path.split('/').last;
 }
 
-/// Reading the chosen file failed. [osMessage] is null when the file is not
-/// UTF-8 text.
+/// Picking or reading the file failed. [osMessage] is null when the file is
+/// not UTF-8 text; [path] is empty when the open panel itself failed.
 class FileAccessException implements Exception {
   const FileAccessException(this.path, [this.osMessage]);
 
@@ -28,7 +30,14 @@ class FileAccessException implements Exception {
 typedef PickJsonFile = Future<PickedFile?> Function();
 
 Future<PickedFile?> pickJsonFileFromDisk() async {
-  final path = await showOpenJsonPanel();
+  final String? path;
+  try {
+    path = await showOpenJsonPanel();
+  } on PlatformException catch (e) {
+    throw FileAccessException('', e.message ?? e.code);
+  } on MissingPluginException catch (e) {
+    throw FileAccessException('', e.message);
+  }
   if (path == null) return null;
   try {
     return PickedFile(path: path, text: await File(path).readAsString());
