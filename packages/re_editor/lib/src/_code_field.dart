@@ -1028,7 +1028,19 @@ class _CodeFieldRender extends RenderBox implements MouseTrackerAnnotation {
         _updateDisplayRenderParagraphs();
         return;
       }
-      if (target < _displayParagraphs.first.top) {
+      // JBE: patch 1 (JBE_CHANGES.md). Without word wrap every line has the
+      // same height, so jump straight to the target line instead of laying out
+      // every line in between (seconds for a long jump up in a large file).
+      if (target < _displayParagraphs.first.top && _horizontalViewport != null) {
+        final int startIndex;
+        if (target <= paddingTop) {
+          startIndex = 0;
+        } else {
+          startIndex = min((target / _preferredLineHeight).floor(), _codes.length - 1);
+        }
+        _displayParagraphs.clear();
+        _displayParagraphs.addAll(_buildDisplayRenderParagraphs(startIndex, effectiveWidth));
+      } else if (target < _displayParagraphs.first.top) {
         int startIndex = 0;
         double delta = 0;
         double offset = _displayParagraphs.first.top;
