@@ -285,6 +285,8 @@ class _MainWindowState extends State<MainWindow> {
         await _reformat((document) => document.toText());
       case ('menu', 'minify'):
         await _reformat((document) => document.toCompactText());
+      case ('menu', 'closeDocument'):
+        _closeDocument();
       case ('menu', 'goToLine'):
         await _goToLine();
       case ('menu', 'find'):
@@ -500,6 +502,14 @@ class _MainWindowState extends State<MainWindow> {
     _rememberDiskTime(_open!);
     setWindowTitle(saved.name);
     return true;
+  }
+
+  /// The window was closed (#93): it is only hidden, so drop the document
+  /// (already confirmed) and show the empty state when it comes back.
+  void _closeDocument() {
+    if (_searchOpen) setState(() => _searchOpen = false);
+    _setOpen(null);
+    setWindowTitle(AppLocalizations.of(context)!.appTitle);
   }
 
   /// Cmd+N: a new, never-saved document holding `{}`.

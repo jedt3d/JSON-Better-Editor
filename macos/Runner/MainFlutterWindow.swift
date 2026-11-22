@@ -198,15 +198,24 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
   }
 
   /// Close button and Cmd+W: ask first, then close for real.
+  /// The window is never really closed: Flutter's engine lives in it. It is
+  /// hidden and its document cleared, and the app keeps running (#93);
+  /// `show()` brings it back.
   func windowShouldClose(_ sender: NSWindow) -> Bool {
-    guard isDocumentEdited else { return true }
     confirmClose { ok in
       guard ok else { return }
-      // Answered; Quit (after the last window closes) must not ask again.
+      // Answered; Quit must not ask again.
       self.isDocumentEdited = false
-      self.close()
+      self.windowChannel?.invokeMethod("menu", arguments: "closeDocument")
+      self.orderOut(nil)
     }
     return false
+  }
+
+  /// Shows the window again after Close (#93): Dock icon, File › New / Open,
+  /// or a file from Finder.
+  func show() {
+    if !isVisible { makeKeyAndOrderFront(nil) }
   }
 
   /// The part of the screen windows may use: the screen minus the menu bar
