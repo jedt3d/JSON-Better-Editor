@@ -119,3 +119,26 @@ List<(int, int)> _stringRanges(String text) {
 
 bool _inString(List<(int, int)> strings, int i) =>
     strings.any((r) => r.$1 <= i && i <= r.$2);
+
+/// The innermost `{` or `[` that is still open at [caret], or null at the
+/// top level. Used to tell a key position (inside an object) from a value
+/// in an array.
+String? openContainerAt(String Function(int line) lineAt, TextPoint caret) {
+  var depth = 0;
+  for (var line = caret.line; line >= 0; line--) {
+    final text = lineAt(line);
+    final strings = _stringRanges(text);
+    final start = line == caret.line ? caret.column - 1 : text.length - 1;
+    for (var i = start; i >= 0; i--) {
+      final c = text[i];
+      if (_inString(strings, i)) continue;
+      if (_close.contains(c)) {
+        depth++;
+      } else if (_open.contains(c)) {
+        if (depth == 0) return c;
+        depth--;
+      }
+    }
+  }
+  return null;
+}

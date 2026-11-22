@@ -58,6 +58,9 @@ Future<void> typeText(WidgetTester tester, String text) async {
     ),
     (_) {},
   );
+  // Lay out the edit before time moves on: re_editor places its key
+  // suggestions 50 ms after typing, using the laid-out line.
+  await tester.pump();
   await tester.pumpAndSettle();
 }
 

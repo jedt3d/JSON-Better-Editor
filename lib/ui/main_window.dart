@@ -176,15 +176,13 @@ class _MainWindowState extends State<MainWindow> {
     }
   }
 
-  Future<void> _openFile() => _exclusive(
-    () => _confirmThenOpen(widget.pickJsonFile),
-  );
+  Future<void> _openFile() =>
+      _exclusive(() => _confirmThenOpen(widget.pickJsonFile));
 
   /// Opens [path] from Finder; the window's document is replaced after the
   /// unsaved-changes prompt (decision #56).
-  Future<void> _openPath(String path) => _exclusive(
-    () => _confirmThenOpen(() => widget.readJsonFile(path)),
-  );
+  Future<void> _openPath(String path) =>
+      _exclusive(() => _confirmThenOpen(() => widget.readJsonFile(path)));
 
   /// Asks Save / Don't Save / Cancel when the document has unsaved changes
   /// (decision #55). True when it is fine to drop the document: there were
