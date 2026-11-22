@@ -18,7 +18,7 @@
 - [x] Syntax highlighting: keys, strings, numbers, booleans, null, brackets and punctuation in distinct colors.
 - [x] Bracket matching and quote matching (highlight the matching `{}` / `[]` / `""`).
 - [x] Line numbers in a gutter.
-- [ ] Collapsible hierarchy: fold/unfold objects `{}` and arrays `[]` from the gutter.
+- [x] Collapsible hierarchy: fold/unfold objects `{}` and arrays `[]` from the gutter.
 
 ### 1.2 JSON understanding and validation
 - [x] Parse key-value pairs, objects, arrays, and data types: String, Number, Boolean, Object, Array, Null. Key order, duplicate keys and number text are kept as written; nesting deeper than 512 levels is rejected (decisions #39, #40).
