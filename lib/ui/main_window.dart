@@ -28,13 +28,17 @@ class MainWindow extends StatefulWidget {
   State<MainWindow> createState() => _MainWindowState();
 }
 
-/// The document currently shown: the file it belongs to, and the Text pane's
-/// editing controller, which holds the current (possibly edited) text.
+/// The document currently shown: the file it belongs to (null for a new,
+/// never-saved document), and the Text pane's editing controller, which
+/// holds the current (possibly edited) text.
 class _OpenFile {
   _OpenFile(this.file, this.controller);
 
-  final PickedFile file;
+  final PickedFile? file;
   final CodeLineEditingController controller;
+
+  /// The file name, or [untitled] for a new document.
+  String name(String untitled) => file?.name ?? untitled;
 }
 
 class _MainWindowState extends State<MainWindow> {
@@ -102,8 +106,8 @@ class _MainWindowState extends State<MainWindow> {
   /// Cmd+S. Every open document has a file in Phase 1 (New gives the empty
   /// state), so Save always writes to it.
   Future<void> _save() => _exclusive(() async {
-    final open = _open;
-    if (open != null) await _writeTo(open, open.file.path);
+    final path = _open?.file?.path;
+    if (path != null) await _writeTo(_open!, path);
   });
 
   /// Cmd+Shift+S.
@@ -113,7 +117,7 @@ class _MainWindowState extends State<MainWindow> {
     final l10n = AppLocalizations.of(context)!;
     final String? path;
     try {
-      path = await widget.chooseSavePath(open.file.name);
+      path = await widget.chooseSavePath(open.name(l10n.untitled));
     } on FileAccessException catch (e) {
       if (!mounted) return;
       return _showError(l10n.saveFailed, e.osMessage ?? l10n.unknownError);
@@ -154,9 +158,11 @@ class _MainWindowState extends State<MainWindow> {
     setWindowTitle(saved.name);
   }
 
+  /// Cmd+N: a new, never-saved document holding `{}`.
   void _newDocument() {
-    _setOpen(null);
-    setWindowTitle(AppLocalizations.of(context)!.appTitle);
+    final untitled = AppLocalizations.of(context)!.untitled;
+    _setOpen(_OpenFile(null, textPaneController('{}')));
+    setWindowTitle(untitled);
   }
 
   Future<void> _showError(String title, String message) {
@@ -182,6 +188,9 @@ class _MainWindowState extends State<MainWindow> {
     final open = _open;
     return CallbackShortcuts(
       bindings: {
+        const SingleActivator(LogicalKeyboardKey.keyN, meta: true):
+            _newDocument,
+        const SingleActivator(LogicalKeyboardKey.keyO, meta: true): _openFile,
         const SingleActivator(LogicalKeyboardKey.keyS, meta: true): _save,
         const SingleActivator(LogicalKeyboardKey.keyS, meta: true, shift: true):
             _saveAs,
@@ -200,7 +209,7 @@ class _MainWindowState extends State<MainWindow> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                open?.file.name ?? l10n.appTitle,
+                open?.name(l10n.untitled) ?? l10n.appTitle,
                 key: const Key('documentTitle'),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

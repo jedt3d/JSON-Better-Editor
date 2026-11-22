@@ -125,7 +125,7 @@
 - [x] Native macOS look: borderless icon buttons that show a rounded fill only on hover and press, like Xcode, Finder and Safari (decision #50). Other OSes get their own toolbar style later.
 - [x] Empty toolbar space behaves like a title bar: drag to move the window; double-click follows the system setting (zoom by default).
 - [x] Left group:
-  - [x] New (file icon).
+  - [x] New (file icon): an editable "Untitled" document holding `{}` (decision #63).
   - [x] Open file (folder icon).
   - [x] Divider.
   - [x] Search (button in place; search itself is §3.3).

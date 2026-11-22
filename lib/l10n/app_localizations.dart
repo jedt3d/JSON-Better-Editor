@@ -208,6 +208,12 @@ abstract class AppLocalizations {
   /// **'Can\'t save the file'**
   String get saveFailed;
 
+  /// Title of a new document that has not been saved yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled'**
+  String get untitled;
+
   /// Dialog body when the system gives no error message.
   ///
   /// In en, this message translates to:
