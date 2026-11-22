@@ -16,6 +16,11 @@ void main() {
     });
   });
 
+  tearDown(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(windowChannel, null);
+  });
+
   testWidgets('window title is the English app title from the ARB file',
       (tester) async {
     await tester.pumpWidget(const JsonBetterEditorApp());

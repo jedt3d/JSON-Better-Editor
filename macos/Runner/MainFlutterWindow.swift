@@ -8,7 +8,7 @@ class MainFlutterWindow: NSWindow {
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
 
-    // Lets Dart set the window title (localized app name, later the file name).
+    // Lets Dart set the window title from the localized app name.
     let windowChannel = FlutterMethodChannel(
       name: "json_better_editor/window",
       binaryMessenger: flutterViewController.engine.binaryMessenger)
