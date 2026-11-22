@@ -144,7 +144,7 @@
 ### 3.4 File operations
 - [x] Open, Save (Cmd+S) and Save As (Cmd+Shift+S, save panel limited to `.json`); Save As makes the new path the current file.
 - [x] Save with no file yet behaves like Save As. Applies once New creates an editable document (Phase 2, decision #43).
-- [ ] Standard File menu items with normal macOS behavior: New, Open, Save, Save As, Close.
+- [x] Standard File menu items with normal macOS behavior: New, Open, Save, Save As, Close.
 - [x] Save with invalid JSON in the Text pane shows the error dialog with line and column and does not write the file (decision #54).
 - [x] Unsaved changes are marked in the window; New, Open, Close and Quit ask Save / Don't Save / Cancel, default Save (decision #55).
 - [x] Save reformats the JSON (pretty-print, 2-space indent) before writing, and the file ends with a newline (decisions #28, #47).

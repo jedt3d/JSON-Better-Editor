@@ -38,13 +38,14 @@ Future<String?> showSaveJsonPanel(String suggestedName) =>
 /// Shows the document as edited: the dot in the window's close button.
 Future<void> setDocumentEdited(bool edited) => _fire('setEdited', edited);
 
-/// Close (red button, Cmd+W) and Quit ask [confirm] first while the
-/// document is edited; the window closes or the app quits only when it
-/// returns true. Null removes the handler.
-void onCloseRequest(Future<bool> Function()? confirm) {
+/// Requests from the native side, answered by [handler] (null removes it):
+/// - `confirmClose`: Close (red button, File › Close, Cmd+W) and Quit ask
+///   first; answer true when the window may close or the app may quit.
+/// - `menu` with `new`, `open`, `save` or `saveAs`: a File menu item.
+void onNativeRequest(
+  Future<Object?> Function(String method, Object? arguments)? handler,
+) {
   _channel.setMethodCallHandler(
-    confirm == null
-        ? null
-        : (call) async => call.method == 'confirmClose' ? confirm() : null,
+    handler == null ? null : (call) => handler(call.method, call.arguments),
   );
 }

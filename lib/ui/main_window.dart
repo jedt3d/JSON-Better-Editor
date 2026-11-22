@@ -83,12 +83,29 @@ class _MainWindowState extends State<MainWindow> {
   @override
   void initState() {
     super.initState();
-    onCloseRequest(_confirmDiscard);
+    onNativeRequest(_nativeRequest);
+  }
+
+  /// Close/Quit confirmation and the File menu (MainFlutterWindow.swift).
+  Future<Object?> _nativeRequest(String method, Object? arguments) async {
+    switch ((method, arguments)) {
+      case ('confirmClose', _):
+        return _confirmDiscard();
+      case ('menu', 'new'):
+        await _newDocument();
+      case ('menu', 'open'):
+        await _openFile();
+      case ('menu', 'save'):
+        await _save();
+      case ('menu', 'saveAs'):
+        await _saveAs();
+    }
+    return null;
   }
 
   @override
   void dispose() {
-    onCloseRequest(null);
+    onNativeRequest(null);
     _open?.controller.dispose();
     super.dispose();
   }
