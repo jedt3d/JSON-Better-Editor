@@ -2,11 +2,13 @@ import 'package:material_ui/material_ui.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/services.dart';
+import 'package:re_editor/re_editor.dart';
 
 import '../app/native_window.dart';
 import '../document/json_document.dart';
 import '../l10n/app_localizations.dart';
 import 'file_access.dart';
+import 'text_pane.dart';
 import 'toolbar_metrics.dart';
 
 /// Main window: toolbar on top, content area below.
@@ -26,13 +28,13 @@ class MainWindow extends StatefulWidget {
   State<MainWindow> createState() => _MainWindowState();
 }
 
-/// The file currently shown: its text as read, and the parsed model that
-/// Save (#9) and the panes (Phase 2/3) build on.
+/// The document currently shown: the file it belongs to, and the Text pane's
+/// editing controller, which holds the current (possibly edited) text.
 class _OpenFile {
-  const _OpenFile(this.file, this.document);
+  _OpenFile(this.file, this.controller);
 
   final PickedFile file;
-  final JsonDocument document;
+  final CodeLineEditingController controller;
 }
 
 class _MainWindowState extends State<MainWindow> {
@@ -40,6 +42,24 @@ class _MainWindowState extends State<MainWindow> {
 
   /// True while Open, Save or Save As is running; a second one is ignored.
   bool _busy = false;
+
+  /// Replaces the open document, disposing the old editor controller.
+  void _setOpen(_OpenFile? open) {
+    final old = _open;
+    setState(() => _open = open);
+    if (old != null && !identical(old.controller, open?.controller)) {
+      // After this frame, so the editor no longer listens to it.
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => old.controller.dispose(),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _open?.controller.dispose();
+    super.dispose();
+  }
 
   Future<void> _exclusive(Future<void> Function() action) async {
     if (_busy) return;
@@ -68,8 +88,8 @@ class _MainWindowState extends State<MainWindow> {
     if (picked == null || !mounted) return;
 
     switch (parse(picked.text)) {
-      case ParseSuccess(:final document):
-        setState(() => _open = _OpenFile(picked!, document));
+      case ParseSuccess():
+        _setOpen(_OpenFile(picked, textPaneController(picked.text)));
         setWindowTitle(picked.name);
       case ParseFailure(:final error):
         _showError(
@@ -101,12 +121,24 @@ class _MainWindowState extends State<MainWindow> {
     if (path != null && mounted) await _writeTo(open, path);
   });
 
-  /// Writes [open]'s pretty-printed document (decision #28) to [path] and
-  /// makes [path] the current file.
+  /// Writes the edited text, pretty-printed (decision #28), to [path] and
+  /// makes [path] the current file. Invalid JSON is not written; the error
+  /// dialog shows where it is (decision #54). The editor keeps the text as
+  /// typed (decision #61).
   Future<void> _writeTo(_OpenFile open, String path) async {
     final l10n = AppLocalizations.of(context)!;
-    // Pretty-printed (decision #28), ending with a newline (decision #47).
-    final text = '${open.document.toText()}\n';
+    final JsonDocument document;
+    switch (parse(open.controller.text)) {
+      case ParseSuccess(document: final parsed):
+        document = parsed;
+      case ParseFailure(:final error):
+        return _showError(
+          l10n.saveFailedTitle(path.split('/').last),
+          l10n.invalidJsonPosition(error.line, error.column, error.message),
+        );
+    }
+    // Ending with a newline (decision #47).
+    final text = '${document.toText()}\n';
     try {
       await widget.writeTextFile(path, text);
     } on FileAccessException catch (e) {
@@ -118,12 +150,12 @@ class _MainWindowState extends State<MainWindow> {
     }
     if (!mounted || !identical(_open, open)) return;
     final saved = PickedFile(path: path, text: text);
-    setState(() => _open = _OpenFile(saved, open.document));
+    _setOpen(_OpenFile(saved, open.controller));
     setWindowTitle(saved.name);
   }
 
   void _newDocument() {
-    setState(() => _open = null);
+    _setOpen(null);
     setWindowTitle(AppLocalizations.of(context)!.appTitle);
   }
 
@@ -180,38 +212,12 @@ class _MainWindowState extends State<MainWindow> {
           Expanded(
             child: open == null
                 ? Center(child: Text(l10n.emptyState))
-                : _PlainTextView(text: open.file.text),
+                : TextPane(
+                    key: ObjectKey(open.controller),
+                    controller: open.controller,
+                  ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Read-only, scrollable monospace view of the file's text. Phase 2 replaces
-/// it with the real Text pane.
-class _PlainTextView extends StatelessWidget {
-  const _PlainTextView({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scrollbar(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: SizedBox(
-          width: double.infinity,
-          child: SelectableText(
-            text,
-            // macOS default monospace font (decisions #17, #29).
-            style: const TextStyle(
-              fontFamily: 'Menlo',
-              fontFamilyFallback: ['Monaco', 'Courier'],
-              fontSize: 13,
-            ),
-          ),
-        ),
       ),
     );
   }
