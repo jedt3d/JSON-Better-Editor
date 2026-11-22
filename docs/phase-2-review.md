@@ -12,7 +12,9 @@ Every PR was reviewed against its acceptance criteria by the coordinator before 
 1. **#61 — the Text pane keeps your text as typed after Save, but the file is pretty-printed.** After
    Save, the pane and the file on disk differ in layout until the file is reopened. This keeps the caret,
    scroll and undo history in place. If you prefer the pane to reformat on Save (as an undoable edit),
-   change `MainWindow._writeTo`.
+   change `MainWindow._writeTo`. *Update 2026-11-23:* Edit › Format (#89) now brings the pane to the
+   same layout as the saved file in one undoable step, so the mismatch can be cleared by hand; Save
+   itself still leaves the pane as typed.
 2. **#68 — closing the only window quits the app.** Many macOS editors stay running with no window.
    Staying open needs a way to create a window from the Dock or menu, which does not exist yet.
 3. **#79 — performance trade-offs.** The "— Edited" mark stays on if typing happens to restore the

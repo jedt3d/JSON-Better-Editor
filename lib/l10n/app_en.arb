@@ -179,6 +179,23 @@
   "@validateInvalid": {
     "description": "Title of the Validate JSON result when the text has an error."
   },
+  "goToLineTitle": "Go to Line",
+  "@goToLineTitle": {
+    "description": "Title of the Go to Line dialog."
+  },
+  "goToLineHint": "Line number (1–{count})",
+  "@goToLineHint": {
+    "description": "Placeholder in the Go to Line field.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goToLineGo": "Go",
+  "@goToLineGo": {
+    "description": "Button that moves to the line."
+  },
   "unknownError": "An unknown error occurred.",
   "@unknownError": {
     "description": "Dialog body when the system gives no error message."

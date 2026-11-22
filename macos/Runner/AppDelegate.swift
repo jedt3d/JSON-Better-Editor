@@ -23,7 +23,9 @@ class AppDelegate: FlutterAppDelegate {
     // Format and Minify (#89), no shortcuts.
     let at = edit.items.firstIndex(where: { $0.submenu?.title == "Find" }) ?? edit.items.count
     edit.insertItem(.separator(), at: at)
-    for (title, name) in [("Minify", "minify"), ("Format", "format"), ("Validate JSON", "validate")] {
+    // Go to Line… (#90), no shortcut for now.
+    for (title, name) in [("Go to Line…", "goToLine"), ("Minify", "minify"), ("Format", "format"),
+                          ("Validate JSON", "validate")] {
       let item = NSMenuItem(title: title, action: #selector(MainFlutterWindow.jsonCommand(_:)),
                             keyEquivalent: "")
       item.representedObject = name
